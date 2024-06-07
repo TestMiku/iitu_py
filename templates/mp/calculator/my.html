@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Калькулятор цен с подрядчиками{% endblock %}
+
+
+{% block chapter %} 
+{% endblock %}
+
+{% block content %}
+
+  <h1>Список запросов на подтверждение</h1>
+
+
+
+  <form id="find_order_form"  method="get" action="{% url 'my_calculator' %}">
+    <div class="row">
+        <div class="form-row mb-3 col-sm-6">
+            <div class="col">
+                <input name="name_filter" id="name_filter" placeholder="Номер заказа" 
+                {% if filter_name_filter %}
+                value="{{filter_name_filter}}"
+                {% else %}
+                value=""
+                {% endif %}
+                type="text" class="form-control" autofocus title="Введите от 4 до 12 символов">
+            </div>
+            <div class="col">
+                <input type="submit" class="btn btn-primary" value="Найти">
+            </div>
+        </div>  
+    </div>  
+    
+    <div class="row">
+        <div class="form-row mb-3 col-sm-3">
+                <div class="col-sm-6 ">
+                    <select name="status_filter" id="status_filter" class="form-control">
+                        {% if filter_status_filter %}
+                        <option value="">{{filter_status_filter}}</option>
+                        {% else %}
+                        <option value="">Статус</option>
+                        {% endif %}
+                        <option value="in_processing">В обработке</option>
+                        <option value="successfull">Занесено в Адем</option>
+                        <option value="failed">Отказ</option>
+                    </select>
+                </div>
+            </div>  
+        </div>
+
+        
+    </form>
+
+
+  <div class="list-group">
+    {% for document in queryset %}
+
+
+    <a href="/mp/calculator/view/{{document.id}}" class="list-group-item list-group-item-action" aria-current="true">
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">Заявка#{{document.id}} | {{document.name}}  Сумма: <span class="id-init-price-span-x">{{document.total_summ}}</span> тг </h5>
+            <small style="height:1em;" class="text-muted">{{document.status_text}} ({{document.supervisor_status_text}})
+                <br>
+                Создан:{{document.created_at_format}}
+                <br>
+                Изменен:{{document.modified_at_format}}
+            </small>
+
+        </div>
+        <p class="mb-1" style="color:{{document.status_color}}!important;">
+            {% if document.changes_comment_status != "" %}
+            <i style="color:{{status_color}}!important;" class="fas fa-info-circle"></i>
+            {% endif %}
+            {{document.changes_comment_status}}
+        </p>
+
+
+        
+        <small>{{document.comment_1c}}</small>
+    </a>
+    
+    
+
+    {% empty %}
+    <h3>Список пуст</h3>
+
+    {% endfor %}
+    
+  </div>
+  <script>
+    change_price_format()
+    function change_price_format(){
+        
+        let class_total_price_span = document.getElementsByClassName('id-init-price-span');
+        for (let i = 0; i < class_total_price_span.length; i++) {
+            try{
+                let x = parseFloat(class_total_price_span[i].innerHTML)*150/150
+                class_total_price_span[i].innerHTML = x.toLocaleString('ru-RU', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                });
+                
+            } catch(e){
+                console.log(e.stack)
+            }
+        }
+        
+        class_total_price_span = document.getElementsByClassName('id-init-price-span-x');
+        for (let i = 0; i < class_total_price_span.length; i++) {
+            try{
+                
+                let x_ = class_total_price_span[i].innerHTML.replace(",", ".")
+                let x = parseFloat(x_)*150/150
+
+                class_total_price_span[i].innerHTML = x.toLocaleString('ru-RU', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                });
+                
+            } catch(e){
+                console.log(e.stack)
+            }
+        }
+    }
+
+</script>
+{% endblock %}

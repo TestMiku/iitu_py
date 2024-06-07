@@ -1,0 +1,26 @@
+<table class="table table-bordered table-striped">
+    <thead class="thead-light">
+        <tr>
+            <th>№</th>
+            <th>Ключ продукта</th>
+            <th>Ед. измерений</th>
+            <th>Количество</th>
+            <th>Строка счета</th>
+            <th>Количество введенное</th>
+            <th>Итоговая сумма</th>
+        </tr>
+    </thead>
+    <tbody id="orderTableBody">
+        {% for order in orders %}
+            <tr data-order-id="{{ order.id }}">
+                <td>{{ forloop.counter }}</td>
+                <td>{{ order.key_search }}</td>
+                <td>{{ order.nomenclature.unit }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>{{ order.invoice_line }}</td>
+                <td>{{ order.quantity_entered }}</td>
+                <td>{{ order.total_sum }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}
+    <!-- Тайтлд пустой страницы -->
+{% endblock %}
+
+{% block links %}
+    <!-- Используемые ссылки в пустом разделе -->
+    <link rel="stylesheet" type="text/css" href="{% static 'order_generator_by_kcell/css/main.css' %}">
+    <script>
+        let doc_type_access = {
+            {% for doc_type in doc_types %}
+
+                {% if forloop.last %}
+                    "{{doc_type.id}}": "{{doc_type.access}}"
+                {% else %}
+                    "{{doc_type.id}}": "{{doc_type.access}}",
+                {% endif %}
+            {% endfor %}
+        };
+        console.log(doc_type_access);
+
+        function checkAcceptFileTypes(doc_type_id) {
+            let fileInput = document.getElementById('id-add-files');
+            let accept = doc_type_access[doc_type_id];
+            console.log('accept: ', accept);
+            fileInput.accept = accept;
+        }
+    </script>
+{% endblock %}
+
+
+{% block chapter %}
+    <!-- Название пустого раздела -->
+{% endblock %}
+
+
+
+{% block back_button %}
+    {% comment %} Кнопка Назад (По умолчанию назад на прошлую веб страницу) {% endcomment %}
+{% endblock %}
+
+{% block content %}
+
+
+
+
+    <h4 class="text-center">Загрузить файлы</h4>
+    <form method="post" class="text-center" id="file-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" value="{{request.id}}" name="request" id="id_request">
+        <div class="form-group col-md-4">
+            <label for="sorted_by"></label>
+            <select class="form-control" name="document_type" id="id_document_type">
+                {% for doc_type in doc_types %}
+                <option value="{{doc_type.id}}">{{doc_type}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div id="drop-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+            ondrop="handleDrop(event)" onclick="selectFile()">
+            <p id="drop-text">Перетащите файл сюда или нажмите для выбора файла.</p>
+            <input type="file" id="id_file" accept="" name="file" multiple onchange="handleFileSelect(event)">
+        </div>
+        <button class="btn-sbmt btn btn-outline-secondary btn-lg" type="submit" hidden>Сохранить</button>
+    </form>
+
+{% endblock %}
+
+
+{% block scripts %}
+    <!-- Скрипты пустого раздела -->
+<script src="{% static 'js/doctrack/main.js' %}"></script>
+
+<script>
+    function handleDragOver(event) {
+        event.preventDefault();
+        // Отмена стандартного действия по умолчанию, чтобы разрешить перетаскивание файла
+        event.dataTransfer.dropEffect = 'copy';
+
+        // Добавление класса для эффекта ховера
+        document.getElementById('drop-area').classList.add('input-hover');
+    }
+
+    function handleDragLeave(event) {
+        // Удаление класса для завершения эффекта ховера
+        document.getElementById('drop-area').classList.remove('input-hover');
+    }
+
+    function handleDrop(event) {
+        // Обработка события перетаскивания
+        const file = event.dataTransfer.files[0];
+        const fileInput = document.getElementById("id_file");
+        fileInput.files = event.dataTransfer.files;
+        event.preventDefault();
+
+        handleFile(file);
+        // Удаление класса для завершения эффекта ховера
+
+        document.getElementById('drop-area').classList.remove('input-hover');
+    }
+
+    function handleFileSelect(event) {
+        // Обработка события выбора файла через input[type=file]
+        const file = event.target.files[0];
+        handleFile(file);
+    }
+
+    function handleFile(file) {
+
+        const baseUrl = window.location.origin;
+        document.getElementById('drop-text').textContent = "Выбран файл: " + file.name;
+        document.querySelector('.btn-sbmt').removeAttribute('hidden');
+    }
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+
+        if (parts.length === 2) {
+            return parts.pop().split(';').shift();
+        }
+
+        return null;
+    }
+
+    function selectFile() {
+        // Имитация клика на input[type=file]
+        document.getElementById('id_file').click();
+    }
+    function importFile() {
+        // Имитация клика на input[type=file]
+        document.getElementById('id_file').click();
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}
+Долги по документам
+{% endblock %}
+
+
+{% block links %}
+
+{% endblock %}
+    
+
+{% block chapter %}
+Долги по документам
+{% endblock %}
+
+
+
+
+{% block content %}
+<br>
+<br>
+<button class="btn btn-success" id="call-btn">Вызвать функцию</button>
+<br>
+<br>
+<a href = "https://docs.google.com/spreadsheets/d/1nT3voM4t7BI2NKfotHS1TQqvGmXwuPl3zERE_wGaaw0/edit#gid=0" id = "link" class = "d-none" target ="_blank">Ссылка на документ</a>
+
+{% endblock %}
+
+
+
+{% block scripts %}
+    <script>
+        $(function() {
+            $("#call-btn").on("click", async function() {
+                $(this).prop("disabled", true);
+                const response = await fetch("/main_sync_caller/", {method: "POST", headers: {
+                    "X-CSRFToken": "{{csrf_token}}"
+                }});
+                const json = await response.json();
+                $("#link").removeClass("d-none");
+                $(this).prop("disabled", false);
+
+            });
+        });
+
+        if (window.history.replaceState) {
+            window.history.replaceState( null, null, window.location.href );
+        }
+    </script>
+{% endblock %}

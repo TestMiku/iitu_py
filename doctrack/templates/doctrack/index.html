@@ -1,0 +1,474 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}
+    ДОКТРЕК - Главная
+{% endblock %}
+
+{% block links %}
+    <style>
+        .info-hide {
+            background-color: white!important;
+            color: black!important;
+            opacity: 1!important;
+            border-radius: 4px!important;
+            position: relative!important;
+            left: 24px!important;
+            width: 24px!important;
+            height: 24px!important;
+            font-size: 24px!important;
+            cursor: pointer!important;
+            box-shadow: 0 0 0 1px rgb(0 0 0 / 20%), 0 4px 5px 0 rgb(0 0 0 / 14%), 0 1px 10px 0 rgb(0 0 0 / 12%)!important;
+        }
+    </style>
+{% endblock %}
+
+{% block chapter %}
+    <div id="main-chapter-title">ДОКТРЕК - Главная</div>
+{% endblock %}
+
+{% block back_button %}
+<!-- Кнопка Назад (По умолчанию назад на прошлую веб страницу) -->
+<form method="GET" action="{% url 'doctrack' %}" class="mb-4">
+    <div class="d-flex justify-content-between">
+        <a href="/mp/doctrack/add" class="btn btn-primary open-modal">Добавить</a>
+        
+        <div class="form-inline">
+            <input type="text" name="search" id="id_search" placeholder="Поиск" value="{{request.GET.search}}" class="form-control ml-4" style="min-width: 500px;">
+            <a class="btn btn-primary ml-4" href="#" data-toggle="collapse" data-target="#collapseFilter" aria-controls="collapseOne" id="filterBtn" >Фильтр</a>
+            <button type="submit"  class="btn btn-primary ml-4">Применить</button>
+            <button type="button"  class="btn btn-primary ml-4" onclick="saveFilter()" title="Сохранить текущий фильтр">
+                <i class="fas fa-save"></i>
+            </button>
+            <a class="btn btn-secondary ml-4" href="/mp/doctrack">Очистить фильтр</a>
+        </div>
+        
+        <div>
+            <!-- <button type="submit"  class="btn btn-primary ml-4" tooltip="Другая кнопка">Другая кнопка</button> -->
+        </div>
+    </div>
+
+    <div class="mt-4 row collapse" id="collapseFilter">
+        <div class="form-group col-sm-4">
+            {% comment %} <label for="projectSelect">Проект:</label>
+            <select class="form-control" id="id_filter_by_project" name="filter_by_project">
+                <!-- Здесь будут варианты выбора проекта -->
+                <option value="">---</option>
+                {% for project in projects %}
+                
+                <option value="{{project.id}}"
+                {% if request.GET.filter_by_project == project.id|slugify  %}selected{% endif %}
+                >{{project.name}}</option>
+                {% endfor %}
+            </select>
+            <label class="mt-2" for="regionSelect">Регион:</label>
+            <select class="form-control" id="id_filter_by_region" name="filter_by_region">
+                <!-- Здесь будут варианты выбора региона -->
+                <option value="">---</option>
+                {% for region in regions %}
+                <option value="{{region.id}}"
+                {% if request.GET.filter_by_region == region.id|slugify  %}selected{% endif %}
+                >{{region.name}}</option>
+                {% endfor %}
+            </select>
+            <label for="workTypeSelect" class="mt-2">Тип работы:</label>
+            <select class="form-control" id="id_filter_by_work_type" name="filter_by_work_type">
+                <!-- Здесь будут варианты выбора типа работы -->
+                <option value="">---</option>
+                {% for work_type in work_types %}
+                <option value="{{work_type.id}}"
+                {% if request.GET.filter_by_work_type == work_type.id|slugify  %}selected{% endif %}
+                >{{work_type.name}}</option>
+                {% endfor %}
+            </select> {% endcomment %}
+
+            <label for="id_filter_by_region">{{filter_form.filter_by_region.label}}</label>
+            {{filter_form.filter_by_region}}
+            <label for="id_filter_by_project">{{filter_form.filter_by_project.label}}</label>
+            {{filter_form.filter_by_project}}
+            <label for="id_filter_by_work_type">{{filter_form.filter_by_work_type.label}}</label>
+            {{filter_form.filter_by_work_type}}
+            <label for="id_filter_by_status">{{filter_form.filter_by_status.label}}</label>
+            {{filter_form.filter_by_status}}
+        </div>
+
+        <div class="col-sm-4">    
+            <div class="row">
+                <div class="col-sm-6">
+                    <label for="createdAtFrom">Создано с:</label>
+                    <input type="date" value="{{request.GET.filter_by_created_at_from}}" class="form-control" id="id_filter_by_created_at_from" name="filter_by_created_at_from">
+                </div>
+                <div class="col-sm-6">
+                    <label for="createdAtTo">Создано по:</label>
+                    <input type="date" value="{{request.GET.filter_by_created_at_to}}" class="form-control" id="id_filter_by_created_at_to" name="filter_by_created_at_to">
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-sm-6">
+                    <label for="createdAtFrom">Изменено с:</label>
+                    <input type="date" class="form-control" value="{{request.GET.filter_by_updated_at_from}}" id="id_filter_by_updated_at_from" name="filter_by_updated_at_from">
+                </div>
+                <div class="col-sm-6">
+                    <label for="createdAtTo">Изменено по:</label>
+                    <input type="date" class="form-control" value="{{request.GET.filter_by_updated_at_to}}" id="id_filter_by_updated_at_to" name="filter_by_updated_at_to">
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-sm-6">
+                    <label for="createdAtFrom">Дата заказа с:</label>
+                    <input type="date" class="form-control" value="{{request.GET.filter_by_order_date_from}}" id="id_filter_by_order_date_from" name="filter_by_order_date_from">
+                </div>
+                <div class="col-sm-6">
+                    <label for="createdAtTo">Дата заказа по:</label>
+                    <input type="date" class="form-control" value="{{request.GET.filter_by_order_date_to}}" id="id_filter_by_order_date_to" name="filter_by_order_date_to">
+                </div>
+            </div>
+        </div>    
+        
+
+
+        <div class="form-group col-sm-4 mt-4">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input"
+                {% if request.GET.filter_by_is_partial == 'on' %}checked{% endif %}
+                id="id_filter_by_is_partial" name="filter_by_is_partial">
+                <label class="form-check-label" for="isPartialCheck">Частичное закрытие</label>
+            </div>
+            <div class="form-check mt-4">
+                <input type="checkbox" class="form-check-input"
+                {% if request.GET.filter_by_is_deleted == 'on' %}checked{% endif %}
+                id="id_filter_by_is_deleted" name="filter_by_is_deleted">
+                <label class="form-check-label" for="isDeletedCheck">Удаленные</label>
+            </div>
+            
+            <span id="saved_filter"></span>
+            
+        </div>
+        <div class="col-sm-12 d-flex justify-content-center">
+            <button type="submit"  class="btn btn-primary ml-4">Применить</button>
+        </div>
+
+    </div>
+</form>
+{% endblock %}
+
+{% block content %}
+<!-- main doctrack start -->
+
+<span id="hidden-columns">
+
+</span>
+<table class="table table-bordered">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col" class="sortable" onclick="sortTable('pk', this)" style="vertical-align:top;" data-index="0" >
+                <a class="btn btn-secondary hide-column-btn"><i class="fas fa-eye-slash"></i></a>
+                Номер заявки
+                <span class="sort_symbol">
+                    {% if request.GET.sorted_by == 'pk' %}&#8595;
+                    {% elif request.GET.sorted_by == '-pk' %}&#8593;
+                    {% else %}{% endif %}
+                </span>
+            </th>
+            <th scope="col" class="sortable" onclick="sortTable('project', this)" style="vertical-align:top;" data-index="1">
+                <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i></a>
+                <br>Проект
+                <span class="sort_symbol">
+                    {% if request.GET.sorted_by == 'project' %}&#8595;
+                    {% elif request.GET.sorted_by == '-project' %}&#8593;
+                    {% else %}{% endif %}
+                </span>
+            </th>
+            <th scope="col" class="sortable" onclick="sortTable('work_type', this)" style="vertical-align:top;" data-index="11">
+                <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                <br>Вид
+                <span class="sort_symbol">
+                    {% if request.GET.sorted_by == 'work_type' %}&#8595;
+                    {% elif request.GET.sorted_by == '-work_type' %}&#8593;
+                    {% else %}{% endif %}
+                </span>
+            </th>
+            <th scope="col" class="sortable" onclick="sortTable('region', this)" style="vertical-align:top;" data-index="12">
+                <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                <br>Регион
+                <span class="sort_symbol">
+                    {% if request.GET.sorted_by == 'region' %}&#8595;
+                    {% elif request.GET.sorted_by == '-region' %}&#8593;
+                    {% else %}{% endif %}
+                </span>
+            </th>
+            <th scope="col" class="sortable" onclick="sortTable('order_bs_name', this)" style="vertical-align:top;" data-index="13">
+                <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                <br>БС
+                <span class="sort_symbol">
+                    {% if request.GET.sorted_by == 'order_bs_name' %}&#8595;
+                    {% elif request.GET.sorted_by == '-order_bs_name' %}&#8593;
+                    {% else %}{% endif %}
+                </span>
+            </th>
+            <th scope="col" class="sortable" onclick="sortTable('created_at', this)" style="vertical-align:top;" data-index="2">
+                <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                <br>Дата и время создания
+                <span class="sort_symbol">
+                    {% if request.GET.sorted_by == 'created_at' %}&#8595;
+                    {% elif request.GET.sorted_by == '-created_at' %}&#8593;
+                    {% else %}{% endif %}
+                </span>
+            </th>
+            <th scope="col" class="sortable" onclick="sortTable('status', this)" style="vertical-align:top;" data-index="3">
+                <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                <br>Статус
+                <span class="sort_symbol">
+                    {% if request.GET.sorted_by == 'status' %}&#8595;
+                    {% elif request.GET.sorted_by == '-status' %}&#8593;
+                    {% else %}{% endif %}
+                </span>
+            </th>
+            <th scope="col" class="sortable" onclick="sortTable('is_partial', this)" style="vertical-align:top;" data-index="4">
+                <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                <br>Частичное закрытие
+                <span class="sort_symbol">
+                    {% if request.GET.sorted_by == 'is_partial' %}&#8595;
+                    {% elif request.GET.sorted_by == '-is_partial' %}&#8593;
+                    {% endif %}
+                </span>
+            </th>
+            <th scope="col" class="sortable" style="vertical-align:top;" data-index="5">
+                <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                <br>Номер версии
+            </th>
+            <th scope="col" class="sortable" style="vertical-align:top;" data-index="6">
+                <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                <br>Последние изменения
+            </th>
+            <th scope="col" class="sortable" onclick="sortTable('modified_at', this)" style="vertical-align:top;" data-index="7">
+                <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                <br>Дата и время изменения
+                <span class="sort_symbol">
+                    {% if request.GET.sorted_by == 'modified_at' %}&#8595;
+                    {% elif request.GET.sorted_by == '-modified_at' %}&#8593;
+                    {% else %}{% endif %}
+                </span>
+            </th>
+            <th scope="col" class="sortable" style="vertical-align:top;" data-index="8">
+                <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                <br>Комментарий при создании заявки
+            </th>
+            <th scope="col" class="sortable" style="vertical-align:top;" data-index="9">
+                <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                <br>Причина отклонения заявки
+            </th>
+            <th scope="col" style="vertical-align:top;">
+                <a class="btn" ><i class="fas fa-eye-slash"></i><a>
+                <br>Подробнее/Обработать
+            </th>
+        </tr>
+    </thead>
+    <tbody id="tbody-object">
+        {% for rqst in requests %}
+        <tr data-td-object-id="{{ rqst }}">
+            <td>{{rqst.pk}}</td>
+            <td>{{rqst.project}}</td>
+            <td>{{rqst.work_type}}</td>
+            <td>{{rqst.region}}</td>
+            <td>{{rqst.get_bs}}</td>
+            <td>{{rqst.created_at_format}}</td>
+            <td style="background-color: {{rqst.status.color}}; color: white;">{{rqst.status}}</td>
+            <td>{% if rqst.is_partial %}
+                <i class="fas fa-check-square"></i>
+                {% else %}
+                <i class="fas fa-square"></i>
+                {% endif %}</td>
+            <td>{{rqst.get_number_of_adjustments}}</td>
+            <td>{{rqst.history.all.first.history_user}}</td>
+            <td>{{rqst.modified_at_format}}</td>
+            <td>{{rqst.get_first_comment}}</td>
+            <td>
+                {% if rqst.rejected_comment %}
+                    {{ rqst.rejected_comment }}
+                {% endif %}
+            </td>
+            <!-- <td><a href="/mp/doctrack/info/{{rqst.pk}}" class="btn btn-secondary">Подробнее</a></td> -->
+            <td><a href="/mp/doctrack/info/{{rqst.pk}}" class="btn btn-secondary open-modal open-detail" id="open-detail">Подробнее</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if paginator.num_pages > 1 %}
+<div class="">
+    <div class="dataTables_paginate paging_simple_numbers" id="dataTable_paginate">
+        <ul class="pagination">
+            {% if page_number > 1 %}
+            <li class="paginate_button page-item previous " id="dataTable_previous">
+                <a href="#" aria-controls="dataTable" data-dt-idx="{{prev_page_number}}" tabindex="0" class="page-link"><</a>
+            </li>
+            {% endif %}
+
+            {% for i in paginator.page_range %}
+            <li class="paginate_button page-item {% if page_number == i %}active{% endif %}">
+                <a href="#" aria-controls="dataTable" data-dt-idx="{{ i }}" tabindex="0" class="page-link">{{ i }}</a>
+            </li>
+            {% endfor %}
+        
+
+            {% if page_number != paginator.num_pages %}
+            <li class="paginate_button page-item next" id="dataTable_next">
+                <a href="#" aria-controls="dataTable" data-dt-idx="{{next_page_number}}" tabindex="0" class="page-link">></a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+{% endif %}
+
+<div class="modal" id="myModal">
+    <div class="modal-dialog" style="max-width:90vw!important;">
+        <div style="width: 100%; height: 0; margin: 0; padding: 0;display: flex;justify-content: end;">
+        </div>
+        <button class="close info-hide" type="button" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+        </button>
+        <div class="modal-content">
+            <div class="modal-body modal-body-iframe" id="iframe-modal-body-check">
+                <!-- Здесь будет добавлен iframe после нажатия на ссылку -->
+            </div>
+      </div>
+    </div>
+</div>
+
+
+<!-- main doctrack end -->
+{% endblock %}
+
+
+{% block scripts %}
+
+    <script>
+        let trObjects = document.querySelectorAll("#tbody-object tr");
+        trObjects.forEach(function(trObject) {
+            trObject.addEventListener("dblclick", function(event) {
+                let objectId = trObject.getAttribute("data-td-object-id");
+                let tdObjects = trObject.querySelectorAll("td");
+                tdObjects[tdObjects.length - 1].querySelector("a").click();
+            });
+        });
+    </script>
+
+<!-- Скрипты пустого раздела -->
+<script src="{% static 'js/doctrack/main.js' %}"></script>
+<script>
+
+let iframe = document.querySelector('#iframe-modal-body-check');
+let myModal = document.querySelector('#myModal');
+
+window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        myModal.style.display = 'none';
+        iframe.style.display = 'none';
+        window.location.reload();
+    }
+})
+
+function sortTable(field, element) {
+    var queryString = window.location.search;
+    var params = new URLSearchParams(queryString);
+    var sortField = params.get('sorted_by');
+    if (sortField === field) {
+        params.set('sorted_by', '-' + field);
+        element.querySelector(".sort_symbol").innerHTML = ""
+    } else if (sortField === "-" + field) {
+        params.set('sorted_by', '');
+        element.querySelector(".sort_symbol").innerHTML = "&#8593;"
+    } else {
+        params.set('sorted_by', field);
+        element.querySelector(".sort_symbol").innerHTML = "&#8595;"
+    }
+    var url = window.location.href;
+    var newUrl = url.split('?')[0] + '?' + params.toString();
+    window.location.href = newUrl;
+}
+
+
+
+    document.addEventListener("DOMContentLoaded", function() {
+    var pageLinks = document.querySelectorAll('.page-link');
+    pageLinks.forEach(function(link) {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+            var pageNumber = parseInt(link.getAttribute('data-dt-idx'));
+            var url = window.location.pathname;
+            var queryString = window.location.search;
+            var params = new URLSearchParams(queryString);
+            params.set('page', pageNumber);
+            var newUrl = url + '?' + params.toString();
+            window.location.href = newUrl;
+        });
+    });
+});
+
+
+
+function saveFilter(){
+    localStorage.setItem("saved_filter", window.location.href)
+    location.reload()
+}
+
+
+function applySavedFilter(){
+    let saved_filter = localStorage.getItem("saved_filter")
+    window.location.href = saved_filter
+}
+
+
+function clearSavedFilter(){
+    localStorage.setItem("saved_filter", "")
+    location.reload()
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    let saved_filter = localStorage.getItem("saved_filter")
+    if (saved_filter == undefined || saved_filter == ""){
+
+    } else {
+        document.getElementById("saved_filter").innerHTML = ` 
+        <span id="saved_filter">
+            <button type="button" class="btn btn-primary mt-4" onclick="applySavedFilter()">Применить сохраненный фильтр</button>
+            <button type="button" class="btn btn-danger mt-4" onclick="clearSavedFilter()">
+                <i class="fas fa-trash"></i>
+            </button>
+        </span>`
+    }
+    let queryParamsCount = getQueryParamsCount()
+    if (getQueryParamsCount() > 0){
+        document.getElementById("filterBtn").innerHTML = `Фильтр
+        <span class="badge badge-danger badge-counter">${queryParamsCount}</span>
+        `
+    }
+})
+
+function getQueryParamsCount() {
+    var queryString = window.location.search;
+    queryString = queryString.substring(1);
+    var queryParams = queryString.split("&");
+    var filledParamsCount = 0;
+    for (var i = 0; i < queryParams.length; i++) {
+        var pair = queryParams[i].split("=");
+        var key = decodeURIComponent(pair[0]);
+        var value = decodeURIComponent(pair[1] || "");
+        // Игнорируем параметры "search" и "sorted_by"
+        if (key === "search" || key === "sorted_by" || key === "page") {
+            continue;
+        }
+        if (value.trim() !== "") {
+            filledParamsCount++;
+        }
+    }
+    return filledParamsCount
+}
+
+
+</script>
+{% endblock %}

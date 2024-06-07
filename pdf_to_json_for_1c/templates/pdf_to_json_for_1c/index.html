@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}
+Преобразователь для 1С
+{% endblock %}
+
+{% block links %}
+<link rel="stylesheet" href="{% static 'pdf_to_json_for_1c/css/main.css' %}">
+{% endblock %}
+
+
+{% block chapter %}
+Преобразователь для 1С
+{% endblock %}
+
+{% comment %}{% block back_button %}
+Кнопка Назад (По умолчанию назад на прошлую веб страницу)
+{% endblock %}{% endcomment %}
+
+{% block content %}
+
+<div hidden>
+    {% csrf_token %}
+    <div id="order_number">{{request.GET.order_number}}</div>
+    <div id="iin">{{request.GET.iin}}</div>
+    <div id="fio">{{request.GET.fio}}</div>
+    <div id="date_certificate">{{request.GET.date_certificate}}</div>
+    <div id="who_certificate">{{request.GET.who_certificate}}</div>
+    <div id="element_id">{{request.GET.element_id}}</div>
+    <div id="gender">{{request.GET.gender}}</div>
+    <div id="certificate_number">{{request.GET.certificate_number}}</div>
+    <div id="user_prof">{{request.GET.user_prof}}</div>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
+</div>
+
+<div class="success-text text-info" id="success-text-container" style="display: none;">
+    <h3>Данные отправлены успешно</h3>
+</div>
+<div class="success-text" id="dungeon-text-container" style="display: none; color: red">
+    <h3>Ошибка</h3>
+</div>
+
+<div class="main-block">
+    {% if result %}
+    <div class="block-body">
+        <div class="pdf-view">
+            {% for image in images %}
+            <div class="image-container">
+                <img class="zoomable-image" src="data:image/png;base64,{{ image }}" alt="Image">
+            </div>
+            {% endfor %}
+            {{result.raw_text|linebreaks}}
+        </div>
+        <div class="variables">
+            <h1>Промежуточные данные</h1>
+            <div class="" style="display: flex; justify-content: space-between">
+                <div class="" style="width:48%;">
+                    <label class="label form-label" for="bin">БИН поставщика</label>
+                    <input type="text" class="form-control result-input" id="bin" value="{{result.sender_bin}}">
+                    <div></div>
+                </div>
+                <div class="" style="width: 48%;">
+                    <label class="label form-label" for="bin">Поставщик</label>
+                    <input type="text" class="form-control result-input" id="sender" value="{{result.sender_name}}">
+                </div>
+            </div>
+            <div class="" style="display: flex; justify-content: space-between" hidden>
+                <div class="" style="width:48%;">
+                    <label class="label form-label" for="doc-number">Счет на оплату №</label>
+                    <input type="text" class="form-control result-input" id="doc-number" value="{{result.order_num}}">
+                </div>
+                <div class="" style="width:48%;">
+                    <label class="label form-label" for="doc-date">Дата оплаты</label>
+                    <input type="date" class="form-control result-input" id="doc-date" value="{{result.order_date}}">
+
+                </div>
+            </div>
+            <div class="" style="display: flex; justify-content: space-between">
+                <div class="" style="width:48%;">
+                    <label class="label form-label" for="doc-number">Банк. счет</label>
+                    <input type="text" class="form-control result-input" id="schet" value="{{result.schet}}">
+                </div>
+                <div class="" style="width:48%;">
+                    <label class="label form-label" for="doc-date">БИН покупателя</label>
+                    <input type="text" class="form-control result-input" id="bin-buyer" value="{{result.byer_bin}}">
+
+                </div>
+            </div>
+            <div class="">
+                <table class="table table-bordered">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>№</th>
+                            <th>Код</th>
+                            <th>Наименование</th>
+                            <th>Кол-во</th>
+                            <th>Ед.</th>
+                            <th>Цена</th>
+                            <th>Сумма</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        {% if result.tables %}
+
+                        {% for table in result.tables %}
+                        <tr>
+                            <td>{{table.no}}</td>
+                            <td><input type="text" class="form-control" style="width: 100px;" value="{{table.code}}">
+                            </td>
+                            <td><input type="text" class="form-control" value="{{table.name}}"></td>
+                            <td><input type="text" class="form-control" style="width: 100px;"
+                                    value="{{table.quantity|floatformat:2}}"></td>
+                            <td><input type="text" class="form-control" style="width: 100px;" value="{{table.unit}}">
+                            </td>
+                            <td><input type="text" class="form-control" value="{{table.price|floatformat:2}}"></td>
+                            <td><input type="text" class="form-control" value="{{table.sum|floatformat:2}}"></td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td>1</td>
+                            <td><input type="text" class="form-control" style="width: 100px;"></td>
+                            <td><input type="text" class="form-control"></td>
+                            <td><input type="text" class="form-control" style="width: 100px;"></td>
+                            <td><input type="text" class="form-control" style="width: 100px;"></td>
+                            <td><input type="text" class="form-control"></td>
+                            <td><input type="text" class="form-control"></td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                <div class="" style="display: flex; justify-content: space-between;">
+                    <button id="addBtn" class="btn btn-primary" onclick="addNewRow()"><i
+                            class="fas fa-plus"></i></button>
+                    <button id="downloadJson" class="btn btn-warning" onclick="downloadJson()">Генерировать
+                        доверенность</button>
+                </div>
+            </div>
+            <label for="textContainer" class="label form-label mt-3">Таблица</label>
+            <div class="table-text" id="textContainer">
+                {{result.table_text|linebreaks}}
+            </div>
+            <!-- <button class="btn-sbmt btn btn-outline-secondary" onclick="highlightText()">Подсветить
+                текст</button> -->
+        </div>
+        <div class="json-version">
+
+        </div>
+    </div>
+    {% else %}
+    <div class="file-upload">
+        <form action="{% url 'pdf_to_json_for_1c' %}" method="post" class="text-center" id="file-form"
+            enctype="multipart/form-data">
+            {% csrf_token %}
+            <div id="drop-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+                ondrop="handleDrop(event)" onclick="selectFile()">
+                <p id="drop-text">Перетащите файл сюда или нажмите для выбора файла.</p>
+                <input type="file" id="fileInput" accept=".pdf" name="file_upload" onchange="handleFileSelect(event)">
+            </div>
+            <button class="btn-sbmt btn btn-outline-secondary btn-lg" type="submit" hidden>Начать
+                обработку</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'pdf_to_json_for_1c/js/script.js' %}"></script>
+{% endblock %}

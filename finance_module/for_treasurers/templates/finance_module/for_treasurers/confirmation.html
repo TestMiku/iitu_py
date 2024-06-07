@@ -1,0 +1,1104 @@
+{% extends 'finance_module/for_treasurers/base.html' %}
+{% load number_format %}
+{% block for_treasurers_active_breadcrump %}
+Подтверждение платежей
+{% endblock %}
+
+{% block styles %}
+<style>
+  #mandatory-payment-seizures-table .bg-yellow {
+    background-color: #fff2cc;
+  }
+
+  #mandatory-payment-seizures-table .bg-yellow {
+    background-color: #fff2cc;
+  }
+</style>
+{% endblock %}
+
+{% block finance_module_main %}
+<div class="card flex-fill rounded-0 border-start-0 border-end-0">
+  <div class="card-header bg-white">
+    <ul class="nav nav-tabs card-header-tabs" id="tabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="mandatory-payment-seizures-tab" data-bs-toggle="tab"
+          data-bs-target="#mandatory-payment-seizures-tab-pane" type="button" role="tab"
+          aria-controls="mandatory-payment-seizures-tab-pane" aria-selected="true">Обязательные платежи</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="paid-invoices-tab" data-bs-toggle="tab" data-bs-target="#paid-invoices-tab-pane"
+          type="button" role="tab" aria-controls="paid-invoices-tab-pane" aria-selected="false">Оплаченные
+          счета</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="debt-translate-groups-tab" data-bs-toggle="tab"
+          data-bs-target="#debt-translate-groups-tab-pane" type="button" role="tab"
+          aria-controls="debt-translate-groups-tab-pane" aria-selected="false">ДМП</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="transfers-tab" data-bs-toggle="tab" data-bs-target="#transfers-tab-pane"
+          type="button" role="tab" aria-controls="transfers-tab-pane" aria-selected="false">Переводы между р/с</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="sutochnye-tab" data-bs-toggle="tab" data-bs-target="#sutochnye-tab-pane"
+          type="button" role="tab" aria-controls="sutochnye-tab-pane" aria-selected="false">Суточные</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="administrative-transfers-tab" data-bs-toggle="tab" data-bs-target="#administrative-transfers-tab-pane"
+          type="button" role="tab" aria-controls="administrative-transfers-tab-pane" aria-selected="false">Переводы на АДМ</button>
+      </li>
+      <li class="nav-item ms-auto" role="presentation">
+        <button class="nav-link" id="confirmation-history-tab" data-bs-toggle="tab"
+          data-bs-target="#confirmation-history-tab-pane" type="button" role="tab"
+          aria-controls="confirmation-history-tab-pane" aria-selected="false">История подтверждения</button>
+      </li>
+    </ul>
+  </div>
+  <div class="card-body">
+    <div class="position-relative h-100">
+      <div class="position-absolute top-0 bottom-0 end-0 start-0" style="overflow-y: scroll;">
+        <div class="tab-content" id="myTabContent">
+          <div class="tab-pane fade show active" id="mandatory-payment-seizures-tab-pane" role="tabpanel"
+            aria-labelledby="mandatory-payment-seizures-tab" tabindex="0">
+            <table class="table table-bordered border-black" id="mandatory-payment-seizures-table">
+              <thead class="">
+                <tr>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" class="align-middle text-center smart-table__always-shown" data-st-subtotal="2">-</th>
+                  <th scope="col" class="align-middle text-center smart-table__always-shown" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-end" data-st-subtotal="9">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                </tr>
+                <tr class="table-light border-black">
+                  <th data-st-field="datetime" data-st-type="date" class="align-middle text-center" scope="col">Дата
+                  </th>
+                  <th data-st-field="mandatory_payment__name" class="align-middle text-center" scope="col">Статья</th>
+                  <th data-st-field="responsible_name" class="align-middle text-center" scope="col">Ответсвенный</th>
+                  <th data-st-field="project_region__name" class="align-middle text-center" scope="col">ПМ</th>
+                  <th data-st-field="account__name" class="align-middle text-center" scope="col">С р/с</th>
+                  <th data-st-field="account__number" class="align-middle text-center" scope="col">Номер р/с</th>
+                  <th class="align-middle text-center smart-table__always-shown" scope="col">На р/с</th>
+                  <th class="align-middle text-center smart-table__always-shown" scope="col">Номер р/с</th>
+                  <th data-st-field="sum" data-st-type="number" class="align-middle text-center" scope="col">Сумма</th>
+                  <th data-st-field="status__name" class="align-middle" scope="col" style="width: 18em;">
+                    <div>
+                      <div class="text-center">
+                        Подтверждение
+                      </div>
+
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="mandatory-payment-seizures-table-rows">
+                <tr id="mandatory-payment-seizures-table-last-row">
+                  <td colspan="10">
+                    <div style="height: 10px"></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="paid-invoices-tab-pane" role="tabpanel" aria-labelledby="paid-invoices-tab"
+            tabindex="0">
+            <table class="table table-bordered border-black" id="paid-invoices-table">
+              <thead>
+                <tr>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="9">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="9">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="9">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="9">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                  <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+                </tr>
+                <tr class="table-light border-black">
+                  <th class="text-center align-middle" data-st-field="number"
+                    style="min-width: 6em; max-width: 6em; height: 6em;">ДО</th>
+                  <th class="text-center align-middle" data-st-field="at" data-st-type="date"
+                    style="min-width: 8em; max-width: 8em; height: 6em;">Дата входящего</th>
+                  <th class="text-center align-middle" data-st-field="invoice_number"
+                    style="min-width: 6em; max-width: 6em; height: 6em;"> № счёта</th>
+                  <th class="text-center align-middle" data-st-field="invoice_date" data-st-type="date"
+                    style="min-width: 6em; max-width: 6em; height: 6em;">Дата счёта</th>
+                  <th class="text-center align-middle" data-st-field="project" style="height: 6em;">Проект</th>
+                  <th class="text-center align-middle" data-st-field="responsible_user_id"
+                    style="min-width: 10em; max-width: 10em; height: 6em;">Ответственный</th>
+                  <th class="text-center align-middle" data-st-field="approver" style="height: 6em;">Утвердитель</th>
+                  <th class="text-center align-middle" data-st-field="llc" style="height: 6em;">Компания</th>
+                  <th class="text-center align-middle" data-st-field="contractor" style="height: 6em;">Контрагенты</th>
+                  <th class="text-center align-middle" data-st-field="comment"
+                    style="min-width: 10em; max-width: 10em; height: 6em;">Описание</th>
+                  <th class="text-center align-middle" data-st-field="currency"
+                    style="min-width: 6em; max-width: 6em; height: 6em;">Валюта</th>
+                  <th class="text-center align-middle" data-st-field="sum" data-st-type="number"
+                    style="min-width: 8em; max-width: 8em; height: 6em;">Сумма для таблицы</th>
+                  <th class="text-center align-middle" data-st-field="invoice_category" style="height: 6em;">Категория
+                    счета</th>
+                  <th class="text-center align-middle" data-st-field="revenue_expense_articles" style="height: 6em;">
+                    Статьи доходов/расходов</th>
+                  <th class="text-center align-middle" data-st-field="sales_order"
+                    style="min-width: 10em; max-width: 10em; height: 6em;">Номер заказа</th>
+                  <th class="text-center align-middle" data-st-field="bin_or_iin"
+                    style="min-width: 10em; max-width: 10em; height: 6em;">БИН/ИИН</th>
+                  <th class="text-center align-middle" data-st-field="document_amount" data-st-type="number"
+                    style="min-width: 10em; max-width: 10em; height: 6em;">Сумма документа</th>
+                  <th class="text-center align-middle" data-st-field="account__number"
+                    style="min-width: 10em; max-width: 10em; height: 6em;">Номер р/с</th>
+                  <th class="text-center align-middle" data-st-field="iic"
+                    style="min-width: 10em; max-width: 10em; height: 6em;">ИИК</th>
+                  <th class="text-center align-middle" data-st-field="payment_destination_code"
+                    style="min-width: 5em; max-width: 5em; height: 6em;">КНП</th>
+                  <th class="text-center align-middle" data-st-field="contract_number"
+                    style="min-width: 10em; max-width: 10em; height: 6em;">Факт номер договора</th>
+                  <th class="text-center align-middle" data-st-field="invoice_amount" data-st-type="number"
+                    style="min-width: 8em; max-width: 8em; height: 6em;">Сумма по счету</th>
+                  <th class="text-center align-middle" data-st-field="paid" data-st-type="number"
+                    style="min-width: 9em; max-width: 9em; height: 6em;">Оплаченная сумма ранее</th>
+                  <th class="text-center align-middle" data-st-field="paid" data-st-type="number"
+                    style="min-width: 8em; max-width: 8em; height: 6em;">Оплачено</th>
+                  <th class="text-center align-middle" data-st-field="at" data-st-type="date"
+                    style="min-width: 7em; max-width: 7em; height: 6em;">Дата оплаты</th>
+                  <th class="text-center align-middle" data-st-field="project_region__name"
+                    style="min-width: 8em; height: 6em;">ПМ</th>
+                  <th class="text-center align-middle" data-st-field="responsible_user_id"
+                    style="min-width: 10em; max-width: 10em; height: 6em;">Руководитель</th>
+                  <th class="text-center align-middle" data-st-field="project_region__subdivision__name"
+                    style="min-width: 10em; max-width: 10em; height: 6em;">Подразделение</th>
+                  <th class="text-center align-middle" data-st-field="account__name" style="height: 6em;">Расчётный счет
+                  </th>
+                  <th class="text-center align-middle" data-st-field="status__name" style="height: 6em;">Подтверждение
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="paid-invoices-table-rows">
+                <tr id="paid-invoices-table-last-row">
+                  <td colspan="30">
+                    <div style="height: 10px;"></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="debt-translate-groups-tab-pane" role="tabpanel"
+            aria-labelledby="debt-translate-groups-tab" tabindex="0">
+            <table class="table border-black table-bordered" id="debt-translate-groups-table">
+              <thead>
+                <tr>
+                  <th data-st-subtotal="2" scope="col" class="align-middle">-</th>
+                  <th data-st-subtotal="2" scope="col" class="align-middle">-</th>
+                  <th data-st-subtotal="2" scope="col" class="align-middle">-</th>
+                  <th data-st-subtotal="2" scope="col" class="align-middle">-</th>
+                  <th data-st-subtotal="2" scope="col" class="align-middle">-</th>
+                  <th data-st-subtotal="2" scope="col" class="align-middle">-</th>
+                  <th data-st-subtotal="2" scope="col" class="align-middle">-</th>
+                  <th data-st-subtotal="2" scope="col" class="align-middle">-</th>
+                  <th data-st-subtotal="9" scope="col" class="align-middle">-</th>
+                  <th data-st-subtotal="2" scope="col" class="align-middle">-</th>
+                </tr>
+                <tr class="table-light border-black">
+                  <th data-st-field="datetime" class="align-middle">Дата</th>
+                  <th data-st-field="responsible_name" class="align-middle" scope="col">Ответственный</th>
+                  <th data-st-field="from_whom" class="align-middle" scope="col">От кого</th>
+                  <th data-st-field="from_account__name" class="align-middle" scope="col">С какого р/с</th>
+                  <th data-st-field="from_account__number" class="align-middle" scope="col">Номер р/с</th>
+                  <th data-st-field="to_whom" class="align-middle" scope="col">Кому</th>
+                  <th data-st-field="to_account__name" class="align-middle" scope="col">На какой р/с</th>
+                  <th data-st-field="to_account__number" class="align-middle" scope="col">Номер р/с</th>
+                  <th data-st-field="sum" data-st-type="number" class="align-middle" scope="col">Сумма</th>
+                  <th data-st-field="status__name" class="align-middle" scope="col">Подтверждение</th>
+                </tr>
+              </thead>
+              <tbody id="debt-translate-groups-table-rows">
+                <tr id="debt-translate-groups-table-last-row">
+                  <td colspan="10">
+                    <div style="height: 10px"></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="transfers-tab-pane" role="tabpanel" aria-labelledby="transfers-tab"
+            tabindex="0">
+            <table class="table table-bordered border-black" id="transfers-table">
+              <thead>
+                <tr>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="9">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                </tr>
+                <tr class="table-light border-black">
+                  <th data-st-field="datetime" class="align-middle" scope="col">Дата</th>
+                  <th data-st-field="responsible_name" class="align-middle" scope="col">Ответственный</th>
+                  <th data-st-field="from_whom__name" class="align-middle" scope="col">С проект региона</th>
+                  <th data-st-field="from_account__name" class="align-middle" scope="col">С р/с</th>
+                  <th data-st-field="from_account__number" class="align-middle" scope="col">Номер р/с</th>
+                  <th data-st-field="to_whom__name" class="align-middle" scope="col">На проект региона</th>
+                  <th data-st-field="to_account__name" class="align-middle" scope="col">На р/с</th>
+                  <th data-st-field="to_account__number" class="align-middle" scope="col">Номер р/с</th>
+                  <th data-st-field="sum" data-st-type="number" class="align-middle" scope="col">Сумма</th>
+                  <th data-st-field="status__name" class="align-middle" scope="col">Подтверждение</th>
+                </tr>
+              </thead>
+              <tbody id="transfers-table-rows">
+                <tr id="transfers-table-last-row">
+                  <td class="text-center" colspan="10">
+                    <div style="height: 10px"></div>
+
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="sutochnye-tab-pane" role="tabpanel" aria-labelledby="sutochnye-tab"
+            tabindex="0">
+            <table class="table table-bordered border-black" id="sutochnye-table">
+              <thead>
+                <tr>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="9">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th class="smart-table__always-shown" scope="col" data-st-subtotal="2">-</th>
+                  <th class="smart-table__always-shown" scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                </tr>
+                <tr class="table-light border-black">
+                  <th data-st-field="created_at" data-st-type="date" class="align-middle" scope="col">Дата</th>
+                  <th data-st-field="project_region__name" class="align-middle" scope="col">ПМ</th>
+                  <th data-st-field="account__name" class="align-middle" scope="col">Расчётный счёт</th>
+                  <th data-st-field="account__number" class="align-middle" scope="col">Номер р/с</th>
+                  <th data-st-field="name" class="align-middle" scope="col">ФИО</th>
+                  <th data-st-field="days" class="align-middle" scope="col">Кол-во дней</th>
+                  <th data-st-field="sum" data-st-type="number" class="align-middle" scope="col">Сумма</th>
+                  <th data-st-field="subdivision__name" class="align-middle" scope="col">Подразделение</th>
+                  <th data-st-field="project" class="align-middle" scope="col">Проект</th>
+                  <th data-st-field="responsible" class="align-middle" scope="col">Ответственный</th>
+                  <th data-st-field="business_trip_period" class="align-middle" scope="col">Срок командировки</th>
+                  <th data-st-field="destination_point" class="align-middle" scope="col">Место назначение</th>
+                  <th class="align-middle smart-table__always-shown" scope="col">Файлы</th>
+                  <th class="align-middle text-center smart-table__always-shown" scope="col"><i
+                      class="fa-solid fa-envelope"></i></th>
+                  <th data-st-field="project_region__name" class="align-middle" scope="col">Подтверждение</th>
+                </tr>
+              </thead>
+              <tbody id="sutochnye-table-rows">
+                <tr id="sutochnye-table-last-row">
+                  <td class="text-center" colspan="14">
+                    <div style="height: 10px"></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="administrative-transfers-tab-pane" role="tabpanel">
+            <table class="table table-bordered border-black" id="administrative-transfers-table">
+              <thead>
+                <tr class="table-light border-black">
+                  <th data-st-field="responsible" class="align-middle" scope="col">Ответственный</th>
+                  <th data-st-field="project_region__name" class="align-middle" scope="col">Регион проект</th>
+                  <th data-st-field="account__name" class="align-middle" scope="col">Расчётный счёт</th>
+                  <th data-st-field="account__number" class="align-middle" scope="col">Номер р/с</th>
+                  <th data-st-field="sum" class="align-middle" scope="col">Сумма</th>
+                  <th data-st-field="note" class="align-middle" scope="col">Примечание</th>
+                  <th data-st-field="created_at" data-st-type="date" class="align-middle" scope="col">Время отправки</th>
+                  <th data-st-field="status__name" class="align-middle" scope="col">Подтверждение</th>
+                </tr>
+              </thead>
+              <tbody id="administrative-transfers-table-rows">
+
+                <tr id="administrative-transfers-table-last-row">
+                  <td class="text-center" colspan="8">
+                    <div style="height: 10px;">
+
+                    </div>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="confirmation-history-tab-pane" role="tabpanel"
+            aria-labelledby="confirmation-history-tab" tabindex="0">
+            <table class="table table-bordered border-black" id="confirmation-history-table">
+              <thead>
+                <tr>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                </tr>
+                <tr class="table-light border-black">
+                  <th data-st-field="created_at" data-st-type="date" scope="col">Дата</th>
+                  <th data-st-field="responsible_name" scope="col">Ответсвенный</th>
+                  <th data-st-field="model_name" scope="col">Подтвердил</th>
+                  <th data-st-field="status" scope="col">Статус</th>
+                  <th data-st-field="rejected_comment" scope="col">Комментария отклонения</th>
+                </tr>
+              </thead>
+              <tbody id="confirmation-history-table-rows">
+
+                <tr id="confirmation-history-table-last-row">
+                  <td colspan="5">
+                    <div style="height: 10px;"></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-footer d-flex align-items-center bg-white justify-content-end">
+    <form id="confirmation-form">
+      <button class="btn btn-success"><span id="confirmation-form-loading"
+          class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span> Подтвердить</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  const csrfToken = "{{csrf_token}}";
+  function getModelName() {
+    const $activeNavLink = $("#tabs .nav-link.active");
+    const $tabPane = $($activeNavLink.attr("data-bs-target"));
+    switch ($activeNavLink.attr("aria-controls")) {
+      case "mandatory-payment-seizures-tab-pane":
+        return "MandatoryPaymentSeizure";
+      case "paid-invoices-tab-pane":
+        return "PaidInvoice";
+      case "debt-translate-groups-tab-pane":
+        return "DebtTranslateGroup";
+      case "transfers-tab-pane":
+        return "Transfer";
+      case "sutochnye-tab-pane":
+        return "Sutochnye";
+      case "administrative-transfers-tab-pane":
+        return "AdministrativeTransfer";
+      default:
+        return null;
+    }
+  }
+  $(document).on("change", ".confirmation .confirmation-checkbox", async function () {
+    const $confirmation = $(this).closest(".confirmation");
+    $confirmation.find(".confirmation-checkbox").not(this).prop("checked", false);
+    $confirmation.find(".reject-comment-textarea").toggleClass("d-none", !($(this).val() === "reject" && $(this).prop("checked")));
+    event.preventDefault();
+  });
+  $(document).on("click", ".show-payment-confirmation", async function () {
+    const response = await fetch(`/p1/finance-module/api/payment-confirmation?model=${getModelName()}&id=${$(this).data("id")}`);
+    const json = await response.json();
+    const $modal = $(`
+      <div class="modal fade" id="staticBackdrop" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="staticBackdropLabel">Информация о подтверждение платежа</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              ${response.ok ? `
+                <div class="row"><div class="col-4">Статус:</div><div class="col">${json.status}</div></div>
+                <div class="row"><div class="col-4">Дата:</div><div class="col">${new Date(json.created_at).toLocaleString()}</div></div>
+                ${json.responsible ? `<div class="row"><div class="col-4">Ответственный:</div><div class="col">${json.responsible.first_name} ${json.responsible.last_name}</div></div>` : ""}
+                ${json.rejected_comment ? `<div class="row"><div class="col-4">Комментарий:</div><div class="col">${json.rejected_comment}</div></div>` : ``}
+              ` : `
+                <div class="text-danger text-center">Ничего не найдено</div>
+              `}
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
+    $modal.modal("show");
+    $modal.on("hidden.bs.modal", function () {
+      $modal.remove();
+    });
+  });
+  const $confirmationFormLoading = $("#confirmation-form-loading");
+  const $confirmationForm = $("#confirmation-form");
+  let canSubmit = false;
+  let commonRejectComment = null;
+  $confirmationForm.on("submit", async function (event) {
+    event.preventDefault();
+    $confirmationFormLoading.removeClass("d-none");
+    canSubmit = false;
+    commonRejectComment = null;
+    const formData = new FormData(this);
+    const $activeNavLink = $("#tabs .nav-link.active");
+    const $tabPane = $($activeNavLink.attr("data-bs-target"));
+    formData.set("model", getModelName());
+    const $idInput = $tabPane.find(`input[name="id"]`);
+    if ($idInput.length === 0) {
+      $confirmationFormLoading.addClass("d-none");
+      return;
+    }
+    for (const idInput of $idInput) {
+      const id = $(idInput).val();
+      const confirmation = $tabPane.find(`input[name="confirmation-${id}"]:checked`).val();
+      if (!confirmation) {
+        continue;
+      }
+      if (confirmation === "reject") {
+        const $rejectCommentTextarea = $tabPane.find(`textarea[name="reject-comment-${id}"]`);
+        let rejectComment = $rejectCommentTextarea.val();
+        if (!rejectComment.trim()) {
+          if (commonRejectComment) {
+            rejectComment = commonRejectComment;
+          } else {
+            try {
+              await new Promise((resolve, reject) => {
+                const $modal = $(`
+                  <div class="modal fade" tabindex="-1" id="common-reject-comment-modal">
+                    <div class="modal-dialog modal-dialog-centered">
+                      <form class="modal-content" id="common-reject-comment-form">
+                        <div class="modal-body">
+                          <label for="common-reject-comment" class="form-label">Общий комментарий для отклонения</label>
+                          <textarea class="form-control" id="common-reject-comment" rows="3" required placeholder="Введите комментарий"></textarea>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                          <button type="submit" class="btn btn-primary">Сохранить</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                `);
+                function onHidden() {
+                  reject();
+                }
+                $modal.on("submit", "#common-reject-comment-form", function (event) {
+                  event.preventDefault();
+                  $modal.off("hidden.bs.modal", onHidden);
+                  commonRejectComment = $modal.find("#common-reject-comment").val();
+                  $modal.modal("hide");
+                  resolve();
+                });
+                $modal.on("hidden.bs.modal", onHidden);
+                $modal.modal("show");
+              });
+              rejectComment = commonRejectComment;
+            } catch (error) {
+              $rejectCommentTextarea.get(0).setCustomValidity("Укажите комментарий");
+              $rejectCommentTextarea.get(0).reportValidity();
+              $confirmationFormLoading.addClass("d-none");
+              return;
+            }
+          }
+        }
+        formData.append(`reject-comment-${id}`, rejectComment);
+      }
+      formData.append("id", id);
+      formData.append(`confirmation-${id}`, confirmation);
+    }
+    canSubmit = true;
+    if (!canSubmit) {
+      $confirmationFormLoading.addClass("d-none");
+      return;
+    }
+    console.log("SUBMIT", Array.from(formData.entries()));
+    const response = await fetch("/p1/finance-module/for-treasurers/api/confirmation", {
+      method: "POST",
+      body: formData,
+      headers: {
+        "X-CSRFToken": csrfToken
+      }
+    });
+    const json = await response.json();
+    $confirmationFormLoading.addClass("d-none");
+    $tabPane.find(".smart-table").smartTableReload();
+  });
+
+  const numberFormat = Intl.NumberFormat("ru-RU", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  $('#mandatory-payment-seizures-table').smartTableWithVirtualScroll({
+    name: 'for-treasurers-mandatory-payment-seizures-table',
+    firstShowRows: "intersected",
+    defaultOrder: [{ field: "can_be_confirmed", sort: "desc" }, { field: 'datetime', sort: 'desc' }],
+    lastRowTarget: '#mandatory-payment-seizures-table-last-row',
+    rowsTarget: '#mandatory-payment-seizures-table-rows',
+    getValuesUrl: '/p1/finance-module/for-treasurers/smart-tables/mandatory-payment-seizures-get-values',
+    getRowsUrl: '/p1/finance-module/for-treasurers/smart-tables/mandatory-payment-seizures-get-rows',
+    getSubtotalsUrl: '/p1/finance-module/for-treasurers/smart-tables/mandatory-payment-seizures-get-subtotals',
+    loadingHtml: `
+        <tr>
+          <td class="text-center text-primary" colspan="10">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </td>
+        </tr>
+      `,
+    getTr(row) {
+      const $tr = $(`
+        <tr class="${row.status.name === "Подтверждено" ? "table-success" : row.status.name === "Отклонён" ? "table-danger" : ""} border-black">
+          <td class="align-middle text-center">${new Date(row.datetime).toLocaleDateString()}</td>
+          <td class="align-middle">${row.mandatory_payment ? row.mandatory_payment.name : ''}</td>
+          <td class="align-middle">${row.responsible ? `${row.responsible.first_name} ${row.responsible.last_name}` : ''}</td>
+          <td class="align-middle">${row.project_region.name}</td>
+          <td class="align-middle">${row.account.name}</td>
+          <td class="align-middle">${row.account.number}</td>
+          <td class="smart-table__always-shown align-middle">АДМ</td>
+          <td class="smart-table__always-shown align-middle">KZ208562203106786042</td>
+          <td class="align-middle text-end">${numberFormat.format(row.sum)}</td>
+          <td class="align-middle confirmation-td">
+            
+          </td>
+        </tr>
+      `);
+      const $confirmationTd = $tr.find(".confirmation-td");
+      if (row.status.name === "Отправлено на второе подтверждение") {
+        $confirmationTd.html(`
+          <div class="confirmation">
+            <div class="d-flex align-items-center justify-content-between gap-5">
+              <input class="mandatory-payment-seizures-id" type="hidden" name="id" value="${row.id}"/>
+              <div class="form-check">
+                <input class="form-check-input confirmation-checkbox" type="checkbox" name="confirmation-${row.id}" value="confirm" id="mandatory-payment-seizures-complete-checkbox-${row.id}">
+                <label class="form-check-label" for="mandatory-payment-seizures-complete-checkbox-${row.id}">
+                  Подтвердить
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input confirmation-checkbox" type="checkbox" name="confirmation-${row.id}" value="reject" id="mandatory-payment-seizures-reject-checkbox-${row.id}">
+                <label class="form-check-label" for="mandatory-payment-seizures-reject-checkbox-${row.id}">
+                  Отклонить
+                </label>
+              </div>
+            </div>
+            <textarea placeholder="Комментарий для отклонения" name="reject-comment-${row.id}" rows="1" class="form-control reject-comment-textarea d-none"></textarea>
+          </div>
+        `);
+      } else if (row.status.name !== "Отправлено на первое подтверждение") {
+        $confirmationTd.html(`<a class="show-payment-confirmation" href="#" data-id="${row.id}">${row.status.name}</a>`);
+      } else {
+        $confirmationTd.html(`${row.status.name}`);
+
+      }
+
+      return $tr;
+    }
+  });
+  $('#paid-invoices-table').smartTableWithVirtualScroll({
+    name: 'for-treasurers-paid-invoices-table',
+    firstShowRows: "intersected",
+    defaultOrder: [{ field: "can_be_confirmed", sort: "desc" }, { field: 'at', sort: 'desc' }],
+    lastRowTarget: '#paid-invoices-table-last-row',
+    rowsTarget: '#paid-invoices-table-rows',
+    getValuesUrl: '/p1/finance-module/for-treasurers/smart-tables/paid-invoices-get-values',
+    getRowsUrl: '/p1/finance-module/for-treasurers/smart-tables/paid-invoices-get-rows',
+    getSubtotalsUrl: '/p1/finance-module/for-treasurers/smart-tables/paid-invoices-get-subtotals',
+    loadingHtml: `
+        <tr>
+          <td class="text-center text-primary" colspan="30">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </td>
+        </tr>
+      `,
+    getTr(row) {
+      const $tr = $(/*html*/`
+        <tr class="${row.status.name === "Подтверждено" ? "table-success" : row.status.name === "Отклонено" ? "table-danger" : ""} border-black">
+          <td class="align-middle text-center">${row.number}</td>
+          <td class="align-middle text-center">${new Date(row.date).toLocaleDateString('ru-RU')}</td>
+          <td class="align-middle">${row.invoice_number}</td>
+          <td class="align-middle text-center">${new Date(row.invoice_date).toLocaleDateString('ru-RU')}</td>
+          <td class="align-middle thin-scrollbar" style="max-width: 12em; white-space: nowrap; overflow-x: scroll">${row.project}</span></td>
+          <td class="align-middle">${row.responsible_user_id}</td>
+          <td class="align-middle thin-scrollbar" style="max-width: 14em; white-space: nowrap; overflow-x: scroll">${row.approver}</td>
+          <td class="align-middle" style="white-space: nowrap;">${row.llc}</td>
+          <td class="align-middle thin-scrollbar" style="max-width: 14em; white-space: nowrap; overflow-x: scroll">${row.contractor}</td>
+          <td class="align-middle thin-scrollbar" style="max-width: 16em; white-space: nowrap; overflow-x: scroll">${row.comment}</td>
+          <td class="align-middle text-center">${row.currency}</td>
+          <td class="align-middle text-end">${numberFormat.format(row.sum)}</td>
+          <td class="align-middle" style="white-space: nowrap;">${row.invoice_category || ""}</td>
+          <td class="align-middle thin-scrollbar" style="max-width: 12em; white-space: nowrap; overflow-x: scroll">${row.revenue_expense_articles || ""}</td>
+          <td class="align-middle">${row.sales_order}</td>
+          <td class="align-middle text-center">${row.bin_or_iin || ""}</td>
+          <td class="align-middle text-end">${row.document_amount ? numberFormat.format(row.document_amount) : ""}</td>
+          <td class="align-middle">${row.account.number}</td>
+          <td class="align-middle text-center">${row.iic || ""}</td>
+          <td class="align-middle text-center">${row.payment_destination_code || ""}</td>
+          <td class="align-middle">${row.contract_number || ""}</td>
+          <td class="align-middle text-end">${numberFormat.format(row.invoice_amount)}</td>
+          <td class="align-middle text-end">${row.paid_amount_1c ? numberFormat.format(row.paid_amount_1c) : ""}</td>
+          <td class="align-middle text-end">${numberFormat.format(row.sum)}</td>
+          <td class="align-middle text-center">${new Date(row.at).toLocaleDateString('ru-RU')}</td>
+          <td class="align-middle thin-scrollbar" style="max-width: 10em; white-space: nowrap; overflow-x: scroll">${row.project_region.name}</td>
+          <td class="align-middle">${row.project_region.director_display}</td>
+          <td class="align-middle">${row.project_region.subdivision ? row.project_region.subdivision.name : ""}</td>
+          <td class="align-middle" style="white-space: nowrap">${row.account.name}</td>
+          <td class="align-middle confirmation-td"></td>
+        </tr>
+      `);
+      const $confirmationTd = $tr.find(".confirmation-td");
+      if (row.status.name === "Отправлен на подтверждение") {
+        $confirmationTd.html(`
+          <div class="confirmation">
+            <div class="d-flex align-items-center justify-content-between gap-5">
+              <input class="paid-invoices-id" type="hidden" name="id" value="${row.id}"/>
+              <div class="form-check">
+                <input class="form-check-input confirmation-checkbox" type="checkbox" name="confirmation-${row.id}" value="confirm" id="paid-invoices-complete-checkbox-${row.id}">
+                <label class="form-check-label" for="paid-invoices-complete-checkbox-${row.id}">
+                  Подтвердить
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input confirmation-checkbox" type="checkbox" name="confirmation-${row.id}" value="reject" id="paid-invoices-reject-checkbox-${row.id}">
+                <label class="form-check-label" for="paid-invoices-reject-checkbox-${row.id}">
+                  Отклонить
+                </label>
+              </div>
+            </div>
+            <textarea placeholder="Комментарий для отклонения" name="reject-comment-${row.id}" rows="1" class="form-control reject-comment-textarea d-none"></textarea>
+          </div>
+        `);
+      } else if (row.status.name !== "Отправлено на первое подтверждение") {
+        $confirmationTd.html(`<a class="show-payment-confirmation" href="#" data-id="${row.id}">${row.status.name}</a>`);
+      } else {
+        $confirmationTd.html(`${row.status.name}`);
+
+      }
+
+      return $tr;
+    }
+  });
+  $('#debt-translate-groups-table').smartTableWithVirtualScroll({
+    name: 'for-treasurers-debt-translate-groups-table',
+    firstShowRows: "intersected",
+    defaultOrder: [{ field: "can_be_confirmed", sort: "desc" }, { field: 'datetime', sort: 'desc' }],
+    lastRowTarget: '#debt-translate-groups-table-last-row',
+    rowsTarget: '#debt-translate-groups-table-rows',
+    getValuesUrl: '/p1/finance-module/for-treasurers/smart-tables/debt-translate-groups-get-values',
+    getRowsUrl: '/p1/finance-module/for-treasurers/smart-tables/debt-translate-groups-get-rows',
+    getSubtotalsUrl: '/p1/finance-module/for-treasurers/smart-tables/debt-translate-groups-get-subtotals',
+    loadingHtml: `
+        <tr>
+          <td class="text-center text-primary" colspan="10">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </td>
+        </tr>
+      `,
+    getTr(row) {
+      const $tr = $(/*html*/`
+        <tr class="${row.status.name === "Подтверждено" ? "table-success" : row.status.name === "Отклонено" ? "table-danger" : ""} border-black">
+          <td class="align-middle">${new Date(row.datetime).toLocaleDateString()}</td>
+          <td class="align-middle">${row.responsible ? `${row.responsible.first_name} ${row.responsible.last_name}` : ""}</td>
+          <td class="align-middle">${row.from_whom}</td>
+          <td class="align-middle">${row.from_account.name}</td>
+          <td class="align-middle">${row.from_account.number}</td>
+          <td class="align-middle">${row.to_whom}</td>
+          <td class="align-middle">${row.to_account.name}</td>
+          <td class="align-middle">${row.to_account.number}</td>
+          <td class="align-middle text-end">${numberFormat.format(row.sum)}</td>
+          <td class="align-middle confirmation-td"></td>
+        </tr>
+      `);
+      const $confirmationTd = $tr.find(".confirmation-td");
+      if (row.status.name === "Отправлено на подтверждение") {
+        $confirmationTd.html(`
+          <div class="confirmation">
+            <div class="d-flex align-items-center justify-content-between gap-5">
+              <input class="debt-translate-groups-id" type="hidden" name="id" value="${row.id}"/>
+              <div class="form-check">
+                <input class="form-check-input confirmation-checkbox" type="checkbox" name="confirmation-${row.id}" value="confirm" id="debt-translate-groups-complete-checkbox-${row.id}">
+                <label class="form-check-label" for="debt-translate-groups-complete-checkbox-${row.id}">
+                  Подтвердить
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input confirmation-checkbox" type="checkbox" name="confirmation-${row.id}" value="reject" id="debt-translate-groups-reject-checkbox-${row.id}">
+                <label class="form-check-label" for="debt-translate-groups-reject-checkbox-${row.id}">
+                  Отклонить
+                </label>
+              </div>
+            </div>
+            <textarea placeholder="Комментарий для отклонения" name="reject-comment-${row.id}" rows="1" class="form-control reject-comment-textarea d-none"></textarea>
+          </div>
+        `);
+      } else if (row.status.name !== "Отправлено на первое подтверждение") {
+        $confirmationTd.html(`<a class="show-payment-confirmation" href="#" data-id="${row.id}">${row.status.name}</a>`);
+      } else {
+        $confirmationTd.html(`${row.status.name}`);
+      }
+      return $tr;
+    }
+  });
+  $('#transfers-table').smartTableWithVirtualScroll({
+    name: 'for-treasurers-transfers-table',
+    defaultOrder: [{ field: "can_be_confirmed", sort: "desc" }, { field: 'datetime', sort: 'desc' }],
+    lastRowTarget: '#transfers-table-last-row',
+    firstShowRows: "intersected",
+    rowsTarget: '#transfers-table-rows',
+    getValuesUrl: '/p1/finance-module/for-treasurers/smart-tables/transfers-get-values',
+    getRowsUrl: '/p1/finance-module/for-treasurers/smart-tables/transfers-get-rows',
+    getSubtotalsUrl: '/p1/finance-module/for-treasurers/smart-tables/transfers-get-subtotals',
+    loadingHtml: `
+        <tr>
+          <td class="text-center text-primary" colspan="10">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </td>
+        </tr>
+      `,
+    getTr(row) {
+      const $tr = $(/*html*/`
+        <tr class="${row.status.name === "Подтверждено" ? "table-success" : row.status.name === "Отклонено" ? "table-danger" : ""} border-black">
+          <td class="align-middle text-center">${new Date(row.datetime).toLocaleDateString()}</td>
+          <td class="align-middle">${row.responsible ? `${row.responsible.first_name} ${row.responsible.last_name}` : ""}</td>
+          <td class="align-middle">${row.from_whom.name}</td>
+          <td class="align-middle">${row.from_account.name}</td>
+          <td class="align-middle">${row.from_account.number}</td>
+          <td class="align-middle">${row.to_whom.name}</td>
+          <td class="align-middle">${row.to_account.name}</td>
+          <td class="align-middle">${row.to_account.number}</td>
+          <td class="align-middle text-end">${numberFormat.format(row.sum)}</td>
+          <td class="align-middle confirmation-td"></td>
+        </tr>
+      `);
+      const $confirmationTd = $tr.find(".confirmation-td");
+      if (row.status.name === "Отправлено на подтверждение") {
+        $confirmationTd.html(`
+          <div class="confirmation">
+            <div class="d-flex align-items-center justify-content-between gap-5">
+              <input class="transfers-id" type="hidden" name="id" value="${row.id}"/>
+              <div class="form-check">
+                <input class="form-check-input confirmation-checkbox" type="checkbox" name="confirmation-${row.id}" value="confirm" id="transfers-complete-checkbox-${row.id}">
+                <label class="form-check-label" for="transfers-complete-checkbox-${row.id}">
+                  Подтвердить
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input confirmation-checkbox" type="checkbox" name="confirmation-${row.id}" value="reject" id="transfers-reject-checkbox-${row.id}">
+                <label class="form-check-label" for="transfers-reject-checkbox-${row.id}">
+                  Отклонить
+                </label>
+              </div>
+            </div>
+            <textarea placeholder="Комментарий для отклонения" name="reject-comment-${row.id}" rows="1" class="form-control reject-comment-textarea d-none"></textarea>
+          </div>
+        `);
+      } else if (row.status.name !== "Отправлено на первое подтверждение") {
+        $confirmationTd.html(`<a class="show-payment-confirmation" href="#" data-id="${row.id}">${row.status.name}</a>`);
+      } else {
+        $confirmationTd.html(`${row.status.name}`);
+      }
+      return $tr;
+    }
+  });
+
+  let sutochnyeFiles = {};
+  const $sutochnyeTable = $('#sutochnye-table');
+  async function sutochnyeMail(id, type) {
+    const $tr = $sutochnyeTable.find(`tr[data-id="${id}"]`);
+    const $mailButton = $tr.find(".sutochnye-mail-button");
+    const $loading = $tr.find(".sutochnye-mail-loading");
+    const $status = $tr.find(".sutochnye-mail-status");
+    $mailButton.prop("disabled", true);
+    $loading.removeClass("d-none");
+    try {
+      let status = null;
+      if (type === "accountant") {
+        const response = await fetch(`/p1/finance-module/for-treasurers/api/sutochnye/${id}/mail-accountant`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": csrfToken
+          }
+        });
+        const json = await response.json();
+        status = json.detail;
+      } else if (type === "000") {
+        const response = await fetch(`/p1/finance-module/for-treasurers/api/sutochnye/${id}/mail-000`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": csrfToken
+          }
+        });
+        const json = await response.json();
+        status = json.detail;
+      }
+      $status.text(status);
+    } catch (error) {
+      console.error(error);
+    }
+    
+    $loading.addClass("d-none");
+    $mailButton.prop("disabled", false);
+  }
+  $sutochnyeTable.smartTableWithVirtualScroll({
+    name: 'for-treasurers-sutochnye-table',
+    defaultOrder: [{ field: "can_be_confirmed", sort: "desc" }, { field: 'created_at', sort: 'desc' }],
+    lastRowTarget: '#sutochnye-table-last-row',
+    rowsTarget: '#sutochnye-table-rows',
+    firstShowRows: "intersected",
+    getValuesUrl: '/p1/finance-module/for-treasurers/smart-tables/sutochnye-get-values',
+    getRowsUrl: '/p1/finance-module/for-treasurers/smart-tables/sutochnye-get-rows',
+    getSubtotalsUrl: '/p1/finance-module/for-treasurers/smart-tables/sutochnye-get-subtotals',
+    loadingHtml: `
+        <tr>
+          <td class="text-center text-primary" colspan="14">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </td>
+        </tr>
+      `,
+    getTr(row) {
+      sutochnyeFiles[row.id] = row["files"];
+      const $tr = $(/*html*/`
+        <tr data-id="${row.id}" class="${row.status.name === "подтверждено" ? "table-success" : row.status.name === "отклонено" ? "table-danger" : ""} border-black">
+          <td class="align-middle text-center">${new Date(row.created_at).toLocaleDateString()}</td>
+          <td class="align-middle">${row.project_region.name}</td>
+          <td class="align-middle">${row.account.name}</td>
+          <td class="align-middle">${row.account.number}</td>
+          <td class="align-middle">${row.name}</td>
+          <td class="align-middle">${row.days}</td>
+          <td class="align-middle text-end">${numberFormat.format(row.sum)}</td>
+          <td class="align-middle">${row.subdivision.name}</td>
+          <td class="align-middle">${row.project}</td>
+          <td class="align-middle">${row.responsible}</td>
+          <td class="align-middle">${new Date(row.business_trip_start_date).toLocaleDateString()}-${new Date(row.business_trip_end_date).toLocaleDateString()}</td>
+          <td class="align-middle">${row.destination_point}</td>
+          <td class="align-middle smart-table__always-shown"><button type="button" data-id="${row.id}" class="btn btn-link btn-sm show-sutochnye-files">Показать файлы</button></td>
+          <td class="align-middle text-center smart-table__always-shown">
+            <div class="d-flex align-items-center justify-content-between gap-1">
+              <div class="dropdown">
+                <button class="btn btn-sm dropdown-toggle sutochnye-mail-button" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="fa-solid fa-share"></i> Письмо
+                </button>
+                <ul class="dropdown-menu">
+                  <li><button class="dropdown-item mail-button mail-accountant-button" data-id="${row.id}" data-type="accountant">Бухгалтерам</button></li>
+                  <li><button class="dropdown-item mail-button" data-id="${row.id}" data-type="000">000</button></li>
+                </ul>
+              </div>
+              <div class="spinner-border spinner-border-sm text-primary sutochnye-mail-loading d-none" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <div id="sutochnye-mail-status"></div>
+            </div>
+          </td>
+          <td class="align-middle confirmation-td"></td>
+        </tr>
+      `);
+      const $confirmationTd = $tr.find(".confirmation-td");
+      if (row.status.name === "не оплачено") {
+        $confirmationTd.html(`
+          <div class="confirmation">
+            <div class="d-flex align-items-center justify-content-between gap-5">
+              <input class="sutochnye-id" type="hidden" name="id" value="${row.id}"/>
+              <div class="form-check">
+                <input class="form-check-input confirmation-checkbox" type="checkbox" name="confirmation-${row.id}" value="confirm" id="sutochnye-complete-checkbox-${row.id}">
+                <label class="form-check-label" for="sutochnye-complete-checkbox-${row.id}">
+                  Подтвердить
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input confirmation-checkbox" type="checkbox" name="confirmation-${row.id}" value="reject" id="sutochnye-reject-checkbox-${row.id}">
+                <label class="form-check-label" for="sutochnye-reject-checkbox-${row.id}">
+                  Отклонить
+                </label>
+              </div>
+            </div>
+            <textarea placeholder="Комментарий для отклонения" name="reject-comment-${row.id}" rows="1" class="form-control reject-comment-textarea d-none"></textarea>
+          </div>
+        `);
+      } else {
+        $confirmationTd.html(`<a class="show-payment-confirmation" href="#" data-id="${row.id}">${row.status.name}</a>`);
+      }
+      return $tr;
+    }
+  });
+  $sutochnyeTable.on("click", ".show-sutochnye-files", function () {
+    const id = $(this).data("id");
+    const $modal = $(`
+      <div class="modal" tabindex="-1">
+        <div class="modal-dialog my-0 h-100 mx-5" style="--bs-modal-width: 100%">
+          <div class="modal-content rounded-0 h-100">
+            <div class="modal-header">
+              <h5 class="modal-title">Файлы</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex flex-column">
+              <ul class="nav nav-tabs" id="sutochnye-files-tabs" role="tablist">
+                
+              </ul>
+              <div class="tab-content border-bottom border-end border-start h-100" id="sutochnye-files">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
+    const $filesTabs = $("#sutochnye-files-tabs", $modal);
+    const $files = $("#sutochnye-files", $modal);
+    let index = 0;
+    for (const file of sutochnyeFiles[id]) {
+      $filesTabs.append(`
+        <li class="nav-item" role="presentation">
+          <button class="nav-link ${index === 0 ? "active" : ""}" id="sutochnye-file-${index}-tab" data-bs-toggle="tab" data-bs-target="#sutochnye-file-${index}-tab-pane" type="button" role="tab" aria-controls="sutochnye-file-${index}-tab-pane" aria-selected="${index === 0 ? "true" : "false"}">${file.file.name}</button>
+        </li>
+      `);
+      $files.append(`
+        <div class="tab-pane h-100 fade ${index === 0 ? "show active" : ""}" id="sutochnye-file-${index}-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+          <iframe class="w-100 h-100 border-0" src="${file.file.url}"></iframe>
+        </div>
+      `);
+      index++;
+    }
+
+    $modal.modal("show");
+    $modal.on("hidden.bs.modal", function () {
+      $modal.remove();
+    });
+  });
+  $sutochnyeTable.on("click", ".mail-button", function () {
+    const id = $(this).data("id");
+    const type = $(this).data("type");
+    $(this).closest(".dropdown").find(".sutochnye-mail-button").dropdown("hide");
+    sutochnyeMail(id, type);
+  });
+  $('#confirmation-history-table').smartTableWithVirtualScroll({
+    name: 'for-treasurers-confirmation-history-table',
+    defaultOrder: [{ field: 'created_at', sort: 'desc' }],
+    lastRowTarget: '#confirmation-history-table-last-row',
+    rowsTarget: '#confirmation-history-table-rows',
+    firstShowRows: "intersected",
+    getValuesUrl: '/p1/finance-module/for-treasurers/smart-tables/confirmation-history-get-values',
+    getRowsUrl: '/p1/finance-module/for-treasurers/smart-tables/confirmation-history-get-rows',
+    getSubtotalsUrl: '/p1/finance-module/for-treasurers/smart-tables/confirmation-history-get-subtotals',
+    loadingHtml: `
+        <tr>
+          <td class="text-center text-primary" colspan="14">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </td>
+        </tr>
+      `,
+    getTr(row) {
+      const $tr = $(/*html*/`
+        <tr class="${row.status.name === "подтверждено" ? "table-success" : row.status.name === "отклонено" ? "table-danger" : ""} border-black">
+          <td class="align-middle text-center">${new Date(row.created_at).toLocaleDateString()}</td>
+          <td class="align-middle">${row.responsible ? `${row.responsible.first_name} ${row.responsible.last_name}` : ""}</td>
+          <td class="align-middle">${row.model_name}</td>
+          <td class="align-middle">${row.status}</td>
+          <td class="align-middle">${row.rejected_comment || "-"}</td>
+        </tr>
+      `);
+      return $tr;
+    }
+  });
+  $('#administrative-transfers-table').smartTableWithVirtualScroll({
+    name: 'division-of-financial-planning-administrative-transfers-table',
+    firstShowRows: "intersected",
+    defaultOrder: [{ field: "can_be_confirmed", sort: "desc" }, { field: 'created_at', sort: 'desc' }],
+    lastRowTarget: '#administrative-transfers-table-last-row',
+    rowsTarget: '#administrative-transfers-table-rows',
+    getValuesUrl: '/p1/finance-module/for-treasurers/smart-tables/administrative-transfers-get-values',
+    getRowsUrl: '/p1/finance-module/for-treasurers/smart-tables/administrative-transfers-get-rows',
+    getSubtotalsUrl: '/p1/finance-module/for-treasurers/smart-tables/administrative-transfers-get-subtotals',
+    loadingHtml: `
+        <tr>
+          <td class="text-center text-primary" colspan="10">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </td>
+        </tr>
+      `,
+    getTr(row) {
+      const $tr = $(`
+        <tr class="${row.status.name === "Подтверждено" ? "table-success" : row.status.name === "Отклонён" ? "table-danger" : ""} border-black">
+          <td class="align-middle">${row.responsible ? `${row.responsible.first_name} ${row.responsible.last_name}` : ''}</td>
+          <td class="align-middle">${row.project_region.name}</td>
+          <td class="align-middle">${row.account.name}</td>
+          <td class="align-middle">${row.account.number}</td>
+          <td class="align-middle text-end">${numberFormat.format(row.sum)}</td>
+          <td class="align-middle">${row.note || ''}</td>
+          <td class="align-middle text-center">${new Date(row.created_at).toLocaleDateString()}</td>
+          <td class="align-middle confirmation-td">
+            
+          </td>
+        </tr>
+      `);
+      const $confirmationTd = $tr.find(".confirmation-td");
+      if (row.status.name === "Отправлено на подтверждение") {
+        $confirmationTd.html(`
+          <div class="confirmation">
+            <div class="d-flex align-items-center justify-content-between gap-5">
+              <input class="administrative-transfers-id" type="hidden" name="id" value="${row.id}"/>
+              <div class="form-check">
+                <input class="form-check-input confirmation-checkbox" type="checkbox" name="confirmation-${row.id}" value="confirm" id="administrative-transfers-complete-checkbox-${row.id}">
+                <label class="form-check-label" for="administrative-transfers-complete-checkbox-${row.id}">
+                  Подтвердить
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input confirmation-checkbox" type="checkbox" name="confirmation-${row.id}" value="reject" id="administrative-transfers-reject-checkbox-${row.id}">
+                <label class="form-check-label" for="administrative-transfers-reject-checkbox-${row.id}">
+                  Отклонить
+                </label>
+              </div>
+            </div>
+            <textarea placeholder="Комментарий для отклонения" name="reject-comment-${row.id}" rows="1" class="form-control reject-comment-textarea d-none"></textarea>
+          </div>
+        `);
+      } else {
+        $confirmationTd.html(`<a class="show-payment-confirmation" href="#" data-id="${row.id}">${row.status.name}</a>`);
+      }
+      return $tr;
+    }
+  });
+</script>
+{% endblock %}

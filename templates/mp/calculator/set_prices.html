@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{import_type}}{% endblock %}
+
+
+{% block chapter %}
+{{import_type}}
+{% endblock %}
+
+{% block content %}
+<link href="{% static 'css/set_order.css' %}" rel="stylesheet">
+
+{% if custom_error %}
+<h3 class="text-danger">{{custom_error}}</h3>
+{% endif %}
+<form method="post" enctype="multipart/form-data" id="uploadForm" class="col-4">
+
+  {% csrf_token %}
+  {% if contractor_disabled %}
+  {% else %}
+
+  <select class="form-control mb-2 mt-2" {{contractor_disabled}} id="id_order_project" name="order_project" required>
+    <option value=""></option>
+    <option value="КаР-Тел, ТОО">КаР-Тел, ТОО</option>
+    <option value="KCell, АО">KCell, АО</option>
+    <option value="Мобайл Телеком - Сервис, ТОО">Мобайл Телеком - Сервис, ТОО</option>
+    <option value="ZTE KAZAKHSTAN, ТОО">ZTE KAZAKHSTAN, ТОО</option>
+    <option value="Хуавей Текнолоджиз Казахстан, ТОО">Хуавей Текнолоджиз Казахстан, ТОО</option>
+  </select>
+  {% endif %}
+  {{form.as_p}}
+
+  <input type="button" class="btn btn-primary" onclick="submite_spiner()" value="Загрузить">
+
+</form>
+<p class="text-danger">
+  {{logs|safe}}
+  </div>
+
+<div class="spiner-full-screen" id="hidden-data" style="display:none;">
+  <div class="spiner-div">
+    <img src="{% static 'img/tumblr_nk4e9zslh61qa6q9uo1_500.gif' %}">
+  </div>
+
+
+
+
+  <script>
+    function submite_spiner() {
+      event.preventDefault();
+
+      document.getElementById("hidden-data").style.display = "flex"
+      setTimeout(function () {
+        document.getElementById('uploadForm').submit();
+      }, 1000);
+    }
+  </script>
+  {% endblock %}

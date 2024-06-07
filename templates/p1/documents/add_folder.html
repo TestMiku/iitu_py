@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% load widget_tweaks %}
+
+{% block title %}
+    Создание папки
+{% endblock %}
+
+{% block chapter %}
+    Создание папки
+{% endblock %}
+
+
+{% block content %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-sm-12 col-md-6 col-xl-3">
+                {% for field in form %}
+
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field|add_class:"form-control" }}
+                        <div class="text-danger">
+                            {{ field.errors }}
+                        </div>
+                    </div>
+
+
+
+                {% endfor %}
+                <button class="btn btn-primary w-100">Добавить</button>
+            </div>
+
+        </div>
+    </form>
+{% endblock %}

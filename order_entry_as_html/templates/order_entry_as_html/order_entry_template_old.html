@@ -1,0 +1,56 @@
+{% extends "order_entry_as_html/order_entry_template.html" %}
+
+
+{% block content %}
+    <table class="table table-responsive">
+        <thead>
+        <tr>
+            <th scope="col">Номер строки</th>
+            <th scope="col">Номенклатура</th>
+            <th scope="col">Количество (в счете)</th>
+            <th scope="col">Введённая цена</th>
+            <th scope="col">Налог</th>
+            <th scope="col">Строка счёта</th>
+            <th scope="col">Количество введённое</th>
+            <th scope="col">Заказ</th>
+            <th scope="col">Спецификация заказа</th>
+            <th scope="col">Итоговая сумма</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for number, nomenclature, count, entered_cost, vat, account_line, entered_count, order_number, order_specification, total in data %}
+            <tr>
+                <th scope="row">{{ number }}</th>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ nomenclature }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ count }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ entered_cost }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ vat }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ account_line }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ entered_count }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ order_number }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ order_specification }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ total }}</div>
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+{% endblock %}

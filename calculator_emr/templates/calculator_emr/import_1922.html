@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block chapter %}
+
+{%endblock %}
+
+{% block title %}
+Импорт 19.22
+{% endblock %}
+
+{% block links %}
+{% endblock %}
+
+{% block content %}
+{% if messages %}
+{% for message in messages %}
+<div class="fixed-container">
+    <div class="container text-center d-flex flex-column">
+        <div class="{% if message.tags %}alert {% if message.tags == 'error' %}alert-danger {% else %} alert-success{% endif %}{% endif %} alert-dismissible fade show"
+            style="position: absolute;" id="dangerAlertPrice" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Закрыть">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+<p hidden style="display: none;"></p>
+<div class="container" style="margin-top: 70px;">
+    <h2>Загрузить файл - 1922</h2>
+    <div class="input-group mb-3">
+        <div class="custom-file">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" class="custom-file-input" id="inputGroupFile01" data-browse-on-zone-click="true"
+                    name="file_upload" onchange="displayFileName(this)" required>
+                <label class="custom-file-label" for="inputGroupFile01" id="fileLabel">Выбрать файл</label>
+        </div>
+    </div>
+    <div style="display: flex; justify-content: space-between">
+        <button type="submit" class="btn btn-primary btn-icon-split" onclick="submitForm()"><span
+                class="icon text-white-50">
+                <i class="fas fa-upload"></i>
+            </span><span class="text">Импортировать</span></button>
+        <div id="template-download-button" style="display: initial;">
+            <a href="{% url 'download_template' filename='Шаблон для импорта ТЦП' %}"
+                class="btn btn-info btn-icon-split" download type="button">
+                <span class="icon text-white-50">
+                    <i class="fas fa-download"></i>
+                </span>
+                <span class="text">Скачать шаблон для импорта</span>
+            </a>
+        </div>
+    </div>
+</div>
+<div class="container text-center" style="display: none;" id="loader">
+    <i class="fas fa-circle-notch fa-spin fa-3x"></i>
+</div>
+<script>
+    function displayFileName(input) {
+        var label = document.getElementById('fileLabel');
+        label.innerText = input.files[0].name;
+    }
+    function submitForm() {
+        var fileInput = document.getElementById('inputGroupFile01');
+
+        // Проверяем, был ли выбран файл
+        if (fileInput.files.length > 0) {
+            // Ваш код или вызов функции, которую вы хотите активировать
+            document.getElementById('loader').style.display = 'block';
+        }
+    }
+</script>
+{% endblock %}

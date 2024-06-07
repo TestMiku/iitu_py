@@ -1,0 +1,40 @@
+{% extends "finance_module/base.html" %}
+
+{% load static %}
+{% block active_breadcrump %}
+Обязательные платежи
+{% endblock %}
+{% block title %}
+Обязательные платежи
+{% endblock %}
+{% block links %}
+<link rel="stylesheet" href="{% static 'finance_module/main.css' %}">
+
+
+{% endblock %}
+
+{% block breadcrumbs %}
+{{block.super}} <span class="mx-3 text-primary"><i class="fa-solid fa-chevron-right"></i></span>
+<div class="dropdown">
+    <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      {% block mandatory_payments_active_breadcrump %}{% endblock %}
+    </button>
+    <ul class="dropdown-menu ignore">
+        <li><a class="dropdown-item {% if request.resolver_match.url_name == 'import_mandatory_payments' %}active{% endif %}" href="{% url 'finance_module:mandatory_payments:import_mandatory_payments' %}"><i class="fa-solid fa-file-import"></i> Импорт обезятельных платежей</a></li>
+        <li><a class="dropdown-item {% if request.resolver_match.url_name == 'accrual_calculator' %}active{% endif %}" href="{% url 'finance_module:mandatory_payments:accrual_calculator' %}"><i class="fa-solid fa-calculator"></i> Калькулятор начислений</a></li>
+        <li><a class="dropdown-item {% if request.resolver_match.url_name == 'accrual_list' %}active{% endif %}" href="{% url 'finance_module:mandatory_payments:accrual_list' %}"><i class="fa-solid fa-table"></i> Список начислений</a></li>
+        <li><a class="dropdown-item {% if request.resolver_match.view_name == 'finance_module:mandatory_payments:list' %}active{% endif %}" href="{% url 'finance_module:mandatory_payments:list' %}"><i class="fa-solid fa-table"></i> Список обезятельных платежей</a></li>
+        <li><a class="dropdown-item {% if request.resolver_match.url_name == 'create_access_to_others_exception_for_project_manager' %}active{% endif %}" href="{% url 'finance_module:mandatory_payments:create_access_to_others_exception_for_project_manager' %}"><i class="fa-solid fa-check"></i> Создать исключение для ПМ</a></li>
+        <li><a class="dropdown-item {% if request.resolver_match.url_name == 'unloading_mandatory_payments' %}active{% endif %}" href="{% url 'finance_module:mandatory_payments:unloading_mandatory_payments' %}"><i class="fa-solid fa-upload"></i> Выгузка</a></li>
+    </ul>
+  </div>
+{% endblock %}
+{% block finance_module_content %}
+<div>
+    <div>
+        {% block finance_module_mandatory_payments_content %}
+
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}

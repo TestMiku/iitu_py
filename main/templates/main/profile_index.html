@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Easy Profile Blue - templatemo</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="keywords" content="">
+	<meta name="description" content="">
+<!-- 
+Easy Profile Template
+http://www.templatemo.com/tm-467-easy-profile
+-->
+	<!-- stylesheet css -->
+	<link rel="stylesheet" href="{% static 'profile/css/bootstrap.min.css' %}">
+	<link rel="stylesheet" href="{% static 'profile/css/font-awesome.min.css' %}">
+	<link rel="stylesheet" href="{% static 'profile/css/templatemo-blue.css' %}">
+
+</head>
+<body data-spy="scroll" data-target=".navbar-collapse">
+
+<!-- preloader section -->
+<div class="preloader">
+	<div class="sk-spinner sk-spinner-wordpress">
+       <span class="sk-inner-circle"></span>
+     </div>
+</div>
+
+<!-- header section -->
+<header>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12 col-sm-12">
+				<img src="{{user.avatar.url}}" class="img-responsive img-circle tm-border" alt="templatemo easy profile">
+				<hr>
+				<h1 class="tm-title bold shadow">Привет, Я {{user.first_name}}</h1>
+				<h1 class="white bold shadow">{{user.positiion}} Администратор</h1>
+			</div>
+		</div>
+	</div>
+</header>
+
+<div id="profile_info">	
+	{{user.html_info|safe}}
+</div>
+<!-- about and skills section -->
+
+
+<!-- footer section -->
+<!-- <footer>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12 col-sm-12">
+				<p>Copyright &copy; 2084 Your Easy Profile</p>
+				<ul class="social-icons">
+					<li><a href="#" class="fa fa-facebook"></a></li>
+                    <li><a href="#" class="fa fa-google-plus"></a></li>
+					<li><a href="#" class="fa fa-twitter"></a></li>
+					<li><a href="#" class="fa fa-dribbble"></a></li>
+					<li><a href="#" class="fa fa-github"></a></li>
+					<li><a href="#" class="fa fa-behance"></a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</footer> -->
+
+<!-- javascript js -->	
+<script src="{% static 'profile/js/jquery.js' %}"></script>
+<script src="{% static 'profile/js/bootstrap.min.js' %}"></script>	
+<script src="{% static 'profile/js/jquery.backstretch.min.js' %}"></script>
+<script src="{% static 'profile/js/custom.js' %}"></script>
+
+<script>
+	// HOME BACKGROUND SLIDESHOW
+	$(function(){
+		jQuery(document).ready(function() {
+			$('body').backstretch([
+				"{% static 'profile/images/tm-bg-slide-1.jpg' %}", 
+				"{% static 'profile/images/58ceb316e3a5e6bc647b53b5e6524acd.jpg' %}",
+				"{% static 'profile/images/360_F_610918559_ZdL9SbMtiv5Tsv93H0n2hdixnfixkMm7.jpg' %}",
+				"{% static 'profile/images/71344438a793f166699fcecab1e5e850.jpg' %}",
+				"{% static 'profile/images/minimal-morning-landscape-8k-gx-scaled.jpg' %}",
+				"{% static 'profile/images/ipad-air-2022-3840x3840-7904.png' %}"
+					], 	{duration: 3000, fade: 3000});
+			});
+	})
+</script>
+
+</body>
+</html>

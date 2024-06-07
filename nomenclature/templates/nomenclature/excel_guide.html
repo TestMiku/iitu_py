@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Номенклатура {% endblock %}
+
+{% block chapter %} Номенклатура {% endblock %}
+
+{% block links %}
+    <link rel="stylesheet" href="{% static 'nomenclature/css/style.css' %}" />
+{% endblock %}
+
+{% block content %}
+
+    <div class="d-flex align-items-center mt-5 mb-5">
+        <form id="searchForm" method="get" class="pt-2">
+            <label>
+                <input id="searchInput" type="text" name="search" class="form-control" style="width: 300px;" placeholder="Поиск" value="{{ request.GET.search }}">
+            </label>
+        </form>
+    </div>
+
+    <div id="selectedNomenclatureDetails" style="display: none;">
+        <h4>Выбранные номенклатурные позиции</h4>
+        <h4>Максимальная статья расходов: <span id="max_total_sum_object"></span></h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Ключ продукта</th>
+                    <th>Ед. измерений</th>
+                    <th>Количество</th>
+                    <th>Количество введенное</th>
+                    <th>Итоговая сумма</th>
+                </tr>
+            </thead>
+            <tbody id="selectedNomenclatureDetailsBody"></tbody>
+        </table>
+        <button id="createButton" class="btn btn-primary">Создать</button>
+    </div>
+
+    <div id="notification-container"></div>
+
+    <div id="searchResults" class="mt-5">
+        {% include 'nomenclature/search_results.html' %}
+    </div>
+
+    {% if is_paginated %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="First">
+                            1
+                        </a>
+                    </li>
+                    {% if page_obj.number > 3 %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                    {% if page_obj.number > 2 %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.number|add:"-1" }}">{{ page_obj.number|add:"-1" }}</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ page_obj.number }}</span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    {% if page_obj.number < page_obj.paginator.num_pages|add:"-1" %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.number|add:"1" }}">{{ page_obj.number|add:"1" }}</a>
+                        </li>
+                    {% endif %}
+                    {% if page_obj.number < page_obj.paginator.num_pages|add:"-2" %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                            {{ page_obj.paginator.num_pages }}
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+
+        let entered_objects = JSON.parse(localStorage.getItem('entered_objects')) || [];
+
+        function get_object_with_max_total_sum() {
+            let maxObject = null;
+            let maxTotalSum = -Infinity;
+
+            for (let i = 0; i < entered_objects.length; i++) {
+                const object = entered_objects[i];
+                if (object.total_sum > maxTotalSum) {
+                    maxTotalSum = object.total_sum;
+                    maxObject = object;
+                }
+            }
+
+            return maxObject;
+        }
+
+        function get_total_sum(id) {
+            let tr_object = document.querySelectorAll(`#object_${id} td`);
+            let total_sum = parseInt(tr_object[4].querySelector('input').value);
+            let obj = entered_objects.find(obj => obj.id === id);
+            obj.total_sum = total_sum;
+            return obj;
+        }
+
+        function getDifferenceTotalSumAndCurrentObject(currentObject) {
+            let max_total_sum_object = get_object_with_max_total_sum();
+            let current_total_sum = currentObject.total_sum ? currentObject.total_sum : 0;
+
+            if (parseInt(current_total_sum) > parseInt(max_total_sum_object.total_sum)) {
+                return currentObject;
+            }
+            else {
+                return max_total_sum_object;
+            }
+        }
+
+        function updateEnteredObject(index, key, value) {
+            entered_objects[index][key] = value;
+            localStorage.setItem('entered_objects', JSON.stringify(entered_objects));
+
+            let currentObject = get_total_sum(entered_objects[index].id);
+            let maxTotalSumObject = getDifferenceTotalSumAndCurrentObject(currentObject);
+
+            if (maxTotalSumObject.total_sum !== '') {
+                document.getElementById('max_total_sum_object').innerText = maxTotalSumObject.expense_item;
+            }
+            else {
+                document.getElementById('max_total_sum_object').innerText = '';
+            }
+        }
+
+        const resetEnteredObjects = () => {
+            entered_objects = [];
+            localStorage.setItem('entered_objects', JSON.stringify(entered_objects));
+        }
+
+        $(document).ready(function() {
+            function addNomenclature(nomenclatureId, nomenclatureKey, nomenclatureName, nomenclatureUnit, expenseItem) {
+                entered_objects.push({
+                    id: nomenclatureId,
+                    key_search: nomenclatureKey,
+                    name: nomenclatureName,
+                    unit: nomenclatureUnit,
+                    quantity: 1,
+                    quantity_entered: 1,
+                    total_sum: '',
+                    expense_item: expenseItem
+                });
+                console.log(entered_objects);
+                updateSelectedNomenclatureDetails();
+                localStorage.setItem('entered_objects', JSON.stringify(entered_objects));
+            }
+
+            $('.add-product').click(function() {
+                const nomenclatureId = $(this).attr('value');
+                const nomenclatureKey = $(this).data('nomenclature-key-product');
+                const nomenclatureName = $(this).data('nomenclature-name');
+                const nomenclatureUnit = $(this).data('nomenclature-unit');
+                const expenseItem = $(this).data('expense-item');
+                addNomenclature(nomenclatureId, nomenclatureKey, nomenclatureName, nomenclatureUnit, expenseItem);
+            });
+
+            function updateSelectedNomenclatureDetails() {
+                let tbody = $('#selectedNomenclatureDetailsBody');
+                let selectedNomenclatureDetails = $('#selectedNomenclatureDetails');
+
+                if (entered_objects.length > 0) {
+                    selectedNomenclatureDetails.show();
+                } else {
+                    selectedNomenclatureDetails.hide();
+                }
+
+                tbody.empty();
+
+                for (let i = 0; i < entered_objects.length; i++) {
+                    let tr = $(`<tr id="object_${entered_objects[i].id}"></tr>`);
+                    tr.html(`
+                        <td class="key_search_td">${entered_objects[i].key_search}</td>
+                        <td>${entered_objects[i].unit}</td>
+                        <td><input type="text" class="form-control" value="${entered_objects[i].quantity}" oninput="updateEnteredObject(${i}, 'quantity', this.value)"></td>
+                        <td><input type="text" class="form-control" value="${entered_objects[i].quantity_entered}" oninput="updateEnteredObject(${i}, 'quantity_entered', this.value)"></td>
+                        <td><input type="number" class="form-control" value="${entered_objects[i].total_sum}" oninput="updateEnteredObject(${i}, 'total_sum', this.value)"></td>
+                        <td><button class="btn btn-danger delete-product" data-index="${i}">Удалить</button></td>
+                    `);
+                    tbody.append(tr);
+                }
+            }
+
+            $(document).on('click', '.delete-product', function() {
+                let index = $(this).data('index');
+                entered_objects.splice(index, 1);
+                updateSelectedNomenclatureDetails();
+                localStorage.setItem('entered_objects', JSON.stringify(entered_objects));
+            });
+
+            function performSearch(searchQuery) {
+                $.ajax({
+                    url: $('#searchForm').attr('action'),
+                    data: { search: searchQuery },
+                    success: function(data) {
+                        $('#searchResults').html(data.html);
+
+                        $('.add-product').off('click').on('click', function() {
+                            const nomenclatureId = $(this).attr('value');
+                            const nomenclatureName = $(this).data('nomenclature-name');
+                            const nomenclatureUnit = $(this).data('nomenclature-unit');
+                            const expenseItem = $(this).data('expense-item');
+                            addNomenclature(nomenclatureId, nomenclatureName, nomenclatureUnit, expenseItem);
+                        });
+                    }
+                });
+            }
+
+            let initialSearchQuery = $('#searchInput').val();
+            if (initialSearchQuery) {
+                performSearch(initialSearchQuery);
+            }
+
+            $('#searchInput').on('input', function() {
+                var searchQuery = $(this).val();
+                performSearch(searchQuery);
+            });
+
+            $('#searchInput').on('input', function() {
+                var searchQuery = $(this).val().trim();
+                performSearch(searchQuery);
+
+                // Проверяем, содержит ли поле ввода текст
+                if (searchQuery) {
+                    $('.pagination').hide(); // Скрываем блок пагинации
+                } else {
+                    $('.pagination').show(); // Показываем блок пагинации
+                }
+            });
+
+            updateSelectedNomenclatureDetails();
+
+            function showNotification(message, type = 'info', duration = 5000) {
+                const container = document.getElementById('notification-container');
+                const notification = document.createElement('div');
+                notification.classList.add('notification');
+                notification.classList.add(type); // Add type as a separate class
+                notification.innerHTML = `<div class="notification-content">${message}</div><div class="notification-accept">Принято!</div>`;
+
+                const bar = document.createElement('div');
+                bar.classList.add('notification-bar');
+
+                notification.appendChild(bar);
+                container.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.opacity = 0;
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 1000);
+                }, duration);
+
+                document.querySelector('.notification-accept').addEventListener('click', () => {
+                    notification.style.opacity = 0;
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 1000);
+                });
+            }
+
+            function downloadHtmlFile(data, fileName) {
+                const htmlContent = `<import_data hidden="">${data}</import_data>`;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'orders.html';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }
+
+            function sendRequestForDownloadHTMLFile(enteredObjects) {
+                const entered_objects_ids = [];
+                for (let i = 0; i < enteredObjects.length; i++) {
+                    entered_objects_ids.push(enteredObjects[i]);
+                }
+
+                fetch('/nomenclature/orders/download/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ orders: entered_objects_ids })
+                })
+                .then(response => response.text())
+                .then(response => {
+                    return response;
+                })
+                .then(html => {
+                    if (html) {
+                        showNotification('Файл с номенклатурами успешно скачан', 'success', 5000);
+                        downloadHtmlFile(html, 'orders.html');
+                    } else {
+                        showNotification('Произошла ошибка при скачивании файла', 'error', 5000);
+                    }
+                });
+                return false;
+            }
+
+            function createNomenclatureOrders() {
+                let validatedObjects = [];
+
+                for (let i = 0; i < entered_objects.length; i++) {
+                    let obj = entered_objects[i];
+                    if (obj.quantity !== "" &&  obj.quantity_entered !== "" && obj.total_sum !== "") {
+                        validatedObjects.push(obj);
+                    } else {
+                        console.log('Неполные данные:', obj);
+                    }
+                }
+
+                if (validatedObjects.length === entered_objects.length) {
+                    fetch('/nomenclature_add_to_order/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ nomenclatures: validatedObjects }),
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            showNotification('Ошибка с сервера: ' + response.status, 'error', 5000);
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        sendRequestForDownloadHTMLFile(data['created_orders']);
+                        resetEnteredObjects();
+                        updateSelectedNomenclatureDetails();
+                    })
+                    .catch(error => {
+                        showNotification('Ошибка создания заказов номенклатуры: ' + error.message, 'error', 5000);
+                    });
+                } else {
+                    showNotification('Не все поля заполнены.', 'error', 5000);
+                }
+            }
+
+            $('#createButton').on('click', function() {
+                createNomenclatureOrders();
+            });
+
+        });
+
+
+    </script>
+
+{#    <script src="{% static 'nomenclature/js/script.js' %}"></script>#}
+{% endblock %}

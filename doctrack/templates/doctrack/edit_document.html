@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}
+    <!-- Тайтлд пустой страницы -->
+{% endblock %}
+
+{% block links %}
+    <!-- Используемые ссылки в пустом разделе -->
+    <link rel="stylesheet" type="text/css" href="{% static 'order_generator_by_kcell/css/main.css' %}">
+{% endblock %}
+
+
+{% block chapter %}
+    <!-- Название пустого раздела -->
+{% endblock %}
+
+{% block back_button %}
+    {% comment %} Кнопка Назад (По умолчанию назад на прошлую веб страницу) {% endcomment %}
+{% endblock %}
+
+{% block content %}
+    <!-- <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="custom-file w-auto mr-2">
+        {{form.as_p}}
+        <input type="file" name="file" id="id_file" class="custom-file-input">
+        </div>
+
+        <div class="row">
+<i class="col-3"></i>
+<button class="btn btn-primary col-6" type="submit">Сохранить</button>
+<i class="col-3"></i>
+        </div>
+    </form> -->
+
+
+
+
+    <h4>{{file_name}}</h4>
+    <form method="post" class="text-center" id="file-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div id="drop-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+            ondrop="handleDrop(event)" onclick="selectFile()">
+            <p id="drop-text">Перетащите файл сюда или нажмите для выбора файла.</p>
+            <input type="file" id="id_file" accept="" name="file" onchange="handleFileSelect(event)">
+        </div>
+        <button class="btn-sbmt btn btn-outline-secondary btn-lg" type="submit" hidden>Сохранить</button>
+    </form>
+
+{% endblock %}
+
+
+{% block scripts %}
+    <!-- Скрипты пустого раздела -->
+<script src="{% static 'js/doctrack/main.js' %}"></script>
+
+<script>
+    
+    function handleDragOver(event) {
+    event.preventDefault();
+    // Отмена стандартного действия по умолчанию, чтобы разрешить перетаскивание файла
+    event.dataTransfer.dropEffect = 'copy';
+
+    // Добавление класса для эффекта ховера
+    document.getElementById('drop-area').classList.add('input-hover');
+}
+
+function handleDragLeave(event) {
+    // Удаление класса для завершения эффекта ховера
+    document.getElementById('drop-area').classList.remove('input-hover');
+}
+
+function handleDrop(event) {
+    // Обработка события перетаскивания
+    const file = event.dataTransfer.files[0];
+    const fileInput = document.getElementById("id_file");
+    fileInput.files = event.dataTransfer.files;
+    event.preventDefault();
+
+    handleFile(file);
+    // Удаление класса для завершения эффекта ховера
+
+    document.getElementById('drop-area').classList.remove('input-hover');
+}
+
+function handleFileSelect(event) {
+    // Обработка события выбора файла через input[type=file]
+    const file = event.target.files[0];
+    handleFile(file);
+}
+
+function handleFile(file) {
+
+    const baseUrl = window.location.origin;
+    // if (file) {
+    //     console.log("Выбран файл:", file);
+    //     const formData = new FormData(document.getElementById("file-form"));
+
+    //     const xmlHttpRequest = new XMLHttpRequest();
+    //     xmlHttpRequest.addEventListener("readystatechange", function () {
+    //         if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+    //             console.log(this.response);
+    //         }
+    //     });
+    //     xmlHttpRequest.open("POST", `${baseUrl}/og-by-kcell/excel-file-upload`);
+    //     xmlHttpRequest.send(formData);
+    // fetch(`${baseUrl}/og-by-kcell/excel-file-upload`, {
+    //     method: 'POST',
+    //     body: formData,
+    // })
+    //     .then(response => response.blob())  // Обработка как Blob (файл)
+    //     .then(blob => {
+    //         // blob - это ваш файл, который вы можете обработать
+    //         console.log('File received:', response);
+
+    //         // Пример: создание ссылки для скачивания файла
+    //         const downloadLink = document.createElement('a');
+    //         downloadLink.href = URL.createObjectURL(blob);
+    //         downloadLink.download = 'excek.xlsx';  // Замените на нужное имя файла
+    //         document.body.appendChild(downloadLink);
+    //         downloadLink.click();
+    //         document.body.removeChild(downloadLink);
+    //     })
+    //     .catch(error => {
+    //         console.error('Error during file upload:', error);
+    //     });
+    // }
+    document.getElementById('drop-text').textContent = "Выбран файл: " + file.name;
+    document.querySelector('.btn-sbmt').removeAttribute('hidden');
+
+
+}
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+
+    if (parts.length === 2) {
+        return parts.pop().split(';').shift();
+    }
+
+    return null;
+}
+
+function selectFile() {
+    // Имитация клика на input[type=file]
+    document.getElementById('id_file').click();
+}
+function importFile() {
+    // Имитация клика на input[type=file]
+    document.getElementById('id_file').click();
+}
+</script>
+{% endblock %}

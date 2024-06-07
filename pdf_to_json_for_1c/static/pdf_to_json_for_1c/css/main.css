@@ -1,0 +1,102 @@
+.main-block{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    height: 70vh;
+    width: 90vw;
+    align-items: center;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    border-radius: 10px;
+    border: 1px solid rgb(106, 98, 98);
+    overflow: hidden;
+    padding: 50px;
+    }
+.block-body{
+    display: flex;
+}
+
+.pdf-view{
+    padding: 20px;
+    /* min-width: 600px; */
+    min-height: 700px;
+    margin-top: 10px;
+    border: 1px solid rgb(106, 98, 98);
+    border-radius: 10px;
+    overflow: auto;
+    max-height: 800px;
+    /* max-width: 800px; */
+    max-width: 900px;
+}
+
+
+
+.variables{
+    border: 1px solid rgb(106, 98, 98);
+    border-radius: 10px;
+    margin-left: 2vw;
+    margin-top: 10px;
+    padding: 25px;
+    min-width: 1200px;
+    min-height: 700px;
+    max-height: 800px;
+    overflow: auto;
+}
+
+.table-text{
+    border: 1px solid rgb(106, 98, 98);
+    border-radius: 10px;
+    padding: 25px;
+    overflow: auto;
+    margin-bottom: 5px;
+}
+.file-upload {
+    /* margin-top: 150px; */
+}
+
+#drop-area {
+    border-radius: 10px;
+    width: 30vw;
+    height: 40vh;
+    border: 2px dashed #ccc;
+    text-align: center;
+    padding: 20px;
+    margin: 50px auto;
+    cursor: pointer;
+}
+
+#drop-area.input-hover {
+    background-color: #b5b9bb;
+    /* Цвет ховера */
+}
+
+#drop-area input {
+    display: none;
+}
+
+.highlighted {
+    background-color: yellow;
+}
+
+.result-input{
+    margin-bottom: 10px;
+}
+
+
+.zoomable-image {
+    max-width: 100%;
+    max-height: 100%;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.success-text {
+    /* width: 100px; */
+    /* height: 100px; */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(60%, -800%);/*translate(60%, -490%);*/
+  }  

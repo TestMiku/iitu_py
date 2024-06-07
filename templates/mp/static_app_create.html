@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}{{statapp.name}}{% endblock %}
+
+
+{% block chapter %}Создать Статичный раздел
+{% endblock %}
+
+{% block content %}
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <p><label for="id_name" class="form-label">{{form.name.label}}</label>{{form.name}}</p>
+    <p><label for="id_preview_description" class="form-label">{{form.preview_description.label}}</label>{{form.preview_description}}</p>
+    <p><label for="id_instruction" class="form-label">{{form.instruction.label}}</label>{{form.instruction}}</p>
+    <p><label for="id_file_field" class="form-label mr-4">{{form.file_field.label}}</label>{{form.file_field}}</p>
+    <p><label for="id_roles" class="form-label mr-4">{{form.roles.label}}</label>{{form.roles}}</p>
+
+
+    <button class="btn btn-primary mb-2" type="submit">Создать</button>
+</form>
+
+{% endblock %}

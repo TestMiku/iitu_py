@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ statapp.name }}{% endblock %}
+
+
+{% block chapter %} {{ statapp.name }}
+{% if download_link %}
+<script>
+    let url = "{{download_link}}";
+
+    let link = document.createElement('a');
+    link.href = url;
+    link.download = ''; // Это пустая строка принудительно заставляет браузер загрузить файл, а не открывать его в новой вкладке
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+</script>
+{% endif %}
+<a type="submit" href="/mp/dounload_statapps/{{statapp.id}}" class="btn btn-primary mb-2">Скачать
+    {% comment %} <a type="submit" href="/media/{{ statapp.file_field }}" class="btn btn-primary mb-2">Скачать
+        {%endcomment %} - {{ statapp.name }}</a>
+
+    {% if user.is_superuser %}
+    <a type="submit" href="/mp/create_or_update_chapter/{{ statapp.id }}" class="btn btn-secondary mb-2">Изменить</a>
+    {% endif %}
+
+    {% endblock %}
+
+    {% block content %}
+    <h1>Инструкция</h1>
+    {{ statapp.html_instruction | safe }}
+
+    {% endblock %}

@@ -1,0 +1,101 @@
+{% extends "order_entry_as_html/order_entry_template.html" %}
+
+{% block content %}
+    <table class="table table-responsive">
+        <thead>
+        <tr>
+            <th scope="col">No.</th>
+            <th scope="col">PO line No.</th>
+            <th scope="col">Purchasing Area</th>
+            <th scope="col">Construction Area</th>
+            <th scope="col">Site Code</th>
+            <th scope="col">Site Name</th>
+            <th scope="col">Logic Site Code</th>
+            <th scope="col">Logic Site Name</th>
+            <th scope="col">Item Code</th>
+            <th scope="col">Item Name</th>
+            <th scope="col">Unit</th>
+            <th scope="col">PO quantity</th>
+            <th scope="col">confirmed quantity</th>
+            <th scope="col">Settlement Quantity</th>
+            <th scope="col">Line settlement status</th>
+            <th scope="col">Quantity bill</th>
+            <th scope="col">Quantity cancelled</th>
+            <th scope="col">Unit Price</th>
+            <th scope="col">tax rate</th>
+            <th scope="col">PR Line Number</th>
+            <th scope="col">Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for number, po_number, purchasing_area, construction_area, site_code, site_name, logic_site_code, logic_site_name, item_code, item_name, unit, po_quantity, confirmed_quantity, settlement_quantity, line_settlement_status, quantity_bill, quantity_cancelled, unit_price, tax_rate, pr_line_number, description in data %}
+            <tr>
+                <th scope="col">
+                    {{ number }}
+                </th>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ po_number }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ purchasing_area }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ construction_area }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ site_code }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ site_name }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ logic_site_code }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ logic_site_name }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ item_code }}</div>
+                </td>
+                <td>
+                    {{ item_name }}
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ unit }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ po_quantity }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ confirmed_quantity }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ settlement_quantity }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ line_settlement_status }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ quantity_bill }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ quantity_cancelled }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ unit_price }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ tax_rate }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ pr_line_number }}</div>
+                </td>
+                <td>
+                    {{ description }}
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends 'finance_module/mandatory_payments/base.html' %}
+
+{% block mandatory_payments_active_breadcrump %}
+Список начисление
+{% endblock %}
+
+{% block finance_module_mandatory_payments_content %}
+<div id="filter-menu" class="card shadow mt-3 z-3" style="display: none;">
+    <div class="card-body">
+        <div class="input-group mb-2">
+            <input type="search" id="search-input" class="form-control">
+            <label for="search-input" class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></label>
+        </div>
+        <div
+            class="d-flex align-items-center justify-content-around rounded-top bg-light border-top border-end border-start">
+            <button class="btn btn-link" id="select-all-button">Выделить всё</button>
+            <div class="vr"></div>
+            <button class="btn btn-link" id="reset-button">Очистить</button>
+        </div>
+        <ul class="list-group list-group-flush border rounded-bottom" id="unique-value-list" style="max-height: 12em; overflow-y: scroll;">
+            <li class="list-group-item">
+                <div class="form-check">
+                    <input class="form-check-input unique-value-checkbox" type="checkbox" value=""
+                        id="flexCheckDefault">
+                    <label class="form-check-label" for="flexCheckDefault">
+                        lorem40
+                    </label>
+                </div>
+            </li>
+            <li class="list-group-item">A second item</li>
+            <li class="list-group-item">A third item</li>
+            <li class="list-group-item">A fourth item</li>
+            <li class="list-group-item">And a fifth one</li>
+        </ul>
+    </div>
+    <div class="card-footer d-flex align-items-center justify-content-end">
+
+        <button type="button" class="btn btn-outline-danger me-2" data-smt-filter-menu-cancel-button>Отмена</button><button type="button"
+            class="btn btn-primary" data-smt-filter-menu-submit-button>ОК</button>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Список начислений</h5>
+    </div>
+    <div class="card-body">
+        <table id="table" class="table table-striped table-bordered" data-smt-filter-menu-target="#filter-menu"
+            data-smt-unique-value-checkbox-target=".unique-value-checkbox" data-smt-unique-value-search-input-target="#search-input"
+            data-smt-unique-value-select-all-button-target="#select-all-button"
+            data-smt-unique-value-reset-button-target="#reset-button"
+            data-smt-unique-value-list-target="#unique-value-list"
+            >
+            <thead>
+                <tr class="table-light">
+                    <th class="position-relative" scope="col">
+                        №
+                        <button class="btn-sm position-absolute m-1 bottom-0 end-0 btn" data-smt-filter-menu-open-button
+                            data-smt-field="number">
+                            <i class="fa-solid fa-caret-down"></i>
+                        </button>
+                    </th>
+                    <th class="position-relative" scope="col">
+                        Статья
+                        <button class="btn-sm position-absolute m-1 bottom-0 end-0 btn" data-smt-filter-menu-open-button
+                            data-smt-field="number">
+                            <i class="fa-solid fa-caret-down"></i>
+                        </button>
+                    </th>
+                    <th class="position-relative" scope="col">
+                        Сумма
+                        <button class="btn-sm position-absolute m-1 bottom-0 end-0 btn" data-smt-filter-menu-open-button
+                            data-smt-field="number">
+                            <i class="fa-solid fa-caret-down"></i>
+                        </button>
+                    </th>
+                    <th class="position-relative" scope="col">
+                        Дата
+                        <button class="btn-sm position-absolute m-1 bottom-0 end-0 btn" data-smt-filter-menu-open-button
+                            data-smt-field="number">
+                            <i class="fa-solid fa-caret-down"></i>
+                        </button>
+                    </th>
+                    <th class="position-relative" scope="col">
+                        Ответственный
+                        <button class="btn-sm position-absolute m-1 bottom-0 end-0 btn" data-smt-filter-menu-open-button
+                            data-smt-field="number">
+                            <i class="fa-solid fa-caret-down"></i>
+                        </button>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+
+    class MandatoryPaymentAccrualsTableWithFilter extends TableWithFilter {
+        async getRows() {
+
+        }
+
+        showRows() {
+            
+        }
+
+        async getUniqueValues() {
+            
+        }
+
+        showUniqueValues() {
+
+        }
+    }
+
+    let tableWithFilter = null;
+    $(function () {
+        tableWithFilter = new MandatoryPaymentAccrualsTableWithFilter("#table");
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,22 @@
+<div>
+    <div id="{{ widget.attrs.id }}_html"
+         contenteditable="true"
+         class="form-control"
+         style="min-height: 16em; overflow: scroll;">
+
+    </div>
+    <input name="{{ widget.name }}"{% if widget.value != None %}
+           value="{{ widget.value|stringformat:'s' }}"{% endif %} {% include "django/forms/widgets/attrs.html" %}
+           hidden>
+
+
+    <script>
+        const {{widget.attrs.id}} =
+        document.getElementById("{{widget.attrs.id}}");
+        const {{widget.attrs.id}}_html = document.getElementById("{{widget.attrs.id}}_html");
+        {{widget.attrs.id}}_html.addEventListener("input", function () {
+            {{widget.attrs.id}}.
+            value = this.innerHTML;
+        }, false);
+    </script>
+</div>

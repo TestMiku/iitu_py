@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Детали документа{% endblock %}
+{% block chapter %}Детали документа{% endblock %}
+
+{% block content %}
+    <p>Номер заявки: {{ document.request }}</p>
+    <p>Имя документа: {{ document.document.name }}</p>
+    <!-- Добавьте другую информацию по мере необходимости -->
+{% endblock %}

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload a 7.23</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 30px; /* Add padding to body */
+            display: flex;
+            justify-content: flex-start; /* Align to the left */
+            align-items: flex-start; /* Align to the upper corner */
+            height: calc(100vh - 40px); /* Subtract padding from height */
+        }
+        .upload-container {
+            text-align: left; /* Align text to the left */
+            padding: 20px; /* Add padding */
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .upload-container h2 {
+            margin-top: 0;
+        }
+        .upload-input {
+            margin-top: 20px;
+        }
+        .upload-button {
+            background-color: darkblue;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        .row-preview {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <h2>Upload 7.23</h2>
+        <form action="#" method="post" enctype="multipart/form-data" class="upload-form">
+            {% csrf_token %}
+            <input type="file" name="file" id="file" class="upload-input" required onchange="handleFile(this)">
+            <br>
+            <button class="upload-button" >Upload</button>
+        </form>
+        <div id="row-preview" class="row-preview">
+            <!-- Display first 10 rows here -->
+        </div>
+    </div>
+
+    <script>
+        function handleFile(input) {
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 0, raw: false });
+                
+                // Display first 10 rows
+                displayFirst10Rows(rows);
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function displayFirst10Rows(rows) {
+            const rowPreviewDiv = document.getElementById('row-preview');
+            rowPreviewDiv.innerHTML = '<h3>Превью:</h3>';
+            const table = document.createElement('table');
+            table.style.width = '100%';
+            table.style.borderCollapse = 'collapse';
+            const tbody = document.createElement('tbody');
+            
+            // Create table rows
+            for (let i = 0; i < Math.min(rows.length, 10); i++) {
+                const tr = document.createElement('tr');
+                for (let j = 0; j < rows[i].length; j++) {
+                    const td = document.createElement('td');
+                    td.style.border = '1px solid #ccc';
+                    td.style.padding = '8px';
+                    td.textContent = rows[i][j];
+                    tr.appendChild(td);
+                }
+                tbody.appendChild(tr);
+            }
+            table.appendChild(tbody);
+            rowPreviewDiv.appendChild(table);
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
+</body>
+</html>

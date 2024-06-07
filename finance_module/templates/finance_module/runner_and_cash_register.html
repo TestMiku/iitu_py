@@ -1,0 +1,60 @@
+{% extends "finance_module/base.html" %}
+{% block active_breadcrump %}
+Бегунок/Касса
+{% endblock %}
+{% block title %}
+Бегунок/Касса
+{% endblock %}
+{% block finance_module_content %}
+
+<div class="row">
+    <div class="col-6">
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Бегунок</h5>
+
+                {% if runners %}
+                <table class="table table-bordered">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">Назначение</th>
+                            <th scope="col">Сумма</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for runner in runners %}
+                        <tr>
+                            <td>{{ runner.appointment }}</td>
+                            <td data-format-number>{{ runner.money_summ }} </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>У вас нет суммы на кассе.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Касса</h5>
+                <p>Сумма на кассе: <span data-format-number="number-2">{{cash_register.sum}}</span></p>
+                <form method="post" class="d-flex align-items-center">
+                    {% csrf_token %}
+                    <input class="me-2 form-control w-auto d-inline-block" type="number" name="sum" step="0.01" min="0" placeholder="Введите сумму" required>
+                    <button class="btn btn-primary">Отправить</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+{% if user.is_staff %}
+<a class="btn btn-secondary" href="{% url 'finance_module:upload_excel' %}">Добавить</a>
+{% endif %}
+{% endblock %}

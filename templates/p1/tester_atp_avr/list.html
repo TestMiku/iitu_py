@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block chapter %}{{page_name}}{% endblock chapter %}
+
+{% block content %}
+
+    <a href="/p1/tester-atp-avr">Назад на проверятель</a>
+    <span> | </span>
+    <a href="{{add_url}}">Добавить</a>
+    <hr>
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col" class="sortable" data-index="1">Значение</th>
+                <th scope="col" class="sortable" data-index="2">Изменить</th>
+                <th scope="col" class="sortable" data-index="3">Удалить</th>
+            </tr>
+        </thead>
+
+
+        <tbody>
+            {% for obj in obj_list %}
+            <tr>
+                <td>{{ obj.name }}</td>
+                <td>
+                    <a href="{{obj_url}}{{ obj.pk }}">Изменить</a>
+                </td>
+                <td>
+                    <a href="{{obj_url}}del/{{ obj.pk }}">Удалить</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

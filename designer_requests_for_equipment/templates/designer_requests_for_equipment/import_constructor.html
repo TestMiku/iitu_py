@@ -1,0 +1,404 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}
+Импорт конструктора
+{% endblock %}
+
+{% block links %}
+<link rel="stylesheet" href="{% static 'designer_requests_for_equipment/css/imp_cons.css' %}">
+{% endblock %}
+
+
+{% block chapter %}
+Импорт конструктора
+{% endblock %}
+
+{% comment %}{% block back_button %}
+Кнопка Назад (По умолчанию назад на прошлую веб страницу)
+{% endblock %}{% endcomment %}
+
+{% block content %}
+<div class="container bg-white p-1"
+    style="border-radius: 10px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
+    <div class="main-block m-5">
+        <form>
+            <div class="dropdown">
+                <label for="category">Выберите категорию</label>
+                <input id="category" name="category" type="text" class="input-from form-control main-form-input"
+                    value="{{request.GET.category}}" data-toggle="dropdown" autocomplete="off">
+                <div class="dropdown-menu">
+                    {% for category in cotegories %}
+                    <a class="dropdown-item"
+                        onclick="window.location.href = `/designer-rfe/import-constructor?category={{ category.title_name }}&subcategory=`">
+                        {{category.title_name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="dropdown">
+                <label for="subcategory">Выберите подкатегорию</label>
+                <div class="row">
+                    <input id="subcategory" name="subcategory" type="text"
+                        class="col-11 input-from form-control main-form-input" data-toggle="dropdown"
+                        aria-expanded="false" autocomplete="off" value="{{request.GET.subcategory}}"
+                        style="margin-left: 10px;">
+                    <div class="dropdown-menu">
+                        {% for subcategory in subcategories %}
+                        {% if request.GET.category == subcategory.title_name.title_name %}
+                        <a class="dropdown-item"
+                            onclick="window.location.href = `/designer-rfe/import-constructor?category={{request.GET.category}}&subcategory={{subcategory.base_equipment_name}}`">
+                            {{subcategory.base_equipment_name }}</a>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    <button class="btn btn-danger btn-sm" type="button" style="height: 37px; margin-left: 5px;"
+                        onclick="deleteSubcategory('{{request.GET.subcategory}}', '{{request.GET.category}}')">
+                        <i class="fas fa-trash"></i></button>
+                </div>
+
+            </div>
+        </form>
+
+        <div class="dropdown">
+            <label for="package">Выберите пакет</label>
+            <input id="package" type="text" class="input-from form-control main-form-input" data-toggle="dropdown"
+                aria-expanded="false" autocomplete="off">
+            <div class="dropdown-menu" autocomplete="off">
+                {% for package in packages %}
+                {% if request.GET.category == package.base_equipment_name.title_name.title_name and request.GET.subcategory == package.base_equipment_name.base_equipment_name %}
+                <a class="dropdown-item"
+                    onclick="$(`#package`).val('{{package.transition_name}}');">{{package.transition_name}}</a>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <label for="equipment">Вставьте оборудование</label>
+        <textarea class="form-control" id="equipment" rows="3"></textarea>
+        <button class="btn btn-success btn-lg mt-3" onclick="transferData()">Добавить данные</button>
+        <button class="btn btn-primary btn-lg mt-3" onclick="changeData()" data-toggle="modal"
+            data-target="#transition-backdrop">Изменить данные</button>
+    </div>
+
+</div>
+
+
+<div class="modal fade" id="transition-backdrop" data-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Таблица</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="transition-modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-danger" onclick="deletPackage()">Удалить пакет</button>
+                <button type="button" class="btn btn-primary" onclick="validateForm()" hidden id="updateBtn">
+                    Обновить данные</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    BaseURL = window.location.origin;
+    function transferData() {
+        var lines = $('#equipment').val().split("\n");
+        var equipments = [];
+
+        for (var i = 0; i < lines.length; i++) {
+            var parts = lines[i].split("\t");
+            if (parts.length == 5) {
+                equipments.push({
+                    'set_code': null,
+                    'sap': parts[0],
+                    'description': parts[1],
+                    'product_code': parts[2],
+                    'unit': parts[3],
+                    'q_ty_in_set': parts[4],
+                });
+            }
+            if (parts.length == 6) {
+                equipments.push({
+                    'set_code': parts[0] ? parts[0] : null,
+                    'sap': parts[1],
+                    'description': parts[2],
+                    'product_code': parts[3],
+                    'unit': parts[4],
+                    'q_ty_in_set': parts[5],
+                });
+            }
+        }
+        var category = $('#category').val();
+        var subcategory = $('#subcategory').val();
+        var package = $('#package').val();
+
+
+
+        var csrftoken = getCookie('csrftoken');
+        $.ajax({
+            type: "POST",
+            url: `${BaseURL}/designer-rfe/import-constructor`,
+            data: JSON.stringify({
+                "category": category,
+                "subcategory": subcategory,
+                "package": package,
+                "equipments": JSON.stringify(equipments)
+            }),
+            contentType: "application/json",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success: function (data) {
+                location.reload()
+            },
+            error: function (xhr, status, error) {
+                // В случае ошибки (статус 500) выполните необходимые действия
+                alert('Error: ' + xhr.status);
+            }
+        })
+    }
+
+
+    function changeData() {
+
+        var category = $('#category').val();
+        var subcategory = $('#subcategory').val();
+        var package = $('#package').val();
+        console.log(package)
+        $("#exampleModalLabel").html(`<input type="text" class="form-control text-input" value="${package}" id="packageTitleInTable">`)
+
+
+
+        fetch(`${BaseURL}/designer-rfe/get-sub-data-by-id?tr_name=${package}&category=${category}&subcategory=${subcategory}`).then(response => response.json()).then(json => {
+            modalBody = $('#transition-modal-body')
+            modalBody.empty()
+            // Создаем таблицу
+            const table = document.createElement('table');
+            table.className = 'table table-bordered col-auto ml-auto';
+
+            // Создаем thead
+            const thead = document.createElement('thead');
+            const theadRow = document.createElement('tr');
+
+            // Создаем заголовки для столбцов
+            const headers = ['Удалить', 'Set Code', 'SAP', 'Description', 'Product code', 'Unit', 'Q-ty in set'];
+            headers.forEach(headerText => {
+                const th = document.createElement('th');
+                th.scope = 'col';
+                th.textContent = headerText;
+                theadRow.appendChild(th);
+            });
+            thead.appendChild(theadRow);
+
+            // Создаем tbody
+            const tbody = document.createElement('tbody');
+            tbody.id = 'table-body';
+            json.forEach(data => {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.innerHTML = '<input type="checkbox" class="checkbox-input" aria-label="Checkbox for following text input">';
+                tr.appendChild(td);
+                for (var key in data) {
+                    if (key == 'id') {
+                        tr.id = `row-id-${data[key]}`
+                        continue
+                    }
+                    var value = data[key];
+                    const td = document.createElement('td');
+                    if (key == 'q_ty_in_set') {
+                        td.innerHTML = `<input type="number" class="form-control quantity-input" value="${value}">`;
+                        tr.appendChild(td);
+                        continue
+                    } else if (key == 'set_code' && !value) {
+                        td.innerHTML = `<input type="text" class="form-control text-input">`;
+                        tr.appendChild(td);
+                        continue
+                    }
+                    td.textContent = value;
+                    tr.appendChild(td);
+
+                }
+                tbody.appendChild(tr);
+            })
+            // Добавляем thead и tbody к таблице
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            modalBody.append(table);
+            if (json.length > 0) {
+                const updateBtn = document.getElementById('updateBtn');
+                updateBtn.hidden = false;
+                const addBtn = document.createElement('button');
+                addBtn.innerHTML = '<i class="fas fa-plus"></i>'
+                addBtn.id = 'addBtn';
+                addBtn.className = 'btn btn-primary';
+                addBtn.setAttribute('onclick', 'addNewRow()');
+                modalBody.append(addBtn);
+            } else {
+                updateBtn.hidden = true;
+            }
+        })
+    }
+
+    function addNewRow() {
+        var newRow = '<tr id="new-row">' +
+            '<td><input type="checkbox" class="checkbox-input " aria-label="Checkbox for following text input"></td>' +
+            '<td style="width: 160px"><input type="text" class="form-control text-input"></td>' +
+            '<td style="width: 160px"><input type="number" class="form-control text-input required-input" required></td>' +
+            '<td><input type="text" class="form-control text-input required-input" required></td>' +
+            '<td style="width: 135px"><input type="text" class="form-control text-input required-input" required></td>' +
+            '<td style="width: 85px"><input type="text" class="form-control text-input required-input" required></td>' +
+            '<td><input type="number" class="form-control quantity-input required-input" required></td>' +
+            '</tr>';
+        $('#table-body').append(newRow);
+    };
+
+    function updateData() {
+        var category = $('#category').val();
+        var subcategory = $('#subcategory').val();
+        var package = $('#package').val();
+        var packageTitle = $('#packageTitleInTable').val();
+        var rows = $('#table-body').find('tr')
+
+        var addNewData = [];
+        var rowForDelete = [];
+        var updateExistData = [];
+        rows.each(function () {
+            var cells = $(this).find('td');
+
+            if (cells.eq(0).find('input[type="checkbox"]').prop('checked')) {
+                rowForDelete.push({
+                    'id': $(this).attr('id').replace('row-id-', ''),
+
+                })
+            } else if ($(this).attr('id') == 'new-row') {
+                addNewData.push({
+                    'set_code': cells.eq(1).text() ? cells.eq(1).text() : cells.eq(1).find('input').val() ? cells.eq(1).find('input').val() : null,
+                    'sap': cells.eq(2).text() ? cells.eq(2).text() : cells.eq(2).find('input').val(),
+                    'description': cells.eq(3).text() ? cells.eq(3).text() : cells.eq(3).find('input').val(),
+                    'product_code': cells.eq(4).text() ? cells.eq(4).text() : cells.eq(4).find('input').val(),
+                    'unit': cells.eq(5).text() ? cells.eq(5).text() : cells.eq(5).find('input').val(),
+                    'q_ty_in_set': cells.eq(6).find('input').val(),
+                })
+            } else {
+                updateExistData.push({
+                    'id': $(this).attr('id').replace('row-id-', ''),
+                    'set_code': cells.eq(1).text() ? cells.eq(1).text() : cells.eq(1).find('input').val() ? cells.eq(1).find('input').val() : null,
+                    'q_ty_in_set': cells.eq(6).find('input').val(),
+                })
+            }
+        })
+        var csrftoken = getCookie('csrftoken');
+        $.ajax({
+            type: "POST",
+            url: `${BaseURL}/designer-rfe/import-constructor`,
+            data: JSON.stringify({
+                "category": category,
+                "subcategory": subcategory,
+                "package": package,
+                "package_title": packageTitle,
+                "data": JSON.stringify(addNewData),
+                "data_to_delete": JSON.stringify(rowForDelete),
+                "data_to_update": JSON.stringify(updateExistData)
+            }),
+            contentType: "application/json",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success: function (data) {
+                location.reload()
+            }
+        })
+    }
+
+
+    function validateForm() {
+        var inputs = document.getElementsByClassName("required-input");
+        for (var i = 0; i < inputs.length; i++) {
+            if (inputs[i].hasAttribute("required") && !inputs[i].value) {
+                alert("Пожалуйста, заполните все обязательные поля!");
+                inputs[i].style.borderColor = "red";
+                return false;
+            }
+            inputs[i].style.borderColor = "";
+        }
+        updateData()
+    }
+
+    function deletPackage() {
+        var csrftoken = getCookie('csrftoken');
+        var package = $("#package").val()
+        var category = $("#category").val()
+        var subcategory = $("#subcategory").val()
+        $.ajax({
+            type: "POST",
+            url: `${BaseURL}/designer-rfe/import-constructor`,
+            data: JSON.stringify({
+                "package_for_delete": package,
+                "category": category,
+                "subcategory": subcategory
+            }),
+            contentType: "application/json",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success: function (data) {
+                window.location.href = `/designer-rfe/import-constructor?category=${category}`
+            }
+        })
+    }
+
+    function deleteSubcategory(subcategory, category) {
+        // Ваш код обработки удаления подкатегории
+        console.log('Deleting subcategory:', subcategory, 'from category:', category);
+        // Добавьте здесь код для удаления подкатегории или вызов соответствующего API
+        csrftoken = getCookie('csrftoken');
+        $.ajax({
+            type: "POST",
+            url: `${BaseURL}/designer-rfe/import-constructor`,
+            data: JSON.stringify({
+                "subcategory_for_delete": subcategory,
+                "category": category
+            }),
+            contentType: "application/json",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success: function (data) {
+                window.location.href = `/designer-rfe/import-constructor?category=${category}`
+            },
+            error: function (xhr, status, error) {
+                console.log(xhr.responseText);
+            }
+        });
+    }
+
+
+</script>
+{% endblock %}

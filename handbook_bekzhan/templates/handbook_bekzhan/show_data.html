@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %} Справочник {% endblock %}
+
+{% block chapter %} Справочник {% endblock %}
+
+{% block links %}
+    <link href="{% static 'handbook_bekzhan/style.css' %}" rel="stylesheet" type="text/css">
+{% endblock %}
+    
+{% block content %}
+    <div id="handbook-container" class="container">
+        <h1>Справочник</h1>
+        <form method="get" action="{% url 'show_data' %}">
+            <select name="code">
+                <option value=""></option>
+                {% for code in codes %}
+                <option value="{{ code }}" {% if code_query == code %}selected{% endif %}>{{ code }}</option>
+                {% endfor %}
+            </select>
+            
+            <select name="quantity">
+                <option value=""></option>
+                {% for quantity in quantities %}
+                <option value="{{ quantity }}" {% if quantity_query == quantity %}selected{% endif %}>{{ quantity }}</option>
+                {% endfor %}
+            </select>
+            
+            <select name="name">
+                <option value=""></option>
+                {% for name in names %}
+                <option value="{{ name }}" {% if name_query == name %}selected{% endif %}>{{ name }}</option>
+                {% endfor %}
+            </select>
+            
+            <select name="unit">
+                <option value=""></option>
+                {% for unit in units %}
+                <option value="{{ unit }}" {% if unit_query == unit %}selected{% endif %}>{{ unit }}</option>
+                {% endfor %}
+            </select>
+            
+            <select name="category">
+                <option value=""></option>
+                {% for category in categories %}
+                <option value="{{ category }}" {% if category_query == category %}selected{% endif %}>{{ category }}</option>
+                {% endfor %}
+            </select>
+            
+            <button id="filterButton" type="submit">Фильтр</button>
+
+            <div class="add-more-btn-container">
+                <a id="addButton" href="{% url 'add_data' %}" class="add-more-btn">Add More</a>
+            </div>
+            
+                
+        </form>
+    
+        <div class="table-container"></div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Код товара</th>
+                        <th>Количество</th>
+                        <th>Наименование</th>
+                        <th>Ед. измерения</th>
+                        <th>Категория</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in data %}
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.code }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.unit }}</td>
+                        <td>{{ item.category }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    
+{% endblock %}
+
+</body>
+</html>
+

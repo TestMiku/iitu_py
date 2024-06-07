@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block links %}
+
+{% endblock %}
+{% block title %}
+    Создать Группу для разделов
+{% endblock %}
+{% block chapter %}
+    Создать Группу для разделов
+{% endblock %}
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_div }}
+        <button>Создать</button>
+    </form>
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}

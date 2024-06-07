@@ -1,0 +1,278 @@
+{% extends 'finance_module/mandatory_payments/base.html' %}
+{% block mandatory_payments_active_breadcrump %}
+Калькулятор начислений
+{% endblock %}
+{% block finance_module_mandatory_payments_content %}
+<div class="row mb-2">
+    <div class="col-2">
+        <form method="post" id="accrual-calculator-form">
+            {% csrf_token %}
+            <div class="shadow card">
+                <div class="card-body">
+                    <label class="form-label mb-1" for="mandatory-payment-accrual-calculator-id-select">Начисление:
+                    </label>
+                    <select class="form-select mb-3" name="mandatory-payment-accrual-calculator-id"
+                        id="mandatory-payment-accrual-calculator-id-select">
+                        <option value="" selected>Выберите начисление</option>
+                        {% for mandatory_payment_accrual_calculator in mandatory_payment_accrual_calculators %}
+                        <option value="{{mandatory_payment_accrual_calculator.id}}">
+                            {{mandatory_payment_accrual_calculator}}</option>
+                        {% endfor %}
+
+                    </select>
+                    <label class="form-label mb-1" for="sum-input">Сумма: </label>
+                    <input type="number" id="sum-input" placeholder="Введите сумму" name="total-sum" class="form-control mb-3"
+                        step="0.01">
+                    <label class="form-label mb-1" for="mandatory-payment-select">Статья: </label>
+                    <select name="mandatory-payment-id" class="form-select" id="mandatory-payment-select">
+                        <option value="" selected disabled>Выберите статью</option>
+                        {% for mandatory_payment in mandatory_payments %}
+                        <option value="{{mandatory_payment.id}}">{{mandatory_payment.name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-end">
+                    <button class="btn btn-success" type="submit">Начислить</button>
+
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-10">
+        <div class="shadow card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-3">
+                        <label class="mb-1" for="mandatory-payment-accrual-calculator-name-input">Имя
+                            начисление:</label>
+                        <input form="accrual-calculator-form" type="text" placeholder="Введите имя начисление"
+                            class="form-control mb-3" name="mandatory-payment-accrual-calculator-name"
+                            id="mandatory-payment-accrual-calculator-name-input" required>
+                    </div>
+                    <div class="col-3">
+
+
+                        <label class="mb-1" for="mandatory-payment-accrual-calculator-select">Тип
+                            начисление:
+                        </label>
+                        <select form="accrual-calculator-form" name="mandatory-payment-accrual-calculator-type"
+                            id="mandatory-payment-accrual-calculator-type-select" class="form-select" required>
+                            <option value="" selected>
+                                Выберите тип начисление
+                            </option>
+                            <option value="coefficient">
+                                Коэффициент
+                            </option>
+                            <option value="average">
+                                Среднее значение
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+
+
+                <div id="accruals" class="d-none">
+
+                    <table id="accruals-table" class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th id="coefficient-header" class="shown-coefficient-selected text-center">Коэффициент
+                                    <span id="total-coefficient"></span></th>
+                                <th class="text-center">ПМ (ФИО)</th>
+                                <th id="to-accrual" class="text-center">К начислению <span id="accruals-sum"></span></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+
+                    </table>
+                    <h5>Добавить строку</h5>
+                    <form id="add-new-row-form">
+                        <div class="row mb-2">
+
+                            <div class="col-3 shown-coefficient-selected">
+                                <label class="mb-1" for="coefficient-input">Коэффициент</label>
+                                <input type="number" step="0.01" min="0" max="100" id="coefficient-input"
+                                    class="form-control mb-2" placeholder="Введите коэффициент">
+                            </div>
+                            <div class="col-3">
+                                <label class="mb-1" for="project-manager-id-select">ПМ (ФИО)</label>
+                                <select id="project-manager-id-select" class="form-select" required>
+                                    <option value="" selected>Выберет ПМ (ФИО)</option>
+                                    {% for project_region in project_regions %}
+                                    <option value="{{project_region.id}}">{{project_region}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                        </div>
+                        <button class="btn btn-primary" type="submit">Добавить</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function round2Numbers(x) {
+        return Math.round(x * 100) / 100;
+    }
+    const getMandatoryPaymentAccrualCalculatorUrl = "{% url 'finance_module:get_mandatory_payment_accrual_calculator' %}";
+    $(function () {
+        const $mandatoryPaymentAccrualCalculatorTypeSelect = $("#mandatory-payment-accrual-calculator-type-select");
+        const $mandatoryPaymentAccrualCalculatorIdSelect = $("#mandatory-payment-accrual-calculator-id-select");
+        const $accruals = $("#accruals");
+        const $mandatoryPaymentAccrualCalculatorNameInput = $("#mandatory-payment-accrual-calculator-name-input");
+        const $accrualCalculatorForm = $("#accrual-calculator-form");
+        const $sumInput = $("#sum-input");
+        const $coefficientInput = $("#coefficient-input");
+        const $toAccrual = $("#to-accrual");
+        const $accrualsSum = $("#accruals-sum");
+        const $coefficientHeader = $("#coefficient-header");
+        function getCoefficient() {
+            return parseFloat($coefficientInput.val()) || 0;
+        }
+        const $projectRegionIdSelect = $("#project-manager-id-select");
+        function getProjectRegionName() {
+            const value = $projectRegionIdSelect.val();
+            if (!value) {
+                return null;
+            }
+            return $(`option[value="${value}"]`, $projectRegionIdSelect).text();
+        }
+        const $addNewRowForm = $("#add-new-row-form");
+        const $accrualsTable = $("#accruals-table");
+        const $accrualsTableBody = $("tbody", $accrualsTable);
+        const $totalCoefficient = $("#total-coefficient");
+        function calculateTotalCoefficient() {
+            return Array.from($(".accrual-coefficient-input")).reduce((previousValue, currentValue) => previousValue + (parseFloat($(currentValue).val()) || 0), 0);
+        }
+        function showTotalCoefficient() {
+            const totalCoefficient = calculateTotalCoefficient();
+            if (totalCoefficient) {
+                const equal = Math.abs(totalCoefficient - 100) < 0.000001;
+                $coefficientHeader.toggleClass("text-success", equal);
+                $coefficientHeader.toggleClass("text-danger", !equal);                
+                $totalCoefficient.text(`(${round2Numbers(totalCoefficient).toFixed(2)} %)`)
+            } else {
+                $totalCoefficient.text(null);
+                $coefficientHeader.removeClass("text-danger");
+                $coefficientHeader.removeClass("text-success");
+            }
+        }
+        function calculateAccruals() {
+            const type = $mandatoryPaymentAccrualCalculatorTypeSelect.val();
+            const sum = parseFloat($sumInput.val()) || 0;
+            if (type === "coefficient") {
+                $(".accrual-row").each(function () {
+                    const coefficient = parseFloat($(".accrual-coefficient-input", this).val()) || 0;
+                    $(".accrual-sum-input", this).val(round2Numbers(sum * coefficient / 100).toFixed(2));
+                });
+            } else {
+                const result = round2Numbers(sum / $(".accrual-row").length).toFixed(2);
+                $(".accrual-sum-input").val(result);
+            }
+            
+            const totalSum = Math.round(Array.from($(".accrual-sum-input")).reduce((previousValue, currentValue) => previousValue + (parseFloat($(currentValue).val()) || 0), 0));
+            if (totalSum) {
+                const equal = totalSum === Math.round(sum);
+                
+                $toAccrual.toggleClass("text-success", equal);
+                $toAccrual.toggleClass("text-danger", !equal);
+                $accrualsSum.text(`(${totalSum})`);
+            } else {
+                $toAccrual.removeClass("text-danger");
+                $toAccrual.removeClass("text-success");
+                $accrualsSum.text(null);
+            }
+        }
+
+        $mandatoryPaymentAccrualCalculatorIdSelect.on("change", async function () {
+            $accrualsTableBody.empty();
+            const id = $(this).val();
+            if (!id) {
+                $accruals.toggleClass("d-none", true);
+
+                $mandatoryPaymentAccrualCalculatorNameInput.val(null);
+                $(`option[value=""]`, $mandatoryPaymentAccrualCalculatorTypeSelect).prop("selected", true);
+                return;
+            }
+            const response = await fetch(getMandatoryPaymentAccrualCalculatorUrl + `?id=${id}`);
+            const json = await response.json();
+            $(`option[value="${json.type}"]`, $mandatoryPaymentAccrualCalculatorTypeSelect).prop("selected", true);
+            $mandatoryPaymentAccrualCalculatorNameInput.val(json.name);
+
+            for (const mandatory_payment_accrual_calculator_project_region of json.mandatory_payment_accrual_calculator_project_regions) {
+                addNewAccrualRow(json.type, mandatory_payment_accrual_calculator_project_region.coefficient, mandatory_payment_accrual_calculator_project_region.project_region.id, mandatory_payment_accrual_calculator_project_region.project_region.name);
+            }
+            $accruals.toggleClass("d-none", false);
+            calculateAccruals();
+            showTotalCoefficient();
+            showIfCoefficientSelected();
+        });
+        function showIfCoefficientSelected() {
+            $(".shown-coefficient-selected").toggleClass("d-none", $mandatoryPaymentAccrualCalculatorTypeSelect.val() !== "coefficient");
+        }
+        $mandatoryPaymentAccrualCalculatorTypeSelect.on("change", function () {
+            $accruals.toggleClass("d-none", !$(this).val());
+            showIfCoefficientSelected();
+            calculateAccruals();
+
+        });
+
+        function addNewAccrualRow(type, coefficient, projectRegionId, projectRegionName) {
+            const accrualRow = $(`
+                <tr class="accrual-row">
+                    <td class="shown-coefficient-selected${type !== "coefficient" ? " d-none" : ""}">
+                        <input form="accrual-calculator-form" value="${coefficient}" name="coefficient" class="accrual-coefficient-input form-control" required min="0" max="100" step="0.01"/>
+                    </td>
+                    <td class="text-center" style="vertical-align: middle;">
+                        <input form="accrual-calculator-form" name="project-region-id" value="${projectRegionId}" hidden/>
+                        ${projectRegionName}
+                    </td>
+                    <td>
+                        <input form="accrual-calculator-form" name="sum" class="accrual-sum-input form-control" readonly/>
+                    </td>
+                    <td class="text-center">
+                        <button class="accural-delete-row-btn btn btn-outline-danger btn-sm"><i class="fas fa-minus"></i></button>
+                    </td>
+                </tr>
+            `);
+            $(".accrual-coefficient-input", accrualRow).on("input", function () {
+                calculateAccruals();
+                showTotalCoefficient();
+            });
+            $(".accural-delete-row-btn", accrualRow).on("click", function () {
+                accrualRow.remove();
+                showTotalCoefficient();
+                calculateAccruals();
+
+            });
+            $accrualsTableBody.append(accrualRow);
+        }
+
+        $addNewRowForm.on("submit", function () {
+            const coefficient = getCoefficient();
+            const projectRegionId = $projectRegionIdSelect.val();
+            const projectRegionName = getProjectRegionName();
+            addNewAccrualRow($mandatoryPaymentAccrualCalculatorTypeSelect.val(), coefficient, projectRegionId, projectRegionName);
+            calculateAccruals();
+            showTotalCoefficient();
+
+
+            return false;
+        });
+
+        $sumInput.on("input", function () {
+            calculateAccruals();
+        });
+    });
+</script>
+{% endblock %}

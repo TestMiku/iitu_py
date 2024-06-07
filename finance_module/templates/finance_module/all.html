@@ -1,0 +1,866 @@
+{% extends 'finance_module/base.html' %}
+{% load static balance %}
+{% block active_breadcrump %}
+  Платежи
+{% endblock %}
+
+{% block links %}
+  <link rel="stylesheet" href="{% static 'finance_module/main.css' %}" />
+  <link rel="stylesheet" href="{% static 'finance_module/all.css' %}" />
+  <link rel="stylesheet" href="{% static 'finance_module/unpaid-invoices.css' %}" />
+{% endblock %}
+{% block finance_module_main %}
+  <div class="card rounded-0 border-end-0 border-start-0 mb-2">
+    <div class="card-header bg-white d-flex justify-content-between">
+      <div class="align-self-center d-none" id="project-region-accounts-subdivisions-loading">
+        <div class="spinner-border spinner-border-sm text-primary" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+      <ul id="project-region-accounts-subdivisions" class="nav nav-tabs card-header-tabs align-self-end"></ul>
+      <div class="d-flex align-self-center gap-1">
+        <button id="project-region-accounts-table-setoff-button" type="button" class="btn btn-primary">Сделать взаимозачёт</button>
+        <button id="project-region-accounts-table-toggle-view-button" type="button" class="btn"><i class="fa-solid fa-arrow-right-arrow-left"></i> ПМ</button>
+        <button id="project-region-accounts-table-toggle-collapse-button" class="btn" data-bs-toggle="collapse" data-bs-target="#project-region-accounts-table-collapse" title="Скрыть таблицу расчётных счетов" type="button" aria-expanded="true" aria-controls="project-region-accounts-table-collapse"><i class="fa-regular fa-eye-slash"></i> Скрыть</button>
+        <button id="project-region-accounts-table-reload-button" class="btn" title="Обновить таблицу расчётных счетов" type="button"><i class="fas fa-sync"></i></button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="collapse show" id="project-region-accounts-table-collapse">
+        <div class="tab-content" id="project-region-accounts-table-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card rounded-0 flex-fill border-end-0 border-start-0">
+    <div class="card-header bg-white d-flex">
+      <ul id="payments-tabs" class="nav nav-tabs card-header-tabs align-self-end w-100">
+        <li class="nav-item">
+          <a class="nav-link payment-tab active" id="mandatory-payments-tab" data-bs-toggle="tab" href="#mandatory-payments" role="tab" aria-controls="mandatory-payments" aria-selected="true">Обязательные платежи</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link payment-tab" id="unpaid-invoices-tab" data-bs-toggle="tab" href="#unpaid-invoices" role="tab" aria-controls="unpaid-invoices" aria-selected="false">Реестр неоплаченных счетов</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link payment-tab" id="interdivisional-debts-tab" data-bs-toggle="tab" href="#interdivisional-debts" role="tab" aria-controls="interdivisional-debts" aria-selected="false">ДМП</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Переводы</a>
+          <ul class="dropdown-menu">
+            <li><button class="dropdown-item payment-tab" id="transfers-tab" data-bs-toggle="tab" data-bs-target="#transfers" type="button" role="tab" aria-controls="transfers" aria-selected="false">Между р/с</button></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><button class="dropdown-item payment-tab" id="raschyotnye-tab" data-bs-toggle="tab" data-bs-target="#raschyotnye" type="button" role="tab" aria-controls="raschyotnye" aria-selected="false">Расчётные</button></li>
+            <li><button class="dropdown-item payment-tab" id="sutochnye-tab" data-bs-toggle="tab" data-bs-target="#sutochnye" type="button" role="tab" aria-controls="sutochnye" aria-selected="false">Суточные</button></li>
+            <li><button class="dropdown-item payment-tab" id="chsi-tab" data-bs-toggle="tab" data-bs-target="#chsi" type="button" role="tab" aria-controls="chsi" aria-selected="false">ЧСИ</button></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><button class="dropdown-item payment-tab" id="begunki-tab" data-bs-toggle="tab" data-bs-target="#begunki" type="button" role="tab" aria-controls="begunki" aria-selected="false">Бегунки</button></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-danger payment-tab" id="all-tab" data-bs-toggle="tab" href="#all" role="tab" aria-controls="all" aria-selected="false">Все операции</a>
+        </li>
+
+        <li class="nav-item ms-sm-0 ms-xxl-auto me-4">
+          <a class="nav-link text-info payment-tab" id="history-tab" data-bs-toggle="tab" href="#history" role="tab" aria-controls="history" aria-selected="false">История платежей</a>
+        </li>
+      </ul>
+      <div class="align-self-center">
+        <button id="sync-button" class="btn"><i class="fas fa-sync"></i></button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="position-relative h-100" style="min-height: 50vh;">
+        <div class="position-absolute top-0 bottom-0 end-0 start-0" style="overflow-y: scroll;">
+          <div class="tab-content" id="tab-content">
+            <div class="tab-pane fade show active" id="mandatory-payments" role="tabpanel" aria-labelledby="mandatory-payments-tab">
+              <div class="position-absolute top-0 bottom-0 end-0 start-0 d-flex align-items-center justify-content-center d-none" id="mandatory-payments-loading">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+              <div class="form-check m-2">
+                <input class="form-check-input" type="checkbox" value="" id="filter-mandatory-payments-table-with-subdivision">
+                <label class="form-check-label" for="filter-mandatory-payments-table-with-subdivision">
+                  Фильтр по подразделению
+                </label>
+              </div>
+              <div class="position-relative" id="mandatory-payments-table-container"></div>
+            </div>
+            <div class="tab-pane fade" id="unpaid-invoices" role="tabpanel" aria-labelledby="unpaid-invoices-tab">
+              <div>
+                <div id="unpaid-invoices-table-container">
+                  <table id="unpaid-invoices-table">
+                    <thead>
+                      <tr>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="9" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="9" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="9" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="9" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="9" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="9" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="9" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="9" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                        <th class="text-danger bg-white" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                      </tr>
+                      <tr>
+                        <th style="position: sticky; min-width: 90px; top: 22.07px" class="th" scope="col" data-st-field="number">
+                          <div class="th-content">ДО</div>
+                        </th>
+                        <th style="position: sticky; min-width: 94px;top: 22.07px" class="th" scope="col" data-st-field="date">
+                          <div class="th-content">Дата</div>
+                        </th>
+                        <th style="position: sticky; min-width: 133px;top: 22.07px" class="th" scope="col" data-st-field="invoice_number">
+                          <div class="th-content">№ счёта</div>
+                        </th>
+                        <th style="position: sticky; min-width: 135px;top: 22.07px" class="th" scope="col" data-st-field="invoice_date">
+                          <div class="th-content">Дата счёта</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="project">
+                          <div class="th-content">Проект</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="responsible_user_id">
+                          <div class="th-content">
+                            Ответст<br />венный
+                          </div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="approver">
+                          <div class="th-content">Утвердитель</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="llc">
+                          <div class="th-content">ТОО</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="contractor">
+                          <div class="th-content">Контрагент</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="comment">
+                          <div class="th-content">Комментарий</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="currency">
+                          <div class="th-content">Валюта</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="annotated_pm_sum" data-st-type="number">
+                          <div class="th-content">Сумма для таблицы</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="invoice_category">
+                          <div class="th-content">Категория счёта</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="revenue_expense_articles">
+                          <div class="th-content">Статьи доходов/расходов</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="sales_order">
+                          <div class="th-content">Заказ на продажу</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="bin_or_iin">
+                          <div class="th-content">БИН/ИИН</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="document_amount" data-st-type="number">
+                          <div class="th-content">Сумма документа</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col">
+                          <div class="th-content">С какого р/с платить</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="iic">
+                          <div class="th-content">ИИК</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="payment_destination_code">
+                          <div class="th-content">КНП</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="contract_number">
+                          <div class="th-content">Фактический номер договора</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="invoice_amount" data-st-type="number">
+                          <div class="th-content">Сумма по счёту</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="paid_amount_1c" data-st-type="number">
+                          <div class="th-content">Оплаченная ранее сумма (1С)</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="annotated_today_paid" data-st-type="number">
+                          <div class="th-content">Оплачено сегодня</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="annotated_planned_payment" data-st-type="number">
+                          <div class="th-content">Планируемая оплата</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="annotated_remainder" data-st-type="number">
+                          <div class="th-content">Остаток по оплате(1С)</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="annotated_allowed_payment_amount" data-st-type="number">
+                          <div class="th-content">Можно доплатить, тг</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px; min-width: 10em;" class="th" scope="col" data-st-field="annotated_pm_sum" data-st-type="number">
+                          <div class="th-content">Сумма от ПМ</div>
+                        </th>
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="annotated_payment_decision">
+                          <div class="th-content">Решение по оплате</div>
+                        </th>
+                        {% comment %} <th style="top: 22.07px" class="th" scope="col">
+                          <div class="th-content">С какого р/с платить</div>
+                        </th> {% endcomment %}
+                        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="bank">
+                          <div class="th-content">Банк</div>
+                        </th>
+                        {% comment %} <th class="th" scope="col">
+                          <div class="th-content">ТИП</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Статус ДО</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Создатель счёта</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Подр</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Оплатить до(дата)</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Номер документа</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Дата документа</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Закрывающий документ в 1С посажен на сумму</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Закрывающий документ предоставлен на сумму</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Непосаженный ЭАВР (сумма)</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Дата окончания работ</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Условия предоплаты, %</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Ранее оплачено, %</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Можно доплатить, тг</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Статус работ</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Решение по оплате</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Размер превышения, тг</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">% после оплаты</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Стоп лист</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Дата выставления СФ заказчику</div>
+                        </th>
+                        <th class="th" scope="col">
+                          <div class="th-content">Приоритетность оплаты</div>
+                        </th> {% endcomment %}
+                      </tr>
+                    </thead>
+                    <tbody id="unpaid-invoices-rows">
+                      <tr id="unpaid-invoices-last-row">
+                        <td colspan="52">
+                          <div style="height: 10px;"></div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="interdivisional-debts" role="tabpanel" aria-labelledby="interdivisional-debts-tab">
+              <div class="position-absolute top-0 bottom-0 end-0 start-0">
+                <div class="container-fluid h-100">
+                  <div class="row h-100">
+                    <div class="col-3">
+                      <h4>Переводы</h4>
+                      <div class="interdivisional-debts-loading d-none text-center">
+                        <div class="spinner-border text-primary" role="status">
+                          <span class="visually-hidden">Loading...</span>
+                        </div>
+                      </div>
+                      <div id="interdivisional-debts-transfers-container"></div>
+                    </div>
+                    <div class="col-9 d-flex flex-column">
+                      <h4>Таблица</h4>
+                      <div class="interdivisional-debts-loading d-none text-center">
+                        <div class="spinner-border text-primary" role="status">
+                          <span class="visually-hidden">Loading...</span>
+                        </div>
+                      </div>
+                      <div class="position-relative flex-fill">
+                        <div id="interdivisional-debts-table-container" class="position-absolute top-0 bottom-0 end-0 start-0">
+                        </div>
+                      </div>  
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="transfers" role="tabpanel" aria-labelledby="transfers-tab" tabindex="0">
+              <div class="container-fluid" id="transfers-container">
+                <form class="mb-3" id="transfer-form">
+                  <div class="row mb-3">
+                    <label class="col-sm-2 col-xxl-1 col-form-label" for="interdivisional-debts-to-account-select">На расчётный счёт</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <select id="interdivisional-debts-to-account-select" class="to-account-select form-select" name="to-account" required disabled>
+                        <option value="" selected disabled>Выберите расчётный счёт</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="interdivisional-debts-sum-input" class="col-sm-2 col-xxl-1 col-form-label">Сумма</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input id="interdivisional-debts-sum-input" type="number" class="form-control" name="sum" step="0.01" min="0" required placeholder="Введите сумму" />
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Перевести</button>
+                </form>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="raschyotnye" role="tabpanel" aria-labelledby="raschyotnye-tab" tabindex="0">
+              
+            </div>
+            <div class="tab-pane fade" id="sutochnye" role="tabpanel" aria-labelledby="sutochnye-tab" tabindex="0">
+              <div class="container-fluid">
+                <form id="sutochnye-form" enctype="multipart/form-data">
+                  <div class="row mb-3">
+                    <label for="sutochnye-name-input" class="col-sm-2 col-xxl-1 col-form-label">ФИО</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input type="text" name="name" id="sutochnye-name-input" class="form-control" placeholder="Введите ФИО" required />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="sutochnye-days-input" class="col-sm-2 col-xxl-1 col-form-label">Кол-во дней</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input type="number" name="days" id="sutochnye-days-input" class="form-control" min="0" placeholder="Введите кол-во дней" required />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="sutochnye-sum-input" class="col-sm-2 col-xxl-1 col-form-label">Сумма</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input type="number" name="sum" id="sutochnye-sum-input" class="form-control" min="0" step="0.01" placeholder="Введите сумму" required />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="sutochnye-subdivision-select" class="col-sm-2 col-xxl-1 col-form-label">Подразделение</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <select type="text" name="subdivision-id" id="sutochnye-subdivision-select" class="form-select" required>
+                        <option value="">Выберете подразделение</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="sutochnye-project-input" class="col-sm-2 col-xxl-1 col-form-label">Номер проекта</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input type="number" name="project" id="sutochnye-project-input" class="form-control" placeholder="Введите номер проекта" required />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="sutochnye-business-trip-start-date-input" class="col-sm-2 col-xxl-1 col-form-label">Срок командировки</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <div class="d-flex align-items-center justify-content-between gap-1">
+                        <div class="d-flex align-items-center gap-2">
+                          <label class="form-label mb-0" for="sutochnye-business-trip-start-date-input">С</label>
+                          <div>
+                            <input type="date" name="business-trip-start-date" id="sutochnye-business-trip-start-date-input" class="form-control w-auto" required />
+                          </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                          <label class="form-label mb-0" for="sutochnye-business-trip-end-date-input">По</label>
+                          <div>
+                            <input type="date" name="business-trip-end-date" id="sutochnye-business-trip-end-date-input" class="form-control w-auto" required />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="sutochnye-responsible-input" class="col-sm-2 col-xxl-1 col-form-label">Ответсвенный</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input type="text" name="responsible" id="sutochnye-responsible-input" class="form-control" placeholder="Введите имя ответсвенного" required />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="sutochnye-destination-point-textarea" class="col-sm-2 col-xxl-1 col-form-label">Пункт назначение</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <textarea name="destination-point" id="sutochnye-destination-point-textarea" rows="1" class="form-control" placeholder="Введите пункт назначение" required></textarea>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="sutochnye-files-input" class="col-sm-2 col-xxl-1 col-form-label">Файлы</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input type="file" name="files" id="sutochnye-files-input" class="form-control" multiple accept=".pdf" />
+                    </div>
+                  </div>
+                
+                  <button type="submit" class="btn btn-primary">Добавить</button>
+                  <button type="reset" class="btn btn-link">Очистить форму</button>
+                </form>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="chsi" role="tabpanel" aria-labelledby="chsi-tab" tabindex="0">
+              <div class="container-fluid">
+                <form action="" id="chsi-form">
+                  <div class="row mb-3">
+                    <label for="chsi-llc-input" class="col-sm-2 col-xxl-1 col-form-label">ТОО</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input type="text" name="llc" id="chsi-llc-input" class="form-control" placeholder="Введите ТОО" required />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="chsi-recipient-input" class="col-sm-2 col-xxl-1 col-form-label">Получатель</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input type="text" name="recipient" id="chsi-recipient-input" class="form-control" placeholder="Введите получателя" required />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="chsi-bin-or-iin-input" class="col-sm-2 col-xxl-1 col-form-label">ИИН/БИН</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input type="text" name="bin-or-iin" id="chsi-bin-or-iin-input" class="form-control" placeholder="Введите ИИН/БИН" required />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="chsi-iik-input" class="col-sm-2 col-xxl-1 col-form-label">ИИК</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input type="text" name="iik" id="chsi-iik-input" class="form-control" placeholder="Введите ИИК" required />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="chsi-executive-inscription-input" class="col-sm-2 col-xxl-1 col-form-label">Исполнительная надпись</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input type="text" name="executive-inscription" id="chsi-executive-inscription-input" class="form-control" placeholder="Введите исполнительную надпись" required />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="chsi-retention-type-input" class="col-sm-2 col-xxl-1 col-form-label">Вид удержания</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input type="text" name="retention-type" id="chsi-retention-type-input" class="form-control" placeholder="Введите вид удержания" required />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="chsi-collaborator-input" class="col-sm-2 col-xxl-1 col-form-label">Сотрудник</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input type="text" name="collaborator" id="chsi-collaborator-input" class="form-control" placeholder="Введите сотрудника" required />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="chsi-iin-input" class="col-sm-2 col-xxl-1 col-form-label">ИИН</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input type="text" name="iin" id="chsi-iin-input" class="form-control" placeholder="Введите вид удержания" required />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="chsi-actual-retention-rate-input" class="col-sm-2 col-xxl-1 col-form-label">Фактическая ставка удержания</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input type="number" name="actual-retention-rate" id="chsi-actual-retention-rate-input" min="0" step="0.01" max="100" class="form-control" placeholder="Введите фактическую ставку удержания" required />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="chsi-sum-input" class="col-sm-2 col-xxl-1 col-form-label">Сумма</label>
+                    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-2">
+                      <input type="number" name="sum" id="chsi-sum-input" min="0" step="0.01" max="100" class="form-control" placeholder="Введите сумму" required />
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Добавить</button>
+                  <button type="reset" class="btn btn-link">Очистить форму</button>
+                </form>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="begunki" role="tabpanel" aria-labelledby="begunki-tab" tabindex="0">...</div>
+            <div class="tab-pane fade" id="all" role="tabpanel" aria-labelledby="all-tab">
+              <div class="position-absolute top-0 bottom-0 end-0 start-0 d-flex align-items-center justify-content-center d-none" id="no-payments-message">
+                <div>Нет ни единого платежа</div>
+              </div>
+              <div id="errors"></div>
+              <div class="d-none" id="mandatory-payments-sums-container">
+                <h4>Обязательные платежи</h4>
+                <table class="table table-bordered border-black">
+                  <thead class="table-light border-black">
+                    <tr>
+                      <th class="text-center" scope="col" style="width: 50px">#</th>
+                      <th scope="col">Статья</th>
+                      <th scope="col">ПМ</th>
+                      <th scope="col" style="width: 250px">Расчётный счёт</th>
+                      <th scope="col" style="width: 200px">Сумма</th>
+                    </tr>
+                  </thead>
+                  <tbody id="mandatory-payments-sums"></tbody>
+                  <tfoot>
+                    <tr>
+                      <th class="text-end" colspan="4">Итого</th>
+                      <td id="mandatory-payments-total-sum"></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div class="d-none" id="unpaid-invoices-sums-container">
+                <h4>Реестр неоплаченных счетов</h4>
+                <table class="table table-bordered border-black">
+                  <thead class="table-light border-black">
+                    <tr>
+                      <th class="text-center" scope="col" style="width: 50px">#</th>
+                      <th scope="col">ДО</th>
+                      <th scope="col">Проект</th>
+                      <th scope="col">Контрагент</th>
+                      <th scope="col">Комментарий</th>
+                      <th scope="col">ПМ</th>
+                      <th scope="col" style="width: 250px">Расчётный счёт</th>
+                      <th scope="col" style="width: 200px">Сумма</th>
+                    </tr>
+                  </thead>
+                  <tbody id="unpaid-invoices-sums"></tbody>
+                  <tfoot>
+                    <tr>
+                      <th class="text-end" colspan="7">Итого</th>
+                      <td id="unpaid-invoices-total-sum"></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div class="d-none" id="interdivisional-debts-sums-container">
+                <h4>ДМП</h4>
+                <table class="table table-bordered border-black">
+                  <thead class="table-light border-black">
+                    <tr>
+                      <th class="text-center" scope="col" style="width: 50px">#</th>
+                      <th scope="col">От кого</th>
+                      <th scope="col">С расчётного счёта</th>
+                      <th scope="col">Кому</th>
+                      <th scope="col">На расчётный счёт</th>
+                      <th scope="col" style="width: 200px">Сумма</th>
+                    </tr>
+                  </thead>
+                  <tbody id="interdivisional-debts-sums"></tbody>
+                  <tfoot>
+                    <tr>
+                      <th class="text-end" colspan="5">Итого</th>
+                      <td id="interdivisional-debts-total-sum"></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div class="d-none" id="transfers-sums-container">
+                <h4>Переводы между р/с</h4>
+                <table class="table table-bordered border-black">
+                  <thead class="table-light border-black">
+                    <tr>
+                      <th class="text-center" scope="col" style="width: 50px">#</th>
+                      <th scope="col">ПМ</th>
+                      <th scope="col">С расчётного счёта</th>
+                      <th scope="col">На расчётный счёт</th>
+                      <th scope="col" style="width: 200px">Сумма</th>
+                    </tr>
+                  </thead>
+                  <tbody id="transfers-sums"></tbody>
+                  <tfoot>
+                    <tr>
+                      <th class="text-end" colspan="4">Итого</th>
+                      <td id="transfers-total-sum"></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div class="d-none" id="sutochnye-sums-container">
+                <h4>Суточные</h4>
+                <table class="table table-bordered border-black">
+                  <thead class="table-light border-black">
+                    <tr>
+                      <th class="text-center" scope="col" style="width: 50px">#</th>
+                      <th scope="col">ПМ</th>
+                      <th scope="col">Расчётный счёт</th>
+                      <th scope="col">ФИО</th>
+                      <th scope="col">Кол-во дней</th>
+                      <th scope="col">Подразделение</th>
+                      <th scope="col">Проект</th>
+                      <th scope="col">Ответсвенный</th>
+                      <th scope="col">Срок командировки</th>
+                      <th scope="col">Пункт назначение</th>
+                      <th scope="col" style="width: 200px">Сумма</th>
+                    </tr>
+                  </thead>
+                  <tbody id="sutochnye-sums"></tbody>
+                  <tfoot>
+                    <tr>
+                      <th class="text-end" colspan="10">Итого</th>
+                      <td id="sutochnye-total-sum"></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div id="accounts-sums-container">
+                <h4>Итого по расчётным счетам</h4>
+                <table class="table table-bordered border-black">
+                  <thead class="table-light border-black">
+                    <th>ПМ</th>
+                    <th>Расчётный счёт</th>
+                    <th style="width: 200px">Сумма</th>
+                  </thead>
+                  <tbody id="accounts-sums"></tbody>
+                  <tfoot>
+                    <tr>
+                      <th colspan="2" class="text-end">Итого</th>
+                      <td id="accounts-total-sum"></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
+              
+              <ul class="nav nav-tabs mb-1" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="mandatory-payment-seizures-history-tab" data-bs-toggle="tab" data-bs-target="#mandatory-payment-seizures-history" type="button" role="tab" aria-controls="mandatory-payment-seizures-history" aria-selected="true">Изьятие</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="paid-invoices-history-tab" data-bs-toggle="tab" data-bs-target="#paid-invoices-history" type="button" role="tab" aria-controls="paid-invoices-history" aria-selected="false">Оплаченные счета</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="interdivisional-debts-history-tab" data-bs-toggle="tab" data-bs-target="#interdivisional-debts-history" type="button" role="tab" aria-controls="interdivisional-debts-history" aria-selected="false">ДМП</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="debts-history-tab" data-bs-toggle="tab" data-bs-target="#debts-history" type="button" role="tab" aria-controls="debts-history" aria-selected="false">ДМП (подробно)</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="sutochnye-history-tab" data-bs-toggle="tab" data-bs-target="#sutochnye-history" type="button" role="tab" aria-controls="sutochnye-history" aria-selected="false">Суточные</button>
+                </li>
+                <div class="ms-auto">
+                  <button id="unload-1-button" class="btn"><i class="fa-solid fa-upload"></i> Выгрузка ДДС</button>
+                </div>
+              </ul>
+              <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="mandatory-payment-seizures-history" role="tabpanel" aria-labelledby="mandatory-payment-seizures-history-tab">
+                  <div class="position-relative" style="height: 50vh; overflow-y: scroll;">
+                    <table id="mandatory-payment-seizures-history-table" class="table table-striped">
+                      <thead>
+                        <tr>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="9">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                        </tr>
+                        <tr>
+                          <th class="table-light" scope="col" data-st-field="project_region__name">ПМ</th>
+                          <th class="table-light" scope="col" data-st-field="mandatory_payment__name">Статья</th>
+                          <th class="table-light" scope="col" data-st-field="account__name">Расчётный счёт</th>
+                          <th class="table-light" scope="col" data-st-field="sum" data-st-type="number">Сумма</th>
+                          <th class="table-light" scope="col" data-st-field="datetime" data-st-type="date">Дата</th>
+                          <th class="table-light" scope="col" data-st-field="status__name">Статус</th>
+                        </tr>
+                      </thead>
+                      <tbody id="mandatory-payment-seizures-history-table-rows">
+                        <tr id="mandatory-payment-seizures-history-last-row">
+                          <td colspan="6">
+                            <div style="height: 10px;"></div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="tab-pane fade" id="paid-invoices-history" role="tabpanel" aria-labelledby="paid-invoices-history-tab">
+                  <div class="position-relative" style="height: 50vh; overflow-y: scroll;">
+                    <table id="paid-invoices-history-table" class="table table-striped">
+                      <thead>
+                        <tr>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="9">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="9">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                        </tr>
+                        <tr>
+                          <th class="table-light" data-st-field="number" scope="col">ДО</th>
+                          <th class="table-light" data-st-field="project" scope="col">Проект</th>
+                          <th class="table-light" data-st-field="contractor" scope="col">Контрагент</th>
+                          <th class="table-light" data-st-field="comment" scope="col">Комментарий</th>
+                          <th class="table-light" data-st-field="project_region__name" scope="col">ПМ</th>
+                          <th class="table-light" data-st-field="account__name" scope="col">Расчётный счёт</th>
+                          <th class="table-light" data-st-field="sum" scope="col" data-st-type="number">Сумма</th>
+                          <th class="table-light" data-st-field="commission" scope="col" data-st-type="number">Коммиссия</th>
+                          <th class="table-light" data-st-field="at" scope="col" data-st-type="date">Дата</th>
+                          <th class="table-light" scope="col" data-st-field="status__name">Статус</th>
+                        </tr>
+                      </thead>
+                      <tbody id="paid-invoices-history-table-rows">
+                        <tr id="paid-invoices-history-last-row">
+                          <td colspan="10">
+                            <div style="height: 10px;"></div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="tab-pane fade" id="interdivisional-debts-history" role="tabpanel" aria-labelledby="interdivisional-debts-history-tab">
+                  <div class="position-relative" style="height: 50vh; overflow-y: scroll;">
+                    <table id="interdivisional-debts-history-table" class="table">
+                      <thead>
+                        <tr>
+                          <th class="table-light smart-table__always-shown"></th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="9">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                        </tr>
+                        <tr>
+                          <th class="table-light smart-table__always-shown"></th>
+                          <th class="table-light" data-st-field="from_whom" scope="col">От кого</th>
+                          <th class="table-light" data-st-field="from_account__name" scope="col">С расчётного счёта</th>
+                          <th class="table-light" data-st-field="to_whom" scope="col">Кому</th>
+                          <th class="table-light" data-st-field="to_account__name" scope="col">На расчётный счёт</th>
+                          <th class="table-light" data-st-field="sum" data-st-type="number" scope="col">Сумма</th>
+                          <th class="table-light" data-st-field="datetime" data-st-type="date" scope="col">Дата</th>
+                          <th class="table-light" scope="col" data-st-field="status__name">Статус</th>
+                        </tr>
+                      </thead>
+                      <tbody id="interdivisional-debts-history-table-rows">
+                        <tr id="interdivisional-debts-history-last-row">
+                          <td colspan="8">
+                            <div style="height: 10px;"></div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="tab-pane fade" id="debts-history" role="tabpanel" aria-labelledby="debts-history-tab">
+                  <div class="position-relative" style="height: 50vh; overflow-y: scroll;">
+                    <table id="debts-history-table" class="table table-striped">
+                      <thead>
+                        <tr>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="9">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                        </tr>
+                        <tr>
+                          <th class="table-light" data-st-field="from_whom" scope="col">От кого</th>
+                          <th class="table-light" data-st-field="to_whom" scope="col">Кому</th>
+                          <th class="table-light" data-st-field="sum" data-st-type="number" scope="col">Сумма</th>
+                          <th class="table-light" data-st-field="datetime" data-st-type="date" scope="col">Дата</th>
+                          <th class="table-light" data-st-field="group__status__name" scope="col">Статус</th>
+                        </tr>
+                      </thead>
+                      <tbody id="debts-history-table-rows">
+                        <tr id="debts-history-last-row">
+                          <td colspan="8">
+                            <div style="height: 10px;"></div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="tab-pane fade" id="sutochnye-history" role="tabpanel" aria-labelledby="sutochnye-history-tab">
+                  <div class="position-relative" style="height: 50vh; overflow-y: scroll;">
+                    <table id="sutochnye-history-table" class="table">
+                      <thead>
+                        <tr>
+                          <th class="table-light smart-table__always-shown"></th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="9">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                          <th class="table-light align-middle" scope="col" data-st-subtotal="2">0</th>
+                        </tr>
+                        <tr>
+                          <th class="table-light smart-table__always-shown" style="min-width: 1em;width: 1em;"></th>
+                          <th class="table-light" data-st-field="name" scope="col" style="min-width: 16em; width: 16em;">ФИО</th>
+                          <th class="table-light" data-st-field="days" scope="col" style="min-width: 5em; width: 5em;">Кол-во дней</th>
+                          <th class="table-light" data-st-field="sum" data-st-type="number" scope="col" style="min-width: 6em; width: 6em;">Сумма</th>
+                          <th class="table-light" data-st-field="subdivision__name" scope="col" style="min-width: 5em; width: 5em;">Подразделение</th>
+                          <th class="table-light" data-st-field="project" scope="col" style="min-width: 18em; width: 18em;">Проект</th>
+                          <th class="table-light" data-st-field="responsible" scope="col" style="min-width: 16em; width: 16em;">Ответсвенный</th>
+                          <th class="table-light" data-st-field="responsible" scope="col" style="min-width: 12em; width: 12em;">Срок командировки</th>
+                          <th class="table-light" data-st-field="destination_point" scope="col" style="min-width: 16em; width: 16em;">Пункт назначение</th>
+                          <th class="table-light" data-st-field="project_region__name" scope="col" style="min-width: 16em; width: 16em;">ПМ</th>
+                          <th class="table-light" data-st-field="account__name" scope="col" style="min-width: 16em; width: 16em;">Расчётный счёт</th>
+                          <th class="table-light" data-st-field="created_at" data-st-type="date" data-st-type="date" scope="col">Дата</th>
+                          <th class="table-light" scope="col" data-st-field="status__name" style="min-width: 14em; width: 14em;">Статус</th>
+                        </tr>
+                      </thead>
+                      <tbody id="sutochnye-history-table-rows">
+                        <tr id="sutochnye-history-table-last-row">
+                          <td colspan="13">
+                            <div style="height: 10px;"></div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer bg-white d-flex align-items-center">
+      <form id="form" class="d-flex align-items-center">
+        <button id="submit-button" class="btn btn-primary me-2" disabled>Отправить</button>
+        <div id="form-loading" class="d-none spinner-border spinner-border-sm text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <div id="form-log"></div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+  const csrfToken = "{{csrf_token}}";
+  const getPmSumUrl = "{% url "finance_module:unpaid_invoices:get_pm_sum" %}";
+  if (window.history.replaceState) {
+    window.history.replaceState(null, null, window.location.href);
+  }  
+</script>
+  <script src="{% static 'finance_module/accounts-table.js' %}"></script>
+  <script src="{% static 'finance_module/all.js' %}"></script>
+{% endblock %}

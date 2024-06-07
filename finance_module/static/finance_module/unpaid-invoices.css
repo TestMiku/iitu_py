@@ -1,0 +1,89 @@
+#unpaid-invoices-table-container {
+    background-color: white;
+    color: black;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 14px;
+}
+
+#unpaid-invoices-table {
+    position: relative;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 2px solid black;
+    border-top:0;
+    border-left: 0;
+    border-bottom: 0;
+}
+
+#unpaid-invoices-table tr:has( + tr) :where(td, th) {
+    border-bottom: 0;
+}
+
+#unpaid-invoices-table tbody tr:nth-child(1) :where(td, th) {
+    border-top: 0;
+}
+
+#unpaid-invoices-table th {
+    border: 2px solid black;
+    border-right: 0;
+}
+
+#unpaid-invoices-table td {
+    border: 2px solid black;
+    border-right: 0;
+}
+
+
+
+#unpaid-invoices-table :where(th, td) {
+
+
+    padding: 0.0625em 0.125em;
+}
+
+#unpaid-invoices-table thead th {
+    text-align: center;
+    background-color: #92D050;
+}
+
+.th-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 90px;
+}
+
+#unpaid-invoices-table thead th.th-subtotal {
+    background-color: #00ffff;
+    color: #ff0000;
+    font-weight: normal;
+    font-size: 0.9em;
+}
+
+.td-content {
+    white-space: nowrap;
+    overflow-x: scroll;
+}
+
+.td-content::-webkit-scrollbar {
+    display: none;
+}
+
+.th-content-dropdown-container {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding: 0;
+}
+
+.th-content-dropdown {}
+
+.th {
+    position: relative;
+}
+
+#dropdown {
+    position: absolute;
+    top: 0;
+    left: 0;
+}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Подтвердите удаление{% endblock %}
+{% block chapter %}Подтвердите удаление{% endblock %}
+
+{% block content %}
+<p>Вы уверены, что хотите удалить документ? "{{ object }}"?</p>
+<form method="post">
+  {% csrf_token %}
+  <input type="submit" class="btn btn-danger" value="Delete">
+</form>
+<a href="{% url 'project_list' %}">Отмена</a>
+{% endblock %}

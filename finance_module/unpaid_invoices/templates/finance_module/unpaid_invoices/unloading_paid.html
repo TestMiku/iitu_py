@@ -1,0 +1,26 @@
+{% extends "finance_module/unpaid_invoices/base.html" %}
+{% block unpaid_invoices_active_breadcrump %}Выгрузка{% endblock %}
+
+{% block unpaid_invoices_content %}
+    <div>
+        <form method="GET" class="d-flex align-items-center">
+            <label for="unpaid_invoice">
+                <h1 style="font-size: 18px; margin-right: 20px;">
+                    Неоплаченные счета
+                </h1>
+            </label>
+            <input type="text" name="unpaid_invoice" id="unpaid_invoice" hidden="hidden">
+            <button class="btn btn-primary" type="submit">Выгрузка</button>
+        </form>
+
+        <form method="GET" class="d-flex align-items-center mt-5">
+            <label for="logistic">
+                <h1 style="font-size: 18px; margin-right: 20px;">
+                    Экспорт для импорта в 1С
+                </h1>
+            </label>
+            <input type="text" name="logistic" id="logistic" hidden="hidden">
+            <button class="btn btn-primary" type="submit">Выгрузка</button>
+        </form>
+    </div>
+{% endblock %}

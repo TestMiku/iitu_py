@@ -1,0 +1,122 @@
+{% extends 'finance_module/unpaid_invoices/base.html' %}
+{% load static %}
+{% block unpaid_invoices_active_breadcrump %}
+Реестр оплат
+{% endblock %}
+
+{% block unpaid_invoices_content %}
+<div class="position-relative h-100">
+  <div class="position-absolute top-0 bottom-0 start-0 end-0" style="overflow-x: scroll;">
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-sm btn-success mb-1" id="mail-1c-button"><i class="fa-solid fa-share"></i> Отправить как
+        письмо</button>
+      <span id="mail-1c-status"></span>
+    </div>
+    <table class="table table-bordered border-black" id="paid-invoices-table">
+      <thead>
+        <tr>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+          <th scope="col" class="text-danger" data-st-subtotal="2">-</th>
+        </tr>
+        <tr class="table-light border-black">
+          <th class="text-center align-middle" data-st-field="number"
+            style="min-width: 6em; max-width: 6em; height: 6em;">ДО</th>
+          <th class="text-center align-middle" data-st-field="at" data-st-type="date"
+            style="min-width: 8em; max-width: 8em; height: 6em;">Дата входящего</th>
+          <th class="text-center align-middle" data-st-field="invoice_number"
+            style="min-width: 6em; max-width: 6em; height: 6em;">№ счёта</th>
+          <th class="text-center align-middle" data-st-field="invoice_date" data-st-type="date"
+            style="min-width: 6em; max-width: 6em; height: 6em;">Дата счёта</th>
+          <th class="text-center align-middle" data-st-field="project" style="height: 6em;">Проект</th>
+          <th class="text-center align-middle" data-st-field="responsible_user_id"
+            style="min-width: 10em; max-width: 10em; height: 6em;">Ответственный</th>
+          <th class="text-center align-middle" data-st-field="approver" style="height: 6em;">Утвердитель</th>
+          <th class="text-center align-middle" data-st-field="llc" style="height: 6em;">Компания</th>
+          <th class="text-center align-middle" data-st-field="contractor" style="height: 6em;">Контрагенты</th>
+          <th class="text-center align-middle" data-st-field="comment"
+            style="min-width: 10em; max-width: 10em; height: 6em;">Описание</th>
+          <th class="text-center align-middle" data-st-field="currency"
+            style="min-width: 6em; max-width: 6em; height: 6em;">Валюта</th>
+          <th class="text-center align-middle" data-st-field="sum" data-st-type="number"
+            style="min-width: 8em; max-width: 8em; height: 6em;">Сумма для таблицы</th>
+          <th class="text-center align-middle" data-st-field="invoice_category" style="height: 6em;">Категория счета
+          </th>
+          <th class="text-center align-middle" data-st-field="revenue_expense_articles" style="height: 6em;">Статьи
+            доходов/расходов</th>
+          <th class="text-center align-middle" data-st-field="sales_order"
+            style="min-width: 10em; max-width: 10em; height: 6em;">Номер заказа</th>
+          <th class="text-center align-middle" data-st-field="bin_or_iin"
+            style="min-width: 10em; max-width: 10em; height: 6em;">БИН/ИИН</th>
+          <th class="text-center align-middle" data-st-field="document_amount" data-st-type="number"
+            style="min-width: 10em; max-width: 10em; height: 6em;">Сумма документа</th>
+          <th class="text-center align-middle" data-st-field="account__number"
+            style="min-width: 10em; max-width: 10em; height: 6em;">Номер р/с</th>
+          <th class="text-center align-middle" data-st-field="iic"
+            style="min-width: 10em; max-width: 10em; height: 6em;">ИИК</th>
+          <th class="text-center align-middle" data-st-field="payment_destination_code"
+            style="min-width: 5em; max-width: 5em; height: 6em;">КНП</th>
+          <th class="text-center align-middle" data-st-field="contract_number"
+            style="min-width: 10em; max-width: 10em; height: 6em;">Факт номер договора</th>
+          <th class="text-center align-middle" data-st-field="invoice_amount" data-st-type="number"
+            style="min-width: 8em; max-width: 8em; height: 6em;">Сумма по счету</th>
+          <th class="text-center align-middle" data-st-field="paid" data-st-type="number"
+            style="min-width: 9em; max-width: 9em; height: 6em;">Оплаченная сумма ранее</th>
+          <th class="text-center align-middle" data-st-field="paid" data-st-type="number"
+            style="min-width: 8em; max-width: 8em; height: 6em;">Оплачено</th>
+          <th class="text-center align-middle" data-st-field="at" data-st-type="date"
+            style="min-width: 7em; max-width: 7em; height: 6em;">Дата оплаты</th>
+          <th class="text-center align-middle" data-st-field="project_region__name"
+            style="min-width: 8em; height: 6em;">ПМ</th>
+          <th class="text-center align-middle" data-st-field="responsible_user_id"
+            style="min-width: 10em; max-width: 10em; height: 6em;">Руководитель</th>
+          <th class="text-center align-middle" data-st-field="project_region__subdivision__name"
+            style="min-width: 10em; max-width: 10em; height: 6em;">Подразделение</th>
+          <th class="text-center align-middle" data-st-field="account__name" style="height: 6em;">Расчётный счет</th>
+        </tr>
+      </thead>
+      <tbody id="paid-invoices-table-rows">
+        <tr id="paid-invoices-table-last-row">
+          <td colspan="30">
+            <div style="height: 10px;"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const csrfToken = "{{csrf_token}}";
+</script>
+<script src="{% static 'finance-module/unpaid-invoices/paid-invoices.js' %}"></script>
+{% endblock %}

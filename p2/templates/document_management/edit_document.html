@@ -1,0 +1,63 @@
+<!-- Обновленный шаблон edit_document.html -->
+{% extends 'base.html' %}
+
+{% block title %}Документы{% endblock %}
+{% block chapter %}Документы{% endblock %}
+
+
+{% block content %}
+    <div class="mt-4">
+        <a class="btn btn-primary" href="{% url 'project_list' %}">На главную страницу</a>
+    </div>
+  <div class="container">
+    <h2 class="mt-4">Заявка №{{ request.request_number }}</h2>
+
+    <p>Регион: {{ request.region }}</p>
+    <p>Наименование БС: {{ request.bis_name }}</p>
+    <p>Номер заказа: {{ request.order_number }}</p>
+    <p>Статус: {{ request.get_status_display }}</p>
+
+    <p>Создано: {{ request.created_at }}</p>
+
+    <form method="post" enctype="multipart/form-data" class="mt-3">
+      {% csrf_token %}
+
+      <div class="list-group">
+        {% for doc in existing_documents %}
+          <p>Причина отклонения документа: {{ doc.comment }}</p>
+          <div class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+              <h5 class="mb-1">{{ doc.document.name }}</h5>
+              <div class="form-check">
+                <input type="checkbox" name="documents_to_delete" value="{{ doc.id }}" class="form-check-input">
+                <label class="form-check-label" for="delete_{{ doc.id }}">Удалить</label>
+              </div>
+            </div>
+            <label for="document_{{ doc.id }}" class="mb-0 mt-2">Заменить документ:</label>
+            <input type="file" name="document_{{ doc.id }}" id="document_{{ doc.id }}" class="form-control-file">
+          </div>
+        {% endfor %}
+          <br>
+      </div>
+        {% if existing_documents %}
+        <div class="col-12 d-flex justify-content-center">
+            {% if not request.isapproved %}
+                <button type="submit" name="status" value="pending2" class="btn btn-success">Отправить в финансовый отдел</button>
+            {% endif %}
+
+            {% if request.isapproved %}
+                <button type="submit" name="status" value="pending3" class="btn btn-success">Отправить в финансовый отдел</button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </form>
+
+    {% if not existing_documents %}
+      <p class="mt-3">У данной заявки нет документов с отклоненным статусом</p>
+    {% endif %}
+
+
+
+
+  </div>
+{% endblock %}

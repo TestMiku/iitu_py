@@ -1,0 +1,367 @@
+{% extends 'finance_module/division_of_financial_planning/base.html' %}
+{% load static dictionary number_format %}
+{% block division_of_financial_planning_active_breadcrump %}
+Ежедневно
+{% endblock %}
+{% block links %}
+<link rel="stylesheet" href="{% static 'finance_module/history.css' %}" />
+{% endblock %}
+{% block styles %}
+<style>
+  #dayly-table {
+    --border-size: 0.05cm;
+    --border-color: black;
+    width: 100%;
+    position: relative;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  #dayly-table :where(th, td) {
+    padding: 0.5em;
+    margin: 0;
+    background-color: white;
+  }
+
+  #dayly-table .border-top {
+    border-top: var(--border-size) solid var(--border-color) !important;
+  }
+
+  #dayly-table .border-bottom {
+    border-bottom: var(--border-size) solid var(--border-color) !important;
+  }
+
+  #dayly-table .border-left {
+    border-left: var(--border-size) solid var(--border-color) !important;
+  }
+
+  #dayly-table .border-right {
+    border-right: var(--border-size) solid var(--border-color) !important;
+  }
+
+  #dayly-table .cell-content-center {
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  #dayly-table .category {
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+  }
+
+  #dayly-table .number {
+    text-align: right;
+    max-width: 10em;
+  }
+
+  #dayly-table .text {
+    max-width: 10em;
+  }
+
+  #dayly-table .hoverable-cell:hover {
+    background-color: var(--bs-gray-100);
+  }
+
+  .add-note {
+    display: none;
+  }
+
+  #dayly-table td:hover .add-note {
+    display: unset;
+  }
+</style>
+{% endblock %}
+{% block finance_module_main %}
+<div class="modal modal-fullscreen" id="project-region-mandatory-payment-seizures-table-modal" tabindex="-1"
+  aria-labelledby="project-region-mandatory-payment-seizures-table-modal-label" aria-hidden="true">
+  <div class="modal-dialog mx-auto my-0" style="--bs-modal-width: 75vw; height: 100vh;">
+    <div class="modal-content rounded-0">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="project-region-mandatory-payment-seizures-table-modal-label"></h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table id="mandatory-payment-seizures-table" class="table table-bordered border-black">
+          <thead class="table-light border-black">
+            <tr>
+              <th scope="col" data-st-subtotal="2">-</th>
+              <th scope="col" data-st-subtotal="2">-</th>
+              <th scope="col" data-st-subtotal="2">-</th>
+              <th scope="col" data-st-subtotal="2">-</th>
+              <th scope="col" data-st-subtotal="2">-</th>
+              <th scope="col" data-st-subtotal="2">-</th>
+              <th class="text-end" scope="col" data-st-subtotal="9">-</th>
+              <th scope="col" data-st-subtotal="2">-</th>
+            </tr>
+            <tr>
+              <th scope="col" data-st-field="project_region__director_display">Руководитель</th>
+              <th scope="col" data-st-field="project_region__project_manager_display">ПМ</th>
+              <th scope="col" data-st-field="project_region__name">Проект регион</th>
+              <th scope="col" data-st-field="mandatory_payment__name">Статья</th>
+              <th scope="col" data-st-field="account__name">Расчётный счёт</th>
+              <th scope="col" data-st-field="responsible_fullname">Ответственный</th>
+              <th scope="col" data-st-field="sum" data-st-type="number">Сумма</th>
+              <th scope="col" data-st-field="datetime" data-st-type="date">Дата</th>
+            </tr>
+          </thead>
+          <tbody id="daily-mandatory-payment-seizures-rows">
+            <tr id="daily-mandatory-payment-seizures-last-row">
+              <td colspan="8">
+                <div style="height: 10px;"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container-fluid flex-fill">
+  <div class="row h-100">
+    <div class="col-5">
+      <div class="d-flex flex-column h-100 gap-1">
+        <div class="position-relative flex-fill" style="overflow-y: scroll;">
+          <div class="position-absolute top-0 bottom-0 start-0 end-0">
+            <table class="table table-bordered border-black mb-1" id="accounts-table">
+              <thead class="table-light border-black">
+                <tr>
+                  <th scope="col" data-st-field="subdivision" style="width: 10em;">Подразделение</th>
+                  <th scope="col" data-st-field="name" style="width: 20em;">Расчётный счёт</th>
+                  <th scope="col" class="text-warning" data-st-field="mandatory_payment_seizures_sum"
+                    data-st-type="number" style="width: 10em;">Сумма погашение</th>
+                  <th scope="col" class="text-secondary" data-st-field="remainder" data-st-type="number"
+                    style="width: 10em;">Остаток</th>
+                </tr>
+              </thead>
+              <tbody id="accounts-table-rows">
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <hr>
+        <div>
+          <table class="table table-bordered border-black" id="project-regions-table">
+            <thead class="table-light border-black">
+              <tr>
+                <th data-st-field="director" scope="col">Руководитель</th>
+                <th data-st-field="projectManager" scope="col">ПМ</th>
+                <th data-st-field="name" scope="col">Регион</th>
+                <th data-st-field="mandatoryPaymentSeizuresSum" scope="col" class="text-warning">Сумма погашение</th>
+                <th data-st-field="inflowsSum" scope="col" class="text-success">Сумма прихода</th>
+              </tr>
+            </thead>
+            <tbody id="project-regions-table-rows">
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-7">
+      <div class="d-flex flex-column h-100 gap-1">
+        <div>
+          <div class="row mb-1">
+            <label class="col-auto col-form-label" for="show-select">Показать</label>
+            <div class="col-auto">
+              <select name="show" id="show-select" class="form-select need-disable">
+                <option value="per-day">За день</option>
+                <option value="per-month">За месяц</option>
+                <option value="per-year">За год</option>
+                <option value="during-period">За период</option>
+              </select>
+            </div>
+          </div>
+          <div id="day-change">
+            <div class="row">
+              <div class="col">
+                <button type="button" id="day-change-previous-button" class="need-disable btn btn-link"><i
+                    class="fa-solid fa-arrow-left"></i> <span id="day-change-previous-date"></span></button>
+              </div>
+              <div class="col d-flex align-items-center justify-content-center gap-2">
+                <div class="h4 mb-0 text-nowrap" id="day-change-current-date"></div>
+                <button type="button" class="btn btn-sm copy-link-button" title="Копировать ссылку">
+                  <i class="fa-solid fa-link"></i>
+                </button>
+                <button type="button" class="btn btn-sm unload-button" title="Выгрузка таблицы в .xlsx">
+                  <i class="fa-solid fa-upload"></i>
+                </button>
+              </div>
+
+              <div class="col text-end">
+                <button type="button" id="day-change-next-button" class="need-disable btn btn-link"><span
+                    id="day-change-next-date"></span> <i class="fa-solid fa-arrow-right"></i></button>
+              </div>
+            </div>
+            <form method="get" id="day-change-form">
+              <div class="d-flex align-items-center gap-3">
+                <div class="form-floating">
+                  <input type="date" name="date" class="form-control" id="day-change-date-input" value="" required />
+                  <label for="day-change-date-input" class="form-label">Дата</label>
+                </div>
+                <button class="btn btn-primary need-disable">Перейти</button>
+              </div>
+            </form>
+          </div>
+          <div id="month-change">
+            <div class="row">
+              <div class="col">
+                <button class="need-disable btn btn-link" id="month-change-previous-button"><i
+                    class="fa-solid fa-arrow-left"></i> <span id="month-change-previous-date"></span></button>
+              </div>
+              <div class="col d-flex align-items-center justify-content-center gap-2">
+                <div class="h4 mb-0 text-nowrap" id="month-change-current-date"></div>
+                <button type="button" class="btn btn-sm copy-link-button" title="Копировать ссылку">
+                  <i class="fa-solid fa-link"></i>
+                </button>
+                <button type="button" class="btn btn-sm unload-button" title="Выгрузка таблицы в .xlsx">
+                  <i class="fa-solid fa-upload"></i>
+                </button>
+              </div>
+              <div class="col text-end">
+                <button class="need-disable btn btn-link" id="month-change-next-button"><span
+                    id="month-change-next-date"></span><i class="fa-solid fa-arrow-right"></i></button>
+              </div>
+            </div>
+            <form method="get" id="month-change-form">
+              <div class="d-flex align-items-center gap-3">
+
+                <div class="form-floating">
+                  <input type="month" class="form-control" name="month" id="month-change-month-input" />
+                  <label for="month-change-month-input" class="form-label">Месяц</label>
+                </div>
+
+                <div>
+                  <button class="btn btn-primary need-disable">Перейти</button>
+                </div>
+
+              </div>
+            </form>
+          </div>
+          <div id="year-change">
+            <div class="row">
+              <div class="col">
+                <button class="need-disable btn btn-link" id="year-change-previous-button"><i
+                    class="fa-solid fa-arrow-left"></i> <span id="year-change-previous-date"></span></button>
+              </div>
+              <div class="col d-flex align-items-center justify-content-center gap-2">
+                <div class="h4 mb-0 text-nowrap" id="year-change-current-date"></div>
+                <button type="button" class="btn btn-sm copy-link-button" title="Копировать ссылку">
+                  <i class="fa-solid fa-link"></i>
+                </button>
+                <button type="button" class="btn btn-sm unload-button" title="Выгрузка таблицы в .xlsx">
+                  <i class="fa-solid fa-upload"></i>
+                </button>
+              </div>
+              <div class="col text-end">
+                <button class="need-disable btn btn-link" id="year-change-next-button"><span
+                    id="year-change-next-date"></span> <i class="fa-solid fa-arrow-right"></i></button>
+              </div>
+            </div>
+            <form method="get" id="year-change-form">
+              <div class="d-flex align-items-center gap-3">
+                <div class="form-floating">
+                  <input type="number" name="year" class="form-control" id="year-change-year-input" required
+                    style="width: 6em;" />
+                  <label for="year-change-year-input" class="form-label">Год</label>
+                </div>
+                <button class="btn btn-primary need-disable">Перейти</button>
+              </div>
+            </form>
+          </div>
+          <div id="period-change">
+            <div class="row">
+              <div class="col d-flex align-items-center justify-content-center gap-2">
+                <div class="h4 mb-0 text-nowrap" id="period-change-date-range"></div>
+                <button type="button" class="btn btn-sm copy-link-button" title="Копировать ссылку">
+                  <i class="fa-solid fa-link"></i>
+                </button>
+                <button type="button" class="btn btn-sm unload-button" title="Выгрузка таблицы в .xlsx">
+                  <i class="fa-solid fa-upload"></i>
+                </button>
+              </div>
+            </div>
+            <form method="get" id="period-change-form">
+              <div class="d-flex align-items-center gap-3">
+                <div class="form-floating">
+                  <input type="date" name="start-date" class="form-control" id="period-change-start-date-input"
+                    value="" />
+                  <label for="date-input" class="form-label">С</label>
+                </div>
+                <div class="form-floating">
+                  <input type="date" name="end-date" class="form-control" id="period-change-end-date-input" value="" />
+                  <label for="period-change-end-date-input" class="form-label">По</label>
+                </div>
+                <button class="btn btn-primary need-disable">Перейти</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="flex-fill">
+          <div class="position-relative h-100">
+            <div class="position-absolute top-0 bottom-0 end-0 start-0" style="overflow: scroll;">
+              <table id="daily-table" class="table table-borderless mb-1 border-end border-black position-relative"
+                style="border-collapse: separate; border-spacing: 0;">
+                <thead>
+                  <tr>
+                    <th
+                      class="sticky-relative sticky-relative-top sticky-relative-left border-black border-end border-bottom border-top border-start"
+                      scope="col" data-st-subtotal="2">-</th>
+                    <th class="sticky-relative sticky-relative-top text-end border-black border-bottom border-top"
+                      scope="col" data-st-subtotal="9" style="min-width: 10em; max-width: 10em;">-</th>
+                    <th
+                      class="sticky-relative sticky-relative-top text-end border-black border-bottom border-top border-start"
+                      scope="col" data-st-subtotal="9" style="min-width: 10em; max-width: 10em;">-</th>
+                    <th
+                      class="sticky-relative sticky-relative-top text-end border-black border-bottom border-top border-start"
+                      scope="col" data-st-subtotal="9" style="min-width: 10em; max-width: 10em;">-</th>
+                    <th
+                      class="sticky-relative sticky-relative-top text-end border-black border-bottom border-top border-start"
+                      scope="col" data-st-subtotal="9" style="min-width: 10em; max-width: 10em;">-</th>
+                    <th
+                      class="sticky-relative sticky-relative-top text-end debt-td border-black border-bottom border-top border-start"
+                      scope="col" data-st-subtotal="9" style="min-width: 10em; max-width: 10em;">-</th>
+                    <th
+                      class="sticky-relative sticky-relative-top comment-th debt-td border-black border-bottom border-top border-start"
+                      scope="col" data-st-subtotal="2" style="min-width: 18em">-</th>
+                  </tr>
+                  <tr>
+                    <th
+                      class="table-light sticky-relative sticky-relative-top sticky-relative-left border-black border-end border-bottom border-start"
+                      data-st-field="name" scope="col">Статья</th>
+                    <th class="table-light sticky-relative sticky-relative-top text-primary border-black border-bottom"
+                      data-st-field="incoming_balance" scope="col" data-st-type="number">Входящий остаток</th>
+                    <th
+                      class="table-light sticky-relative sticky-relative-top text-success border-black border-bottom border-start"
+                      data-st-field="parish" scope="col" data-st-type="number">Приходы</th>
+                    <th
+                      class="table-light sticky-relative sticky-relative-top text-danger border-black border-bottom border-start"
+                      data-st-field="expense" scope="col" data-st-type="number">Расходы</th>
+                    <th
+                      class="table-light sticky-relative sticky-relative-top text-secondary border-black border-bottom border-start"
+                      data-st-field="outgoing_balance" scope="col" data-st-type="number">Исходящий остаток</th>
+                    <th class="table-light sticky-relative sticky-relative-top border-black border-bottom border-start"
+                      data-st-field="total_debt" data-st-type="number" scope="col">Задолженность</th>
+                    <th
+                      class="table-light sticky-relative sticky-relative-top comment-th border-black border-bottom border-start"
+                      data-st-field="comment" scope="col">Комментарий</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  const csrfToken = '{{csrf_token}}'
+</script>
+<script src="{% static 'finance_module/division_of_financial_planning/daily.js' %}"></script>
+{% endblock %}

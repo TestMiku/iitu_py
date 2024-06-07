@@ -1,0 +1,269 @@
+{% extends 'finance_module/unpaid_invoices/base.html' %}
+{% load static %}
+{% block unpaid_invoices_active_breadcrump %}
+  Сумма от ПМ
+{% endblock %}
+{% block links %}
+  <link rel="stylesheet" href="{% static 'finance_module/unpaid-invoices.css' %}" />
+{% endblock %}
+{% block finance_module_main %}
+<div class="flex-fill d-flex flex-column gap-1">
+  <div class="card rounded-0 border-end-0 border-start-0 mb-2">
+    <div class="card-header bg-white d-flex justify-content-between">
+      <div class="align-self-center d-none" id="project-region-accounts-subdivisions-loading">
+        <div class="spinner-border spinner-border-sm text-primary" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+      <ul id="project-region-accounts-subdivisions" class="nav nav-tabs card-header-tabs align-self-end"></ul>
+      <div class="d-flex align-self-center gap-1">
+        <button id="project-region-accounts-table-toggle-view-button" type="button" class="btn"><i class="fa-solid fa-arrow-right-arrow-left"></i> ПМ</button>
+        <button id="project-region-accounts-table-toggle-collapse-button" class="btn" data-bs-toggle="collapse" data-bs-target="#project-region-accounts-table-collapse" title="Скрыть таблицу расчётных счетов" type="button" aria-expanded="true" aria-controls="project-region-accounts-table-collapse"><i class="fa-regular fa-eye-slash"></i> Скрыть</button>
+        <button id="project-region-accounts-table-reload-button" class="btn" title="Обновить таблицу расчётных счетов" type="button"><i class="fas fa-sync"></i></button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="collapse show" id="project-region-accounts-table-collapse">
+        <div class="tab-content" id="project-region-accounts-table-container" style="overflow: scroll;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card border-start-0 border-end-0 flex-fill rounded-0" style="">
+    <div class="card-body">
+      <div class="position-relative h-100">
+        <div class="position-absolute top-0 bottom-0 start-0 end-0" style="overflow: scroll; ">
+          <div id="unpaid-invoices-table-container">
+            <table id="unpaid-invoices-table">
+              <thead>
+                <tr>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="9" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="9" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="9" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="9" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="9" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="9" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="9" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="9" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                  <th class="th-subtotal" scope="col" data-st-subtotal="2" style="position: sticky; height: 22.07px; top: 0px"></th>
+                </tr>
+                <tr>
+                  <th style="position: sticky; min-width: 90px; top: 22.07px" class="th  " scope="col"  data-st-field="number">
+                    <div class="th-content">ДО</div>
+                  </th>
+                  <th style="position: sticky; min-width: 94px;top: 22.07px" class="th  " scope="col"  data-st-field="date">
+                    <div class="th-content">Дата</div>
+                  </th>
+                  <th style="position: sticky; min-width: 133px;top: 22.07px" class="th  " scope="col"  data-st-field="invoice_number">
+                    <div class="th-content">№ счёта</div>
+                  </th>
+                  <th style="position: sticky; min-width: 135px;top: 22.07px" class="th  " scope="col"  data-st-field="invoice_date">
+                    <div class="th-content">Дата счёта</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="project">
+                    <div class="th-content">Проект</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="responsible_user_id">
+                    <div class="th-content">
+                      Ответст<br />венный
+                    </div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="approver">
+                    <div class="th-content">Утвердитель</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="llc">
+                    <div class="th-content">ТОО</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="contractor">
+                    <div class="th-content">Контрагент</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="comment">
+                    <div class="th-content">Комментарий</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="currency">
+                    <div class="th-content">Валюта</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="annotated_pm_sum" data-st-type="number">
+                    <div class="th-content">Сумма для таблицы</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="invoice_category">
+                    <div class="th-content">Категория счёта</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="revenue_expense_articles">
+                    <div class="th-content">Статьи доходов/расходов</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="sales_order">
+                    <div class="th-content">Заказ на продажу</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="bin_or_iin">
+                    <div class="th-content">БИН/ИИН</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="document_amount" data-st-type="number">
+                    <div class="th-content">Сумма документа</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col">
+                    <div class="th-content">С какого р/с платить</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="iic">
+                    <div class="th-content">ИИК</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="payment_destination_code">
+                    <div class="th-content">КНП</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="contract_number">
+                    <div class="th-content">Фактический номер договора</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="invoice_amount" data-st-type="number">
+                    <div class="th-content">Сумма по счёту</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="paid_amount_1c" data-st-type="number">
+                    <div class="th-content">Оплаченная ранее сумма (1С)</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="annotated_today_paid" data-st-type="number">
+                    <div class="th-content">Оплачено сегодня</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="annotated_planned_payment" data-st-type="number">
+                    <div class="th-content">Планируемая оплата</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="annotated_remainder" data-st-type="number">
+                    <div class="th-content">Остаток по оплате(1С)</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="annotated_allowed_payment_amount" data-st-type="number">
+                    <div class="th-content">Можно доплатить, тг</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px; min-width: 18em;" class="th" scope="col" data-st-field="annotated_pm_sum" data-st-type="number">
+                    <div class="th-content">Расчётный счёт</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px; min-width: 10em;" class="th" scope="col" data-st-field="annotated_pm_sum" data-st-type="number">
+                    <div class="th-content">Сумма от ПМ</div>
+                  </th>
+                  <th style="position: sticky; top: 22.07px" class="th  " scope="col" data-st-field="annotated_payment_decision">
+                    <div class="th-content">Решение по оплате</div>
+                  </th>
+                  {% comment %} <th style="top: 22.07px" class="th" scope="col">
+                    <div class="th-content">С какого р/с платить</div>
+                  </th> {% endcomment %}
+                  <th class="th" scope="col">
+                    <div class="th-content">Банк</div>
+                  </th>
+                  {% comment %} <th class="th" scope="col">
+                    <div class="th-content">ТИП</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Статус ДО</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Создатель счёта</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Подр</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Оплатить до(дата)</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Номер документа</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Дата документа</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Закрывающий документ в 1С посажен на сумму</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Закрывающий документ предоставлен на сумму</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Непосаженный ЭАВР (сумма)</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Дата окончания работ</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Условия предоплаты, %</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Ранее оплачено, %</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Можно доплатить, тг</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Статус работ</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Решение по оплате</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Размер превышения, тг</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">% после оплаты</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Стоп лист</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Дата выставления СФ заказчику</div>
+                  </th>
+                  <th class="th" scope="col">
+                    <div class="th-content">Приоритетность оплаты</div>
+                  </th> {% endcomment %}
+                </tr>
+              </thead>
+              <tbody id="unpaid-invoices">
+                <tr id="unpaid-invoices-last-row">
+                  <td colspan="52">
+                    <div style="height: 10px;"></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer d-flex align-items-center justify-content-end">
+      <button class="btn btn-primary">Отправить</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+const csrfToken = "{{csrf_token}}";
+const updatePmSumUrl = "{% url "finance_module:unpaid_invoices:update_pm_sum" %}";
+</script>
+<script src="{% static 'finance_module/accounts-table.js' %}"></script>
+  <script src="{% static 'finance-module/unpaid-invoices/pm-sum.js' %}"></script>
+{% endblock %}

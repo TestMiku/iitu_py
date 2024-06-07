@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить данные</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 50%;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            margin-top: 20px;
+        }
+        input[type="text"], textarea, input[type="submit"], select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Добавить данные</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div>
+                <label for="id_code">Код товара:</label>
+                {{ form.code }}
+            </div>
+            <div>
+                <label for="id_quantity">Количество:</label>
+                {{ form.quantity }}
+            </div>
+            <div>
+                <label for="id_name">Наименование:</label>
+                {{ form.name }}
+            </div>
+            <div>
+                <label for="id_unit">Ед. измерения:</label>
+                {{ form.unit }}
+            </div>
+            <div>
+                <label for="id_category">Категория:</label>
+                {{ form.category }}
+            </div>
+            <input type="submit" value="Добавить">
+        </form>
+    </div>
+</body>
+</html>

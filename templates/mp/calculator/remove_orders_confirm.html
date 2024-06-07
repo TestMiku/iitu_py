@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{import_type}}{% endblock %}
+
+
+{% block chapter %} 
+{{import_type}}
+{% endblock %}
+
+{% block content %}
+<link href="{% static 'css/set_order.css' %}" rel="stylesheet">
+
+{% if custom_error %}
+<h3 class="text-danger">{{custom_error}}</h3>  
+{% endif %}
+<form method="post" enctype="multipart/form-data" id="uploadForm" class="col-4">
+
+    {% csrf_token %}
+
+    {{form.as_p}}
+
+    <input type="button" class="btn btn-primary" onclick="submite_spiner()" value="Удалить">
+
+</form>
+<p class="text-danger">
+  {{logs|safe}}
+</div>
+
+<div class="spiner-full-screen" id="hidden-data" style="display:none;">
+<div class="spiner-div">
+    <img src="{% static 'img/tumblr_nk4e9zslh61qa6q9uo1_500.gif' %}">
+</div>
+
+
+
+
+<script>
+    function submite_spiner() {
+        event.preventDefault();
+      
+        document.getElementById("hidden-data").style.display = "flex"
+        setTimeout(function() {
+          document.getElementById('uploadForm').submit();
+        }, 1000);
+      }
+</script>
+{% endblock %}

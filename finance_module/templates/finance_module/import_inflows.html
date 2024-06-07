@@ -1,0 +1,154 @@
+{% extends 'finance_module/base.html' %}
+{% load static %}
+{% load dictionary %}
+{% block active_breadcrump %}
+  Импорт поступлений
+{% endblock %}
+{% block title %}
+  Импорт поступлений
+{% endblock %}
+{% block links %}
+  <link rel="stylesheet" href="{% static ' finance_module/main.css' %}" />
+{% endblock %}
+{% block finance_module_content %}
+  <div class="row">
+    <div class="col-3">
+      <div class="card shadow">
+        <div class="card-header">
+          <ul class="card-header-tabs nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="inflows-7-tab" data-bs-toggle="tab" data-bs-target="#inflows-7" type="button" role="tab" aria-controls="inflows-7" style="min-width: 7em;" aria-selected="true">7п</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="inflows-71-tab" data-bs-toggle="tab" data-bs-target="#inflows-71" type="button" role="tab" aria-controls="inflows-71" style="min-width: 7em;" aria-selected="false">71п</button>
+            </li>
+          </ul>
+          
+        </div>
+        <div class="card-body">
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="inflows-7" role="tabpanel" aria-labelledby="inflows-7-tab">
+              <form method="post" enctype="multipart/form-data" id="import-inflows-7-form">
+                {% csrf_token %}
+                <input type="hidden" name="post-type" value="import-inflows-7" />
+                <div class="mb-3">
+                  <label class="form-label" for="import-inflows-7-date-input">Дата</label>
+                  <input type="date" class="form-control" name="date" id="import-inflows-7-date-input" aria-describedby="import-inflows-7-date-input-help-block" />
+                  <div id="import-inflows-7-date-input-help-block" class="form-text">По умолчанию вчерашний день</div>
+                </div>
+                <div class="mb-3">
+                  <label for="import-inflows-7-file-input" class="form-label">Файл для импорта</label>
+                  <input type="file" name="file" id="import-inflows-7-file-input" class="form-control" required />
+                </div>
+    
+                <button class="btn btn-primary w-100">Импорт</button>
+                <i id="import-inflows-7-loading-icon" class="d-none fas fa-spinner fa-pulse mx-2"></i>
+              </form>
+            </div>
+            <div class="tab-pane fade" id="inflows-71" role="tabpanel" aria-labelledby="inflows-71-tab">
+              <form action="" enctype="multipart/form-data" method="post" id="import-inflows-71-form">
+                {% csrf_token %}
+                <input type="hidden" name="post-type" value="import-inflows-71" />
+                <div class="mb-3">
+                  <label for="import-inflows-7-file-input" class="form-label">Файл для импорта</label>
+                  <input type="file" name="file1" id="import-inflows-71-file-input" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                  <label for="import-inflows-7-file-input" class="form-label">Файл для импорта</label>
+                  <input type="file" name="file2" id="import-inflows-71-file-input" class="form-control" required />
+                </div>
+                <input type="hidden" name="post-type" value="import-inflows-71" />
+                <button type="submit" class="btn btn-primary w-100">Импорт</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-9">
+      <div class="card shadow">
+        <div class="card-body">
+          <div style="overflow-y: scroll; height: 70vh;">
+            <table id="inflows-table" class="table table-bordered">
+              <thead>
+                <tr class="table-light">
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th class="text-end" scope="col" data-st-subtotal="9">-</th>
+                  <th class="text-end" scope="col" data-st-subtotal="9">-</th>
+                  <th scope="col" data-st-subtotal="2">-</th>
+                  <th class="text-end" scope="col" data-st-subtotal="9">-</th>
+                </tr>
+                <tr class="table-light">
+                  <th class="align-middle" scope="col" data-st-field="date">Дата</th>
+                  <th class="align-middle" scope="col" data-st-field="project_region__name">ПМ</th>
+                  <th class="align-middle" scope="col" data-st-field="account__name">р/с</th>
+                  <th class="align-middle" scope="col" data-st-field="account__number">Номер р/с</th>
+                  <th scope="col" class="align-middle text-primary" data-st-field="sum" data-st-type="number">Сумма</th>
+                  <th scope="col" class="align-middle text-warning" data-st-field="reserve" data-st-type="number">Резерв</th>
+                  <th scope="col" class="align-middle text-warning" data-st-field="reserve_percent" data-st-type="number">Процент</th>
+                  <th scope="col" class="align-middle text-secondary" data-st-field="remainder" data-st-type="number">Сумма (остаток)</th>
+                </tr>
+              </thead>
+              <tbody id="rows">
+                <tr id="last-row">
+                  <td colspan="8"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block scripts %}
+  <script>
+    $(function () {
+      const numberFormat = new Intl.NumberFormat('ru-RU', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+      const percentNumberFormat = new Intl.NumberFormat('ru-RU', {style: "percent", maximumFractionDigits: 2, minimumFractionDigits: 2});
+      $('#inflows-table').smartTableWithVirtualScroll({
+        name: 'inflows',
+        defaultOrder: [{ field: 'date', sort: 'desc' }],
+        unload: [
+          {
+            html: `<i class="fa-solid fa-file-excel"></i> XLSX`,
+            async onUnload(fieldValuesList, order) {
+              console.log(123)
+            }
+          }
+        ],
+        lastRowTarget: '#last-row',
+        rowsTarget: '#rows',
+        getValuesUrl: '/p1/finance-module/inflows-get-values',
+        getRowsUrl: '/p1/finance-module/inflows-get-rows',
+        getSubtotalsUrl: '/p1/finance-module/inflows-get-subtotals',
+        loadingHtml: `
+          <tr>
+            <td class="text-center text-primary" colspan="8">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </td>
+          </tr>
+        `,
+        getTr(row) {
+          return `
+            <tr>
+                <td class="align-middle">${new Date(row.date).toLocaleDateString("ru-RU")}</td>
+                <td class="align-middle">${row.project_region.name}</td>
+                <td class="align-middle">${row.account.name}</td>
+                <td class="align-middle">${row.account.number}</td>
+                <td class="align-middle text-end">${numberFormat.format(row.sum)}</td>
+                <td class="align-middle text-end">${numberFormat.format(row.reserve)}</td>
+                <td class="align-middle text-end">${percentNumberFormat.format(row.reserve_percent / 100)}</td>
+                <td class="align-middle text-end">${numberFormat.format(row.remainder)}</td>
+            </tr>
+          `;
+        }
+      })
+    })
+  </script>
+{% endblock %}

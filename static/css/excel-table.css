@@ -1,0 +1,81 @@
+
+.note-menu {
+    display: none;
+    position: absolute;
+    z-index: 10000;
+}
+
+.note-menu.active {
+    display: block;
+    opacity: 1;
+}
+
+.note {
+    display: none;
+
+    position: absolute;
+    z-index: 10000;
+    
+    
+}
+
+@keyframes note-appearance {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.note.active {
+    display: block;
+    animation: note-appearance 0.75s linear;
+}
+
+.cell-properties-menu {
+    position: absolute;
+    display: none;
+    z-index: 10000;
+}
+
+.cell-properties-menu.active {
+    display: block;
+}
+
+.excel-cell.has-note {
+    position: relative;
+}
+
+.excel-cell.has-note::after {
+    position: absolute;
+    content: "";
+    display: block;
+    top: 0;
+    right: 0;
+    width: 1rem;
+    height: 1rem;
+    background: linear-gradient(45deg, rgba(0, 0, 0, 0) 50%, black 50%);
+}
+
+.cell-properties-menu .cell-color-picker {
+    width: 10px;
+    height: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.cell-properties-menu .cell-color-picker:first-child {
+    margin-bottom: 0.5em;
+}
+
+.cell-properties-menu .cell-color-picker:not(:first-child):has(+ .cell-color-picker) {
+    border-bottom: none;
+}
+
+.cell-properties-menu .cell-color-picker:not(:first-child):hover+.cell-color-picker {
+    border-top: 1px solid blue;
+}
+
+.cell-properties-menu .cell-color-picker:hover {
+    border: 1px solid blue;
+}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block chapter %}
+    Добавление № документа
+{%endblock %}
+
+{% block title %}
+    Добавление № документа
+{% endblock %}
+
+{% block links %}
+<link rel="stylesheet" type="text/css" href="{% static 'order_generator_by_kcell/css/main.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <h1>Инструкция</h1>
+        Нужно прикрепить файл формата .xlsx с обязательными столбцами: <br>
+        | Контрагент | Итого, с учетом косвенных налогов | Дата принятия статуса | Дата выполнения работ | <br> <br>
+        После нажать на кнопку "Начать обработку". По завершению будет скачан новый файл с добавленным столбцом "№ Документа"
+    </div>
+    <div class="container-fluid pt-5">
+        <div class="row">
+            <div class="col-sm-6">
+                <p class="h3" align="center">Добавление файла для форматирования</p>
+                <form action="{% url 'handle_uploaded_file' %}" method="post" class="text-center" id="file-form" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <label for="prihod71-file1-input" class="form-label">Файл АВР</label>
+                    <div id="drop-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+                        ondrop="handleDrop(event)" onclick="selectFile()">
+                        <p id="drop-text">Перетащите файл сюда или нажмите для выбора файла.</p>
+                        <input type="file" id="fileInput" accept=".xlsx" name="file_upload" onchange="handleFileSelect(event)">
+                    </div>
+                    <button class="btn-sbmt btn btn-outline-secondary btn-lg" type="submit" hidden>Начать
+                        обработку</button>
+                </form>
+            </div>
+            <div class="col-sm-4">
+                <p class="h3" align="center">Добавление <abbr title="19_20">файла</abbr> для обновления базы</p>
+                <form action="{% url 'handle_uploaded_file' %}" method="post" class="text-center" id="file-form1" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <label for="prihod71-file1-input" class="form-label mt-2 mb-5">Файл 19_20</label>
+                    <input type="file" name="file_19_20_upload" class="form-control" accept=".xlsx" id="file_19_20" required/>
+                    <button type="submit" class="btn btn-primary mt-3 mb-3" id="statement-reconciliation-form-submit-button">Обновить базу</button>
+                    <div id="loading" style="display:none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Загрузка...</span>
+                        </div>
+                    </div>
+                </form>
+                <div id="message" class="alert" style="display:none;"></div>
+{#                <form action="{% url 'handle_uploaded_file' %}" method="post" class="text-center" id="file-form" enctype="multipart/form-data">#}
+{#                    {% csrf_token %}#}
+{#                    <div id="drop-area1" ondragover="handleDragOver1(event)" ondragleave="handleDragLeave1(event)"#}
+{#                        ondrop="handleDrop1(event)" onclick="selectFile1()">#}
+{#                        <p id="drop-text1">Перетащите файл сюда или нажмите для выбора файла.</p>#}
+{#                        <input type="file" id="file_19_20" accept=".xlsx" name="file_19_20_upload" onchange="handleFileSelect1(event)">#}
+{#                    </div>#}
+{#                    <button class="btn-sbmt btn btn-outline-secondary btn-lg" type="submit" hidden>Начать#}
+{#                        обработку</button>#}
+{#                </form>#}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script>
+        document.getElementById('file-form1').onsubmit = function(event) {
+            event.preventDefault();
+            document.getElementById('loading').style.display = 'block';
+            const formData = new FormData(this);
+            fetch(this.action, {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+              .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('message').style.display = 'block';
+                document.getElementById('message').textContent = data.message; // Вставка сообщения
+                document.getElementById('message').classList.add('alert-success'); // Добавляем класс для стилизации
+              }).catch(error => {
+                document.getElementById('message').style.display = 'block';
+                document.getElementById('message').textContent = 'Произошла ошибка: ' + error;
+                document.getElementById('message').classList.add('alert-danger'); // Добавляем класс для ошибок
+                console.error('Ошибка:', error);
+            });
+        };
+    </script>
+
+<script src="{% static 'order_generator_by_kcell/js/script.js' %}"></script>
+{% endblock %}

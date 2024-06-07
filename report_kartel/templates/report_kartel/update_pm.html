@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Замена ПМов по отчету КарТел{% endblock %}
+
+{% block chapter %}Замена ПМов по отчету КарТел{% endblock %}
+
+{% block links %}
+<link href="{% static 'report_kartel/style.css' %}" rel="stylesheet" type="text/css">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 600px;
+        margin: 50px auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #333;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    label {
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    select,
+    input[type="text"],
+    input[type="submit"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+    input[type="submit"] {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    input[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Замена ПМ</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label for="old_pm">Старый ПМ:</label>
+        <select name="old_pm" id="old_pm">
+            {% for pm, region in pms_with_regions %}
+            <option value="{{ pm }}" data-region="{{ region }}">{{ pm }} - {{ region }}</option>
+            {% endfor %}
+        </select>
+        
+        <!-- Additional compliance fields dropdowns -->
+        <label for="activity_type">Вид деятельности:</label>
+        <select name="activity_type" id="activity_type">
+            <option value="">Выберите вид деятельности</option>
+            {% for activity_type in dropdown_activity_type %}
+            <option value="{{ activity_type }}">{{ activity_type }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="activity_field">Сфера деятельности:</label>
+        <select name="activity_field" id="activity_field">
+            <option value="">Выберите поле деятельности</option>
+            {% for activity_field in dropdown_activity_field %}
+            <option value="{{ activity_field }}">{{ activity_field }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="customer">Заказчик:</label>
+        <select name="customer" id="customer">
+            <option value="">Выберите заказчика</option>
+            {% for customer in dropdown_customer %}
+            <option value="{{ customer }}">{{ customer }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="work_type">Тип работы:</label>
+        <select name="work_type" id="work_type">
+            <option value="">Выберите тип работы</option>
+            {% for work_type in dropdown_work_type %}
+            <option value="{{ work_type }}">{{ work_type }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="new_pm">Новый ПМ:</label>
+        <input type="text" name="new_pm" id="new_pm">
+        
+        
+        <input type="submit" value="Обновить ПМ">
+    </form>
+</div>
+{% endblock %}

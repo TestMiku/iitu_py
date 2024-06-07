@@ -1,0 +1,110 @@
+{% extends 'finance_module/interdivisional_debts/base.html' %}
+{% load static %}
+
+{% block interdivisional_debts_active_breadcrump %}
+  Дать долг от имени компаний
+{% endblock %}
+{% block title %}
+Дать долг от имени компаний
+{% endblock %}
+{% block links %}
+  <link rel="stylesheet" href="{% static 'finance_module/interdivisional-debts.css' %}" />
+{% endblock %}
+
+{% block interdivisional_debts_content %}
+<div class="row">
+    <form method="post" class="col-4">
+        {% csrf_token %}
+        <div class="card shadow">
+            <div class="card-header">
+                Дать долг от имени компаний
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between"><div>{{administrative_account.name}}</div>  <div>{{administrative_account_balance}}</div></div>
+                <hr>
+                <div class="form-floating mb-1">
+                    <select class="form-select" name="project-region-id" id="project-region-select" required>
+                        <option value="" selected>Выберите регион проект</option>
+                        {% for project_region in project_regions %}
+                        <option value="{{project_region.id}}">{{project_region}}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="project-region-select" class="form-label mb-0">Регион проект</label>
+                </div>
+                <div class="form-floating mb-1">
+                    <select class="form-select" name="to-account-id" id="to-account-select" required disabled>
+                        <option value="" selected>Выберите расчётный счёт</option>
+                    </select>
+                    <label for="to-account-select" class="form-label mb-0">Расчётный счёт</label>
+                </div>
+                <div class="form-floating mb-1">
+                    <input type="number" placeholder="Введите сумму" step="0.01" min="0" max="{{administrative_account_balance|stringformat:".2f"}}" name="sum" id="sum-input" class="form-control" required>
+                    <label for="sum-input" class="form-label mb-0">Сумма</label>
+                </div>
+                <div class="form-floating">
+                    <input type="number" placeholder="Введите процент" id="percent-input" step="0.01" min="0" name="percent" max="100" class="form-control" required>
+                    <label for="percent-input" class="form-label mb-0">Процент</label>
+                </div>
+            </div>
+            <div class="card-footer d-flex justify-content-end">
+                <button class="btn btn-success">Дать</button>
+            </div>
+        </div>
+    </form>
+    <div class="col-8">
+        <div class="card shadow">
+            <div class="card-header">
+                Список
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <thead>
+                            <th>Проект регион</th>
+                            <th>Сумма</th>
+                            <th>Процент</th>
+                        </thead>
+                    </thead>
+                    <tbody>
+                        {% for loan_out in loans_out %}
+                        <tr>
+                            <td>{{loan_out.to_whom}}</td>
+                            <td>{{loan_out.additional_properties.sum}}</td>
+                            <td>{{loan_out.additional_properties.percent}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(function() {
+        const projectRegionSelect = $("#project-region-select");
+        const toAccountSelect = $("#to-account-select");
+        projectRegionSelect.on("change", async function() {
+            const projectRegionId = $(this).val();
+            $(`option:not([value=""])`, toAccountSelect).remove();
+            if (projectRegionId) {
+                const response = await fetch(`/p1/finance-module/api/accounts?project-region-id=${projectRegionId}`);
+                const json = await response.json();
+                const accounts = json.accounts;
+                for (const account of accounts) {
+                    toAccountSelect.append(`
+                        <option value="${account.id}">${account.name}</option>
+                    `);
+                }
+                toAccountSelect.attr("disabled", false);
+            } else {
+                toAccountSelect.attr("disabled", true);
+            }
+        });
+
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block chapter %}
+    <h1 style="width: 100%;">Преобразование XLSX файла</h1>
+{% endblock %}
+
+{% block title %}Преобразование XLSX файла{% endblock %}
+
+{% block links %}
+    <link rel="stylesheet" type="text/css" href="{% static 'avh-modules/css/main.css' %}">
+{% endblock %}
+
+{% block content %}
+    
+    <form method="post" class="text-center" id="file-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div id="drop-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+            ondrop="handleDrop(event)" onclick="selectFile()">
+            <p id="drop-text">Перетащите файл сюда или нажмите для выбора файла.</p>
+            <input type="file" id="fileInput" accept=".xlsx" name="xlsx_file" onchange="handleFileSelect(event)">
+        </div>
+        <button class="btn-sbmt btn btn-outline-secondary btn-lg" type="submit" hidden>Начать
+            обработку</button>
+    </form>
+    
+    {% if error %}
+        <p class="text-danger">{{ error }}</p>
+    {% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'avh-modules/js/main.js' %}"></script>
+{% endblock %}

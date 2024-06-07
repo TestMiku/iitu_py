@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}{{statapp.name}}{% endblock %}
+
+
+{% block chapter %}Создать Статичный раздел
+{% endblock %}
+
+{% block content %}
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+        
+    <p>
+        <label for="id_title" class="mr-2">{{form.title.label}}</label>
+        {{form.title}}
+    </p>
+    <p>
+        <label for="id_link" class="mr-2">{{form.link.label}}</label>
+        {{form.link}}
+    </p>
+    <p>
+        <label for="id_color" class="form-label mr-2">Цвет границы: </label>
+        <input type="color" id="id_color" class="" name="color" value="#4e73df" required="">
+    </p>
+    <p>
+        <label for="id_short_description" class="mr-2">{{form.short_description.label}}</label>
+        {{form.short_description}}
+    </p>
+    <p>
+        <label for="id_icon" class="mr-2">{{form.icon.label}}</label>
+        {{form.icon}}
+    </p>
+    <p>
+        <label for="id_is_default" class="mr-2">{{form.is_default.label}}</label>
+        {{form.is_default}}
+    </p>
+    <p>
+        <label for="id_roles" class="mr-4">{{form.roles.label}}</label>
+        {{form.roles}}
+    </p>
+
+    <button class="btn btn-primary mb-2" type="submit">Создать</button>
+</form>
+
+{% endblock %}

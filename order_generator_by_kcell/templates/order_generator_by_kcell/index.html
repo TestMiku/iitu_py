@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block chapter %}
+Заказы KCELL
+{%endblock %}
+
+{% block title %}
+Заказы KCELL
+{% endblock %}
+
+{% block links %}
+<link rel="stylesheet" type="text/css" href="{% static 'order_generator_by_kcell/css/main.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<form action="{% url 'excel_upload' %}" method="post" class="text-center" id="file-form" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div id="drop-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+        ondrop="handleDrop(event)" onclick="selectFile()">
+        <p id="drop-text">Перетащите файл сюда или нажмите для выбора файла.</p>
+        <input type="file" id="fileInput" accept=".xlsx" name="file_upload" onchange="handleFileSelect(event)">
+    </div>
+    <button class="btn-sbmt btn btn-outline-secondary btn-lg" type="submit" hidden>Начать
+        обработку</button>
+</form>
+
+<!-- <form action="{% url 'import_data' %}" method="post" class="text-center" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div id="drop-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+        ondrop="handleDrop(event)" onclick="importFile()">
+        <p id="drop-text">Перетащите файл сюда или нажмите для выбора файла.</p>
+        <input type="file" id="fileImport" accept=".xlsx" name="file_import" onchange="handleFileSelect(event)">
+    </div>
+    <button class="btn-sbmt btn btn-outline-secondary btn-lg" type="submit">Начать
+        Импорт</button>
+</form> -->
+
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'order_generator_by_kcell/js/script.js' %}"></script>
+{% endblock %}

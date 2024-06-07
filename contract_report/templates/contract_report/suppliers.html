@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}
+Поставщики
+{% endblock %}
+
+
+{% block links %}
+
+{% endblock %}
+    
+
+{% block chapter %}
+    Поставщики
+{% endblock %}
+
+
+
+
+{% block content %}
+<br>
+
+<form id="createSupplierForm">
+    {% csrf_token %}
+    <input type="text" name="name" id="id_name" placeholder="Поставщик" required>
+    <input type="number" name="bin" id="id_bin" placeholder="ИИН" required>
+    <input type="text" name="limit_days" id="id_limit_days" placeholder="Срок лимита" required>
+    <input type="text" name="sum_of_limit" id="id_sum_of_limit" placeholder="Сумма лимита" required>
+    <input type="text" name="too" id="too" placeholder="ТОО" required>
+    <button type="button" class="btn btn-success" onclick="createNewSupplier()">Добавить</button>
+</form>
+<br>
+<form method="post" action="{% url 'import_supplier_data' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="upload-file"><i class="fas fa-file-excel">Импорт поставщиков</i></label>
+    <input type="file" name="excel_file" id="upload-file" accept=".xlsx, .xls" required>
+    <input type="submit" class="btn btn-primary" value="Загрузить">
+</form>
+<br>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Поставщик</th>
+            <th>ИИН</th>
+            <th>Срок лимита (в днях)</th>
+            <th>Сумма лимита</th>
+            <th>ТОО</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for supplier in suppliers %}
+            <tr id="sup_row_{{ supplier.id }}">
+                <td>{{ supplier.id }}</td>
+                <td>{{ supplier.name }}</td>
+                <td>{{ supplier.bin }}</td>
+                <td>{{ supplier.limit_days }}</td>
+                <td>{{ supplier.sum_of_limit }}</td>
+                <td>{{ supplier.too }}</td>
+                <td>
+                    <button class="btn btn-danger" onclick="deleteSup({{ supplier.id }})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+
+
+{% block scripts %}
+<script>
+    function createNewSupplier() {
+        var formData = new FormData(document.getElementById('createSupplierForm'));
+    
+        $.ajax({
+            type: 'POST',
+            url: '/process_excel/create_supplier/',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    $('#suppliersTable tbody').append(data);
+                    $('#createSupplierForm')[0].reset();
+                    location.reload();  // Обновление страницы
+                }
+            },
+            error: function (error) {
+                console.log('Error:', error);
+            }
+        });
+    }
+    function deleteSup(supplierId) {
+        fetch(`/process_excel/delete_supplier/${supplierId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                $('#sup_row_' + supplierId).remove();
+            } else {
+                console.error('Error:', data.error);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+    
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+            }
+        }
+        }
+        return cookieValue;
+    }
+    
+</script>
+{% endblock %}

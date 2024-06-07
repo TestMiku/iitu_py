@@ -1,0 +1,19 @@
+#drop-area {
+    border-radius: 10px;
+    width: 500px;
+    height: 300px;
+    border: 2px dashed #ccc;
+    text-align: center;
+    padding: 20px;
+    margin: 50px auto;
+    cursor: pointer;
+}
+
+#drop-area.input-hover {
+    background-color: #b5b9bb;
+    /* Цвет ховера */
+}
+
+#drop-area input {
+    display: none;
+}

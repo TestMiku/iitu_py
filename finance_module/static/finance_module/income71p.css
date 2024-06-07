@@ -1,0 +1,59 @@
+.main {
+    overflow-x: auto; /* Горизонтальный скролл для главного контента, если он не вмещается */
+}
+
+/* Стили для формы загрузки файлов */
+#statement-reconciliation-form .card {
+    min-width: 350px;
+    max-width: 350px; /* Установите максимальную ширину формы */
+}
+
+/* Стили для таблицы */
+#income71p {
+    table-layout: fixed;
+}
+
+#income71p th, #income71p td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#income71p th:nth-child(2), #income71p td:nth-child(2) {
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+#income71p th:nth-child(4), #income71p td:nth-child(4) {
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.content-container {
+    display: flex;
+    justify-content: space-between; /* Располагает содержимое на разных концах контейнера */
+    align-items: center; /* Центрирует содержимое по вертикали */
+    width: 100%; /* Занимает всю ширину ячейки */
+}
+
+.button-toggle {
+    padding: 5px 10px;
+    font-size: 12px;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    text-align: right;
+}
+
+.button-toggle:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.button-toggle:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.5);
+}

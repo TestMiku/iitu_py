@@ -1,0 +1,984 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    ДОКТРЕК | Заявка №{{request.pk}}
+{% endblock %}
+
+{% block links %}
+    <link rel="stylesheet" type="text/css" href="{% static 'order_generator_by_kcell/css/main.css' %}">
+
+<style>
+    *{
+        scroll-behavior: smooth;
+    }
+    .custom-top-right-button {
+        position: absolute;
+        top: 27px;
+        right: 40px;
+        width: 0;
+        height: 0;
+        
+    }
+    .custom-preview-comment{
+        border: 1px solid rgba(0, 0, 0, 0.5);
+        margin: 10px;padding: 5px;
+        border-radius: 8px;
+    }
+    .highlight-border {
+        /* outline: 1px solid rgba(0, 0, 0, 0.5); */
+        animation: shadowAnimation 0.5s both alternate;
+        /* box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 0.5); */
+    }
+    .custom-btn{
+        padding: 5px 10px;
+        border-radius: 8px;
+        border: none;
+        color: aliceblue;
+        text-decoration-line: underline;
+    }
+    .custom-button-legend{
+        display: block;
+        position: relative;
+        top: 30px;
+    }
+    .custom-button-legend>span{
+        padding: 5px;
+        border-radius: 4px;
+    }
+    .rotate-button {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .rotate-button i {
+        display: inline-block;
+        transition: transform 0.3s ease;
+    }
+
+    .rotate-button.rotate i {
+        transform: rotate(180deg);
+    }
+
+    .red_light_box {
+        animation: shadowAnimation 0.5s infinite alternate;
+    }
+
+    @keyframes shadowAnimation {
+        0% {
+            box-shadow: 0 0 0px rgba(0, 0, 0, 0.5);
+        }
+        100% {
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+    }
+    .hide {
+        display: none!important;
+    }
+    .add_document_modal_body_content,
+    .write_comment_modal_body_content {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        z-index: 1000;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+    .title_block_add_document_modal {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #f1f1f4;
+        border-radius: 10px 10px 0 0;
+    }
+    .title_block_add_document_modal h1 {
+        color: #000;
+        font-size: 24px;
+        font-weight: 500;
+        font-family: Inter, Helvetica, sans-serif;
+    }
+    .title_block_add_document_modal i {
+        margin-top: -5px;
+        cursor: pointer;
+    }
+    .form_action_add_document {
+        width: 100%;
+        padding: 100px 200px;
+    }
+    .form_action_write_comment {
+        width: 100%;
+        padding: 100px 50px;
+    }
+    .form_action_add_document button,
+    .form_action_write_comment button {
+        display: inline-flex;
+        float: right;
+    }
+    .add-document-modal-open {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: black;
+        z-index: 8;
+        opacity: 0.5;
+    }
+
+    .modal {
+        position: fixed;
+        padding-top: 50px;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        overflow: auto;
+    }
+
+    .modal-content {
+        width: 200%;
+        top: -75% !important;
+        left: -50% !important;
+        position: absolute;
+        z-index: 9999999999;
+    }
+
+</style>
+{% endblock %}
+
+
+{% block chapter %}
+
+    Информация о заявке №{{request.pk}}
+    <span class="btn" style="cursor: default;color: aliceblue; background-color: {{request.status.color}};">
+        {{request.status}}
+    </span>
+    
+    {% if request.is_deleted %}
+
+    
+
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confirmDeleteModal">
+        <i class="fas fa-undo"></i> Восстановить
+    </button>
+    
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Подтверждение удаления</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите восстановить заявку №{{request.pk}}?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" onclick="location.href = '/mp/doctrack/restore/{{request.pk}}'">Восстановить</button>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+
+    {% if can_update_documents %}
+    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#confirmDeleteModal">
+        Удалить
+    </button>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+    
+        {% if user in request.subscribers.all and user.send_notifications_to_email == True %}
+            <span style="font-size:16px;" class="ml-4 mt-2" onclick="window.location.href = '/mp/doctrack/unsubscribe/{{request.pk}}'">
+                <input type="checkbox" onchange="window.location.href = '/mp/doctrack/unsubscribe/{{request.pk}'" checked>
+                <span class="ml-2">Получать уведомления при изменениях данной заявки</span>
+            </span>
+        {% else %}
+            <span style="font-size:16px;" class="ml-4 mt-2" onclick="window.location.href = '/mp/doctrack/subscribe/{{request.pk}}">
+                <input type="checkbox" onchange="window.location.href = '/mp/doctrack/subscribe/{{request.pk}}'">
+                <span class="ml-2">Получать уведомления при изменениях данной заявки</span>
+            </span>
+        {% endif %}
+
+    {% endif %}
+    
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Подтверждение удаления</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите удалить заявку №{{request.pk}}?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+              <button type="button" class="btn btn-danger" onclick="location.href = '/mp/doctrack/delete/{{request.pk}}'">Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+    
+</div>
+
+{% endblock %}
+
+
+{% block back_button %}
+<!-- Убрал так как тут работа с модалками -->
+{% endblock %}
+
+{% block content %}
+{#    <form method="post" enctype="multipart/form-data">#}
+{#        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">#}
+{#        <input type="hidden" name="document_type" id="id_document_type" value="">#}
+{#        <input type="file" id="id-add-files" accept="" name="file" multiple onchange="handleFileSelect(event)">#}
+{#    </form>#}
+    <div class="background"></div>
+    <div class="add_document_modal_body_content">
+        <div class="title_block_add_document_modal">
+            <h1>Загрузить файлы</h1>
+            <i id="close-add-document">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"></path>
+                </svg>
+            </i>
+        </div>
+        <div class="form_action_add_document">
+            <input type="hidden" name="request" value="{{ request.pk }}">
+            <div class="form_group_add_document">
+                <label for="id_document_type"></label>
+                <select class="form-control" name="document_type" id="id_document_type">
+                    <option class="form-control" id="selected-document-type" value=""></option>
+                </select>
+            </div>
+            <div id="drop-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+                ondrop="handleDrop(event)" onclick="selectFile()">
+                <p id="drop-text">Перетащите файл сюда или нажмите для выбора файла.</p>
+                <input type="file" id="id-add-files" accept="" name="file" multiple onchange="handleFileSelect(event)">
+            </div>
+            <button type="button" onclick="sendFilesToOrder()" id="" class="btn btn-primary">Загрузить</button>
+        </div>
+    </div>
+
+
+{% if request.is_deleted %}
+<div style="pointer-events: none; cursor: not-allowed; opacity: 0.5"> 
+{% endif %}
+
+
+<!-- Основная инфа начало -->
+<a href="#" data-toggle="collapse" data-target="#collapseOne" aria-controls="collapseOne">
+    <h4 class="rotate-button">
+        Основная информация
+        <i class="fas fa-chevron-down" style="margin-left: 20px;"></i>
+
+        {% if can_update_documents %}
+        <a class="btn btn-warning ml-4" href="/mp/doctrack/edit/{{request.id}}">
+            <i class="fas fa-edit" style="font-size: large;"></i>
+        </a>
+        {% endif %}
+
+    </h4>
+</a>
+<fieldset class="row collapse show" id="collapseOne">
+    <div class="col-4">
+        <div class="form-group">
+            <label for="id_project">Проект:</label>
+            <input class="form-control" type="text" id="id_project" disabled value="{{request.project}}">
+        </div>
+        <div class="form-group">
+            <label for="id_work_type">Вид работ:</label>
+            <input class="form-control" type="text" id="id_work_type" disabled value="{{request.work_type}}">
+        </div>
+        <div class="form-group">
+            <label for="id_region">Регион:</label>
+            <input class="form-control" type="text" id="id_region" disabled value="{{request.region}}">
+        </div>
+        <div class="form-group">
+            <label for="id_get_bs">Базовая станция:</label>
+            <input class="form-control" type="text" id="id_get_bs" disabled value="{{request.get_bs}}">
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="form-group">
+            <label for="id_created_at_format">Дата создания:</label>
+            <input class="form-control" type="text" id="id_created_at_format" disabled
+                value="{{request.created_at_format}}">
+        </div>
+        <div class="form-group">
+            <label for="id_status">Статус:</label>
+            <input class="form-control" type="text" id="id_status" disabled value="{{request.status}}">
+        </div>
+        <div class="form-group">
+            <label for="id_get_number_of_adjustments">Количество отклоненных:</label>
+            <input class="form-control" type="text" id="id_get_number_of_adjustments" disabled
+                value="{{request.get_number_of_adjustments}}">
+        </div>
+        <div class="form-group">
+            <label for="id_modified_at_format">Дата последнего изменения:</label>
+            <input class="form-control" type="text" id="id_modified_at_format" disabled
+                value="{{request.modified_at_format}}">
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="form-group">
+            <label for="id_order_creator">Создатель заказа:</label>
+            <input class="form-control" type="text" id="id_order_creator" disabled
+                value="{{request.get_order_creator}}">
+        </div>
+        <div class="form-group">
+            <label for="id_order_number">Номер заказа:</label>
+            <input class="form-control" type="text" id="id_order_number" disabled
+                value="{{request.order_number}}">
+        </div>
+        <div class="form-group">
+            <label for="id_comment">Комментарии при создании:</label>
+            <textarea class="form-control" disabled name="comment" id="id_comment"
+                rows="3">{{request.comment}}</textarea>
+        </div>
+        <div class="form-group mt-4 pt-2">
+            <label for="id_get_rejection_reason">Последний комментарии отклоненного документа:</label>
+            <textarea class="form-control" disabled name="get_rejection_reason" id="id_get_rejection_reason"
+                rows="2">{{request.get_rejection_reason}}</textarea>
+        </div>
+    </div>
+</fieldset>
+<hr>
+<!-- Основная инфа конец -->
+
+
+
+<!-- Документы начало -->
+<div class="row">
+
+    <a href="#" data-toggle="collapse" data-target="#collapseTwo" aria-controls="collapseTwo">
+        <h4 class="rotate-button">
+            Документы
+            <i class="fas fa-chevron-down" style="margin-left: 20px;"></i>
+        </h4>
+    </a>
+    {% if not can_update_documents and can_change_status %}
+        <button class="btn btn-success ml-4">
+            <span class="h5" onclick="change_documents_status(-1, {{request.pk}})">Сохранить</span>
+        </button>
+
+        <button class="btn btn-danger ml-4" data-toggle="modal" data-target="#commentModal">
+            <span class="h5">Отклонить все</span>
+        </button>
+    {% endif %}
+
+    {% if can_update_documents %}
+    <a href="/mp/doctrack/add_document/{{request.pk}}" class="btn btn-primary ml-4 open-modal">
+        <span class="h5">Добавить</span>
+    </a>
+    {% endif %}
+
+    {% if can_change_status or not can_update_documents %}
+        <button class="btn btn-success ml-4">
+            <span class="h5" onclick="change_documents_status(-1, {{request.pk}})">Сохранить</span>
+        </button>
+    {% endif %}
+    <a href="#" class="btn btn-primary ml-4" onclick="find_hrefs_and_start_download('all-download')">
+        <span class="h5">Скачать все</span>
+    </a>
+
+</div>
+<div class="row collapse show pl-2" id="collapseTwo">
+        {% if can_update_documents and can_view_documents %}
+            {% for doctype in request.get_documents_by_type %}
+                {% if can_view_documents %}
+                <div class="mt-2">
+                    <h6>
+                        <a href="#" class="mt-4 rotate-button mr-4" data-toggle="collapse" data-target="#doctype_{{doctype.type.pk}}" aria-controls="doctype_{{doctype.type.pk}}">
+                            <span class="fas fa-file mr-2"></span>
+                            {{doctype.type}}
+                            <i class="fas fa-chevron-down" style="margin-left: 20px;"></i>
+                        </a>
+
+                        {% if can_update_documents %}
+                            <button class="btn btn-sm fw-bold btn-primary" onclick="addDocumentType({{ doctype.type.pk }}, '{{ doctype.type }}')">Добавить</button>
+                        {% endif %}
+                    </h6>
+                    <div class="collapse show" id="doctype_{{doctype.type.pk}}">
+                        {% if doctype.documents %}
+                            <table class="table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 500px;">Файл</th>
+                                    <th>Скачать</th>
+                                    <th>Текущий статус</th>
+
+                                    {% if user.is_superuser or not can_update_documents %}
+                                    <th style="width: 200px;">Изменить статус</th>
+                                    {% endif %}
+
+                                    <th style="width: 500px;">Комментарии</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doc in doctype.documents %}
+                                    <tr>
+                                    <td id="document_name_{{doc.id}}" style="width: 500px;">{{doc}}</td>
+                                    <td>
+                                        <a class="btn btn-primary all-download" download href="{{ doc.file.url }}" download title="Скачать документ">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        {% if can_update_documents %}
+                                            {% if doc.status != 'accepted' and doc.status != 'accepted_by_client' %}
+                                                <a class="btn btn-warning open-modal" href="/mp/doctrack/update_document/{{request.pk}}/{{ doc.id }}" title="Редактировать документ">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            {% endif %}
+                                            <a class="btn btn-danger" onclick="delete_confirm({{doc.id}})" data-toggle="modal" data-target="#deleteModal" href="#" title="Удалить документ">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        {% endif %}
+
+                                        <a class="btn btn-secondary open-modal" href="{{ doc.file.url }}" title="Просмотреть документ">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <div class="btn" style="background-color: {{doc.status_color}}; cursor: default;">
+                                            {{doc.status_text}}
+                                        </div>
+                                    </td>
+
+                                    {% if not can_update_documents %}
+                                    <td style="width: 200px;">
+                                        <input type="hidden" name="document_id" id="id_document_id_{{doc.id}}" class="document_id_class_for_upload" value="{{doc.id}}">
+                                        <div id="id_doc_comment_div_{{doc.id}}" style="display:none; width: 0; height: 0; position: relative; left: 200px;">
+                                            <textarea
+                                                style="display: block; width: 300px; height: 100px"
+                                                onchange="onchangeDocumentComment({{doc.id}})"
+                                                name="comment"
+                                                id="id_doc_comment_{{doc.id}}"
+                                                class="form-control red_light_box document_comment_class_for_upload"
+                                                placeholder="Напишите причину отклонения">
+
+                                            </textarea>
+                                        </div>
+                                        <select
+                                            class="form-control document_status_class_for_upload"
+                                            onchange="changeDocumentStatus({{doc.id}})"
+                                            name="document_status"
+                                            id="id_document_status_{{doc.id}}"
+                                        >
+                                            <option value="accepted" {% if doc.status == "accepted" %}selected{% endif %}>Принять</option>
+                                            <option value="rejected" {% if doc.status == "rejected" %}selected{% endif %}>Отклонить</option>
+                                            <option value="accepted_by_client" {% if doc.status == "accepted_by_client" %}selected{% endif %}>Принято клиентом</option>
+                                        </select>
+                                    </td>
+                                    {% endif %}
+
+                                    <td style="width: 400px;">{{doc.get_last_comment}}</td>
+                                </tr>
+                                {% endfor %}
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <table class="table" id="table_can_not_update">
+                <thead>
+                    <tr>
+                        <th style="width: 500px;">Тип документа</th>
+                        <th style="width: 500px;">Файл</th>
+                        <th>Скачать</th>
+                        <th>Текущий статус</th>
+                        <th>Изменить статус</th>
+
+                        <th style="width: 500px;">Комментарии</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in request.get_documents_by_type %}
+                        {% for file in doc.documents %}
+                            <tr>
+                                <th id="document_type_{{doc.id}}" style="width: 500px;">{{doc.type}}</th>
+                                <th id="document_name_{{file.id}}" style="width: 500px;">{{file}}</th>
+                                <th>
+                                    <a class="btn btn-primary all-download" download href="{{ file.file.url }}" download title="Скачать документ">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    {% if can_update_documents %}
+                                        {% if doc.status != 'accepted' and doc.status != 'accepted_by_client' %}
+                                        <a class="btn btn-warning open-modal" href="/mp/doctrack/update_document/{{request.pk}}/{{ file.id }}" title="Редактировать документ">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% endif %}
+                                        <a class="btn btn-danger" onclick="delete_confirm({{file.id}})" data-toggle="modal" data-target="#deleteModal" href="#" title="Удалить документ">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    {% endif %}
+
+                                    <a class="btn btn-secondary open-modal" href="{{ file.file.url }}" title="Просмотреть документ">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+
+                                </th>
+                                <th>
+                                    <div class="btn" style="background-color: {{file.status_color}}; cursor: default;">
+                                        {{file.status_text}}
+                                    </div>
+                                </th>
+
+                                <th style="width: 200px;">
+                                    <input type="hidden" name="document_id" id="id_document_id_{{file.id}}" class="document_id_class_for_upload" value="{{file.id}}">
+                                    <div id="id_doc_comment_div_{{file.id}}" style="display:none; width: 0; height: 0; position: relative; left: 200px;">
+                                        <label for="id_doc_comment_{{file.id}}"></label><textarea
+                                            style="display: block; width: 300px; height: 100px"
+                                            onchange="onchangeDocumentComment({{file.id}})"
+                                            name="comment"
+                                            id="id_doc_comment_{{file.id}}"
+                                            class="form-control red_light_box document_comment_class_for_upload"
+                                            placeholder="Напишите причину отклонения">
+                                        </textarea>
+                                    </div>
+                                    <select
+                                        class="form-control document_status_class_for_upload"
+                                        onchange="changeDocumentStatus({{file.id}})"
+                                        name="document_status"
+                                        id="id_document_status_{{file.id}}"
+                                    >
+                                        <option value="accepted" {% if file.status == "accepted" %}selected{% endif %}>Принять</option>
+                                        <option value="rejected" {% if file.status == "rejected" %}selected{% endif %}>Отклонить</option>
+                                        <option value="accepted_by_client" {% if file.status == "accepted_by_client" %}selected{% endif %}>Принято клиентом</option>
+                                    </select>
+                                </th>
+
+                                <th style="width: 400px;">{{file.get_last_comment}}</th>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+    <div class="col-12 mt-4">
+        <label class="ml-4">Текущий статус:</label>
+        <i class="custom-btn" style="box-shadow: 0 0 5px {{request.status.color}}; background-color: {{request.status.color}}!important; cursor: default;">
+            <span class="h5">{{request.status.name}}</span>
+        </i>
+        <label class="ml-4" >Дата изменения:</label>
+        <span class="h6" id="date_current_status"></span>
+    </div>
+
+    {% if can_change_status %}
+    <div class="col-12">
+
+        {% for next_status in request.status.next.all %}
+        <button class="btn btn-success ml-4 mt-4" style="background-color: {{next_status.color}}!important;" onclick="change_documents_status({{next_status.id}}, {{request.pk}})">
+            <span class="h5">{{next_status.name}}</span>
+        </button>
+        {% endfor %}
+
+        {% for previous_status in request.status.previous.all %}
+        <button class="btn btn-success ml-4 mt-4" style="background-color: {{previous_status.color}}!important;" onclick="change_documents_status({{previous_status.id}}, {{request.pk}})">
+            <span class="h5">{{previous_status.name}}</span>
+        </button>
+        {% endfor %}
+    </div>
+
+    <div class="write_comment_modal_body_content">
+        <div class="title_block_add_document_modal">
+            <h1>Причина отклонения</h1>
+            <i id="close-write-comment">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"></path>
+                </svg>
+            </i>
+        </div>
+        <div class="form_action_write_comment">
+            <input type="hidden" name="request" value="{{ request.pk }}">
+            <label for="id_comment">
+                <textarea class="form-control" name="comment" id="comment_rejected_order" cols="50" rows="5" placeholder="Причина отклонения"></textarea>
+            </label><br>
+            <br><button type="button" class="btn btn-primary" id="send_comment_for_reject_order">Отправить</button>
+        </div>
+    </div>
+
+    {% endif %}
+
+
+    <!-- Модальное окно -->
+    <div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="commentModalLabel">Введите комментарий</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <textarea class="form-control" id="main_comment_text" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" onclick="change_documents_status(0, {{request.pk}})">Отклонить все</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="commentModalLabel">Вы уверены что хотите удалить?</h5>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <a type="button" id="delete_confirm" class="btn btn-danger" href="">Удалить</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<hr>
+<!-- Документы конец -->
+
+
+
+<!-- Комменты начало -->
+<div class="row">
+    <a href="#" data-toggle="collapse" data-target="#collapseThree" aria-controls="collapseThree">
+        <h4 class="rotate-button">
+            Комментарии
+            <i class="fas fa-chevron-down" style="margin-left: 20px;"></i>
+        </h4>
+    </a>
+</div>
+
+
+
+
+<div class="row collapse show" id="collapseThree">
+    <div class="col-6">
+
+    <form method="post" id="commentForm">
+        {% csrf_token %}
+
+        <input type="hidden" name="entity" maxlength="50" value="DTRequest" required="" id="id_entity">
+        <input type="hidden" value="{{request.pk}}" name="entity_id" required="" id="id_entity_id">
+        <input type="hidden" name="attached_entity" value="DTComment" maxlength="50" id="id_attached_entity">
+        <input type="hidden" name="user" value="{{user.id}}" id="id_user">
+        <input type="hidden" name="attached_entity_id" id="id_attached_entity_id" class="form-control">
+        
+
+        
+        <div class="form-group">
+            <div id="attach_comment_preview_main" class="hide">
+                <label for="id_attached_entity_id">Ответ на коммантарии:</label>
+                <div class="custom-top-right-button">
+                    <button type="button" class="btn btn-danger btn-circle btn-sm" onclick="deleteAttachedComment()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            <div id="attach_comment_preview" class="custom-preview-comment">
+                <!-- Тут блок карточки -->
+            </div>
+        </div>
+            
+            <label for="id_comment">Комментарии:</label>
+            <input type="text" name="comment" rows="3" required id="id_comment" class="form-control" placeholder="Пишите комментарии здесь">
+        </div>
+        
+        
+        <button type="submit" style="width: 0;height: 0; display: none;">Отправить</button>
+    </form>
+
+
+        {% if request.get_comments.0 != "Без комментариев" %}
+
+        {% for comment in request.get_comments %}
+        <!-- Один комментарии -->
+        <div {% if not comment.is_last_5 %} class="collapse" id="more_comments" {% endif %}>
+            <span id="comment_id_{{comment.id}}" style="display: block; width: 0;height: 0;position: relative; top: -200px;"></span>
+            <span class="d-flex align-items-center" href="#">
+                <div class="dropdown-list-image mr-3">
+                    <img class="rounded-circle" width="50" height="50" src="{{comment.user.avatar.url}}" alt="...">
+                </div>
+                <div class="font-weight-bold">
+                    <div class="text-truncate">{{comment.user.get_name}}
+                        {% if comment.get_attached_comment %}
+                        <a href="#comment_id_{{comment.get_attached_comment.id}}" class="ml-2" onclick="highlightContainer(this)">
+                            <i class="fas fa-reply mr-2"></i> {{comment.get_attached_comment.user.get_name}}: {{comment.get_attached_comment.get_comment_text_preview}}
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="small text-gray-500">{{comment.get_date}}</div>
+                </div>
+                <a class="text-secondary ml-4" style="text-decoration: underline;" href="#commentForm" onclick="attach_comment({{comment.id}})">Ответить</a>
+            </span>
+            <div class="font-weight">
+                <p>{{comment.comment|safe}}</p>
+            </div>
+        </div>
+        <hr {% if not comment.is_last_5 %} class="collapse" id="more_comments" {% endif %}>
+        {% endfor %}
+
+        {% if request.get_comments|length > 5 %}
+        <a href="#" class="h4" data-toggle="collapse" data-target="#more_comments" aria-controls="more_comments">
+            Показать все комментарии
+        </a>
+        {% endif %}
+
+
+        {% else %}
+        <h6 class="mt-4 ml-4">Нет комментариев</h6>
+        {% endif %}
+
+
+    </div>
+</div>
+<!-- Комменты конец -->
+
+
+
+<!-- История начало -->
+<!-- История конец -->
+
+
+<div class="modal" id="myModal">
+    <div class="modal-dialog" style="max-width:30vw!important;">
+        <div class="modal-content">
+            <div class="modal-body modal-body-iframe">
+                <!-- Здесь будет добавлен iframe после нажатия на ссылку -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+{% if request.is_deleted %}
+</div>
+{% endif %}
+
+{% endblock %}
+
+
+{% block scripts %}
+
+    <script>
+        async function get_current_status_date(request_pk, status_id) {
+            fetch(`/mp/doctrack/get_date_current_status/${request_pk}/${status_id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            }).then(response => response.json()).then(data => {
+                document.getElementById('date_current_status').innerHTML = data.date;
+                console.log(data.date);
+            });
+        }
+        get_current_status_date({{request.pk}}, {{request.status.id}});
+    </script>
+<script src="{% static 'js/doctrack/main.js' %}"></script>
+<script>
+    let is_clicked = false;
+
+    function checkAcceptFileTypes(doc_type_id) {
+        let doc_type_access = {
+            {% for doc_type in doc_types %}
+                {{ doc_type.id }}: '{{ doc_type.get_file_types }}',
+            {% endfor %}
+        };
+
+        let fileInput = document.getElementById('id-add-files');
+        fileInput.accept = doc_type_access[doc_type_id];
+    }
+
+    function addDocumentType(type_id, name) {
+        const addDocumentBlock = window.document.querySelector('.add_document_modal_body_content');
+        const background = document.querySelector('.background');
+        checkAcceptFileTypes(type_id);
+        console.log('type_id:', type_id);
+        document.querySelector('#drop-area').click();
+
+        let selectedDocumentType = document.getElementById('selected-document-type');
+        selectedDocumentType.value = type_id;
+        selectedDocumentType.innerHTML = name;
+
+        addDocumentBlock.style.display = 'block';
+        is_clicked = true;
+        background.classList.add('add-document-modal-open');
+        document.querySelector('#close-add-document').addEventListener('click', function() {
+            addDocumentBlock.style.display = 'none';
+            background.classList.remove('add-document-modal-open');
+        });
+    }
+
+    function sendFilesToOrder() {
+        const formData = new FormData();
+        const file_list = document.getElementById('id-add-files').files;
+        formData.append('document_type', document.getElementById('id_document_type').value);
+        for (let i = 0; i < file_list.length; i++) {
+            formData.append('file', file_list[i]);
+        }
+
+        fetch('/mp/doctrack/add_document_request/{{ request.pk }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: formData
+        }).then(response => response.json()).then(data => {
+            console.log(data);
+            if (data.status === 200) {
+                window.location.href = '/mp/doctrack/info/{{ request.pk }}';
+            }
+        });
+    }
+
+    function sendRequestForUploadFiles(type_id, request_id) {
+        let request = fetch('/mp/doctrack/add_document/' + request_id, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('{{ csrf_token }}')
+            },
+            body: JSON.stringify({
+                type_id: type_id,
+                file: document.getElementById('id-add-files').files
+            })
+        });
+    }
+
+    function handleDragOver(event) {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'copy';
+
+        document.getElementById('drop-area').classList.add('input-hover');
+    }
+
+    function handleDragLeave(event) {
+        document.getElementById('drop-area').classList.remove('input-hover');
+    }
+
+    function handleDrop(event) {
+        const file = event.dataTransfer.files[0];
+        const fileInput = document.getElementById("id-add-files");
+        fileInput.files = event.dataTransfer.files;
+        event.preventDefault();
+
+        handleFile(file);
+
+        document.getElementById('drop-area').classList.remove('input-hover');
+    }
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        handleFile(file);
+    }
+
+    function handleFile(file) {
+
+        const baseUrl = window.location.origin;
+        document.getElementById('drop-text').textContent = "Выбран файл: " + file.name;
+        console.log(document.querySelector('#id-add-files').files)
+    }
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+
+        if (parts.length === 2) {
+            return parts.pop().split(';').shift();
+        }
+
+        return null;
+    }
+
+    function selectFile() {
+        document.getElementById('id-add-files').click();
+        is_clicked = true;
+    }
+
+    function importFile() {
+        document.getElementById('id-add-files').click();
+    }
+
+    function delete_confirm(doc_id){
+        document.getElementById('delete_confirm').href = "/mp/doctrack/delete_document/" + doc_id
+    }
+
+
+    function highlightContainer(anchor) {
+        var targetId = anchor.getAttribute('href').slice(1);
+        var container = document.getElementById(targetId);
+
+        container.parentNode.classList.add('highlight-border');
+        
+        // Удаление класса после нескольких секунд
+        setTimeout(function() {
+        container.parentNode.classList.remove('highlight-border');
+        }, 3000); // Время в миллисекундах (в данном случае, 3000 мс = 3 секунды)
+    }
+
+
+    function attach_comment(comment_id){
+        let preview = document.getElementById('attach_comment_preview')
+        preview.innerHTML = document.getElementById('comment_id_'+comment_id).parentNode.innerHTML
+
+        preview.getElementsByTagName('a')[0].innerHTML = ""
+        preview.parentNode.classList.remove('hide')
+        document.getElementById('id_attached_entity_id').value = comment_id
+    }
+    
+    function deleteAttachedComment(){
+        let preview = document.getElementById('attach_comment_preview')
+        preview.innerHTML == ""
+        preview.parentNode.classList.add('hide')
+        document.getElementById('id_attached_entity_id').value = ""
+        
+    }
+</script>
+
+
+<script>
+    function find_hrefs_and_start_download(qwer) {
+        let hrefs = document.querySelectorAll("." + qwer);
+
+        let array_links = []
+        hrefs.forEach(function(link) {
+            array_links.push(link.href);
+        });
+
+        var counter = 0;
+
+        array_links.forEach(function(link) {
+            setTimeout(function() {
+                    var a = document.createElement('a');
+                    a.href = link;
+                    a.download = ''; // Можно указать имя файла для загрузки, если оно известно
+                    a.click(); // Имитация клика для начала загрузки
+
+            }, 300 * counter++); // Установка задержки перед каждым скачиванием
+        });
+    }
+</script>
+{% endblock %}

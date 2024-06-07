@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}
+    Долги по документам
+{% endblock %}
+
+{% block links %}
+    <!-- Используемые ссылки в пустом разделе -->
+    <style>
+        .opacity-effect{
+            opacity: 0.5;
+        }
+        .opacity-effect:hover{
+            opacity: 1;
+        }
+    </style>
+{% endblock %}
+
+
+{% block chapter %}
+    <!-- Название пустого раздела -->
+    {% if filter_id %}{{filter_name}}{% else %}Долги по документам{% endif %}
+    <a href="/mp/document_debts" class="btn btn-primary ml-4">Таблица по Контрагентам</a>
+{% endblock %}
+
+{% comment %}{% block back_button %}
+    Кнопка Назад (По умолчанию назад на прошлую веб страницу)
+{% endblock %}{% endcomment %}
+
+{% block content %}
+
+<div class="fixed-container d-flex justify-content-center" style="position: fixed; z-index: 1000; margin: 0;padding: 0;width: 100%;">
+    <div class=" alert alert-warning alert-dismissible fade show justify-content-center" style="display: none;" id="copyAlertCount" role="alert">
+        Текст скопирован
+        <button type="button" class="close" data-dismiss="alert" aria-label="Закрыть">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+</div>
+
+
+
+
+{% if filter_id %}
+<form id="filter_form" method="GET" action="/mp/document_debts/docs/{{filter_id}}" class="mb-4">
+{% else %}
+<form id="filter_form" method="GET" action="{% url 'document_debts_docs' %}" class="mb-4">
+{% endif %}
+    <div class="d-flex justify-content-between">
+        <div class="form-inline">
+            <input type="text" name="search" id="id_search" placeholder="Поиск" value="{{request.GET.search}}" class="form-control ml-4" style="min-width: 500px;">
+            <a class="btn btn-primary ml-4" href="#" data-toggle="collapse" data-target="#collapseFilter" aria-controls="collapseOne" id="filterBtn" >Фильтр</a>
+            <button type="submit"  class="btn btn-primary ml-4">
+                <i style="display: none;" class="fas fa-spinner fa-pulse mx-2 form-loading"></i>
+                Применить</button>
+        </div>
+    </div>
+
+    <div class="mt-4 row collapse" id="collapseFilter">
+        
+        <div class="form-group col-sm-4 mt-4 ml-4 row">
+            <div class="col-sm-6">
+                <label for="createdAtFrom">Сумма незакрытого остатка от:</label>
+                <input type="number" class="form-control" value="{{request.GET.min_summ}}" id="id_min_summ" name="min_summ">
+            </div>
+            <div class="col-sm-6">
+                <label for="createdAtTo">Сумма незакрытого остатка до:</label>
+                <input type="number" class="form-control" value="{{request.GET.max_summ}}" id="id_max_summ" name="max_summ">
+            </div>
+        </div>
+        <div class="form-group col-sm-4 mt-4 ml-4 row">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input"
+                {% if request.GET.only_changed_suppliers == 'on' %}checked{% endif %}
+                id="id_only_changed_suppliers" name="only_changed_suppliers">
+                <label class="form-check-label" for="id_only_changed_suppliers">Только у которых есть изменения</label>
+            </div>
+
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input"
+                {% if request.GET.only_changed_suppliers_up == 'on' %}checked{% endif %}
+                id="id_only_changed_suppliers_up" name="only_changed_suppliers_up">
+                <label class="form-check-label" for="id_only_changed_suppliers_up">Только у кого сумма незакрытого остатка увеличилась</label>
+            </div>
+
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input"
+                {% if request.GET.only_changed_suppliers_down == 'on' %}checked{% endif %}
+                id="id_only_changed_suppliers_down" name="only_changed_suppliers_down">
+                <label class="form-check-label" for="id_only_changed_suppliers_down">Только у кого сумма незакрытого остатка уменьшилась</label>
+            </div>
+            <span id="saved_filter"></span>
+            
+        </div>
+
+        <div class="form-group col-sm-4 mt-4 ml-4">            
+            {% for global_filter in global_filters %}
+            <span>
+                Глобальный: 
+                <a href="/mp/document_debts/docs/{{global_filter.id}}">{{global_filter.name}}</a>
+            </span>
+            <br>
+            {% endfor %}
+        </div>
+
+
+        <div class="col-sm-12 d-flex justify-content-center">
+            <button type="submit"  class="btn btn-primary ml-4">
+                <i style="display: none;" class="fas fa-spinner fa-pulse mx-2 form-loading"></i>
+                Применить
+            </button>
+            <a class="btn btn-secondary ml-4" href="/mp/document_debts/docs">Очистить фильтр</a>
+        </div>
+
+    </div>
+</form>
+
+
+
+
+    
+<div class="container-fluid" id="id_main_content">
+    <div class="row ml-4">
+        <p class="text-primary ml-4">Кол-в  о: {{debt_documents_count}}</p>
+        <p class="text-primary ml-4 pl-4" style="border-left: 1px solid silver;">Сумма: {{debt_documents_total_sum|floatformat:2}}</p>
+
+        <p class="text-primary ml-4 pl-4" style="border-left: 1px solid silver;">Кол-во Контрагентов: {{suppliers_count}}</p>
+        <p class="text-primary ml-4 pl-4" style="border-left: 1px solid silver;">Сумма по Контрагентам: {{suppliers_total_sum|floatformat:2}}</p>
+    </div>
+    
+
+    <!-- Контент пустого раздела -->
+   
+    <div class="collapse show" id="collapse_{{supplier.id}}">
+
+        <div style=" display: grid; grid-template-columns: 1fr 3fr 1fr 1fr 1fr; background-color: #5a5c69; color: aliceblue; ">
+            <div class="pl-4 py-2" style="border:1px solid silver;">Номер ДО</div>
+            <div class="pl-4 py-2" style="border:1px solid silver;">Описание</div>
+            <div class="pl-4 py-2" style="border:1px solid silver;">Неоплачено</div>
+            <div class="pl-4 py-2" style="border:1px solid silver;">Статус документа</div>
+            <div class="pl-4 py-2" style="border:1px solid silver;">Контрагент</div>
+        </div>
+        {% for debt_document in debt_documents %}
+        <div style=" display: grid; grid-template-columns: 1fr 3fr 1fr 1fr 1fr; background-color: #e2e6ff;" data-toggle="collapse" data-target="#collapse_doc_{{debt_document.id}}" aria-controls="collapse_doc_{{debt_document.id}}">
+            <div class="pl-4 py-2" style="border:1px solid silver;">{{debt_document.documentno}}</div>
+            <div class="pl-4 py-2" style="border:1px solid silver;">{{debt_document.name}}</div>
+            <div class="pl-4 py-2" style="border:1px solid silver;">{{debt_document.unclosedbalance|floatformat:2}}
+                
+                {% if debt_document.last_unclosedbalance_change > 0 %}
+                <span style="color:red;">
+                    <i class="fas fa-arrow-up"></i>
+                    {{debt_document.last_unclosedbalance_change|floatformat:2}}
+                </span>
+                {% elif debt_document.last_unclosedbalance_change < 0 %}
+                <span style="color:green;">
+                    <i class="fas fa-arrow-down"></i>
+                    {{debt_document.last_unclosedbalance_change|floatformat:2}}
+                </span>
+                {% endif %}
+            </div>
+            <div class="pl-4 py-2" style="border:1px solid silver;">{{debt_document.docstatus}}</div>
+            <div class="pl-4 py-2" style="border:1px solid silver; cursor: pointer;" onclick="location.href='/mp/document_debts?search='+'{{debt_document.debt_supplier.bin}}'.replace(/ /g,'');">{{debt_document.debt_supplier}}</div>
+        </div>
+
+        <div class="collapse" id="collapse_doc_{{debt_document.id}}">
+            <table class="table table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Дата</th>
+                        <th>Сумма</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for unclosedbalance_change in debt_document.unclosedbalance_changes %}
+                    <tr>
+                        <td>{{unclosedbalance_change.created_at_format}}</td>
+                        <td>{{unclosedbalance_change.old.unclosedbalance|floatformat:2}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+
+        {% endfor %}
+        <div style=" display: grid; grid-template-columns: 6fr; background-color: #5a5c69; color: aliceblue; ">
+            <div class="p-2"></div>
+        </div>
+
+            
+    
+    {% if paginator.num_pages > 1 %}
+    <div class="mt-4">
+        <div class="dataTables_paginate paging_simple_numbers" id="dataTable_paginate">
+            <ul class="pagination">
+                
+                {% if page_number > 1 %}
+                {% if more_than_10 and page_number > 5 %}
+                <li class="paginate_button page-item previous " id="dataTable_previous">
+                    <a href="#" aria-controls="dataTable" data-dt-idx="1" tabindex="0" class="page-link"><<<</a>
+                </li>
+                {% endif %}
+                <li class="paginate_button page-item previous " id="dataTable_previous">
+                    <a href="#" aria-controls="dataTable" data-dt-idx="{{prev_page_number}}" tabindex="0" class="page-link"><</a>
+                </li>
+                {% endif %}
+    
+                {% for i in page_range %}
+                <li class="paginate_button page-item {% if page_number == i %}active{% endif %}">
+                    <a href="#" aria-controls="dataTable" data-dt-idx="{{ i }}" tabindex="0" class="page-link">{{ i }}</a>
+                </li>
+                {% endfor %}
+            
+    
+                {% if page_number != paginator.num_pages %}
+
+                <li class="paginate_button page-item next" id="dataTable_next">
+                    <a href="#" aria-controls="dataTable" data-dt-idx="{{next_page_number}}" tabindex="0" class="page-link">></a>
+                </li>
+                {% if more_than_10 %}
+                {% endif %}
+                <li class="paginate_button page-item next" id="dataTable_next">
+                    <a href="#" aria-controls="dataTable" data-dt-idx="{{paginator.num_pages}}" tabindex="0" class="page-link">>>></a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+    {% endif %} 
+    
+    
+</div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+    <!-- Скрипты пустого раздела -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            set_money_format();
+            var pageLinks = document.querySelectorAll('.page-link');
+            pageLinks.forEach(function(link) {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    var pageNumber = parseInt(link.getAttribute('data-dt-idx'));
+                    var url = window.location.pathname;
+                    var queryString = window.location.search;
+                    var params = new URLSearchParams(queryString);
+                    params.set('page', pageNumber);
+                    var newUrl = url + '?' + params.toString();
+                    window.location.href = newUrl;
+                });
+            });
+        });
+    
+        function set_money_format() {
+            let content = document.getElementById('id_main_content');
+            // Выбираем числа с более чем 10 цифрами или числа с двумя цифрами после запятой
+            content.innerHTML = content.innerHTML.replace(/(\b\d{10,}\b|\d+,\d{2})/g, function(match) {
+                if (/\d{1,},00/g.test(match)) {
+                    match = match.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 ');
+                    return match.replace(/,00/g, '');
+
+                }
+                return match.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 ');
+
+            });
+        }
+
+
+
+
+        function copyText(el) {
+            let text = el
+            // Если текст - число с пробелами или запятыми, уберем пробелы и запятые
+            if (!isNaN(parseFloat(text.replace(/[ ,]/g, '')))) {
+                text = text.replace(/[ ,]/g, '');
+            }
+
+            // Копируем текст в буфер обмена
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    console.log('Текст скопирован успешно:', text);
+                })
+                .catch(err => {
+                    console.error('Ошибка при копировании текста:', err);
+                });
+            notification_count()
+        }
+        
+
+        function notification_count() {
+            var dangerAlert = document.getElementById("copyAlertCount");
+            console.log(dangerAlert.innerHTML)
+            dangerAlert.style.display = "initial"
+
+            setTimeout(function () {
+                dangerAlert.style.display = "none";
+            }, 1000);
+        }
+
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            let filter_form = document.getElementById('filter_form')
+            if (filter_form){
+                filter_form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    let loading_spinners = document.querySelectorAll('.form-loading')
+                    loading_spinners.forEach(function(loading_spinner) {
+                        loading_spinner.style.display = 'inline-block'
+                    })
+                    filter_form.submit();
+                })
+
+            }
+            
+        })
+    </script>
+{% endblock %}

@@ -1,0 +1,401 @@
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+}
+a {
+    color: #4B0082;
+    text-decoration: none;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol, ul {
+  list-style: none;
+}
+blockquote, q {
+  quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+body {
+    font-family: Inter, Helvetica, "sans-serif";
+}
+
+
+/* GET STARTED */
+
+
+section {
+    width: 100%;
+    display: flex;
+}
+
+.sign-up_container {
+    width: 50%;
+    background-color: #f3f6f9;
+}
+
+.main_block_sign-up_container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 100px 135px;
+}
+
+.title_main_block h1 {
+    font-size: 1.5rem;
+    font-weight: 700 !important;
+}
+
+.title_main_block p {
+    font-size: 14px;
+    color: #a1a5b7;
+    margin-top: 15px;
+}
+
+.support_sign-up_main_block {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin: 30px 0;
+}
+
+.support_sign-up_main_block a {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: 1px solid #a1a5b7;
+    font-size: 15px;
+    color: #5e6778;
+}
+
+.support_sign-up_main_block a:hover {
+    background-color: #FFF;
+}
+
+.support_sign-up_main_block a img {
+    width: 15px !important;
+    height: 15px !important;
+    margin: 0 0.75rem 0 0;
+    padding: 0;
+}
+
+.or_just_with_email {
+    color: #a1a5b7;
+    font-size: 14px;
+    margin-bottom: 30px;
+}
+
+.input_forms_sign-up {
+    width: 50%;
+    margin-top: 100px;
+}
+
+label, button{
+    width: 100%;
+}
+
+.input_forms_sign-up form label input {
+    width: calc(100% - 34px);
+    padding: 12px 15px;
+    border: 1px solid #a1a5b7;
+    border-radius: 5px;
+    outline: none;
+}
+
+.input_forms_sign-up form label input[placeholder] {
+    font-size: 15px;
+}
+
+.form_sign_up_button {
+    margin-top: 40px;
+    cursor: pointer;
+    color: #FFF;
+    border-radius: 7px;
+    padding: 15px 0;
+    font-size: 15px;
+    border: none;
+    background-color: #0096FF;
+}
+
+.position-relative {
+    margin: 20px 0 3px 0;
+}
+
+.forgot_password_account {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin: 10px 0 0 0;
+}
+
+.forgot_password_account a {
+    color: #009ef7;
+    font-size: 14px;
+}
+
+.forgot_password_account a:hover {
+    text-decoration: underline;
+}
+
+.check_validate_account {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.check_validate_account p {
+    margin-top: 8px;
+    color: red;
+    font-size: 13px;
+}
+
+.btn-primary {
+    margin-top: 30px;
+    border-radius: 7px;
+    padding: 9px 0;
+    font-size: 15px;
+}
+
+.have_account_sign-in {
+    font-size: 15px;
+    font-weight: 500 !important;
+    color: #5e6778;
+    margin-top: 30px;
+}
+
+.have_account_sign-in a {
+    color: #009ef7;
+}
+
+.have_account_sign-in a:hover {
+    text-decoration: underline;
+}
+
+.image_container {
+    width: 50%;
+    height: 100vh;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url('https://preview.keenthemes.com/metronic8/demo16/assets/media/misc/auth-bg.png')
+}
+
+.white_apple_logo {
+    display: none;
+}
+
+.image_container img {
+    width: 200px;
+    top: 30px;
+    right: 30px;
+    position: absolute;
+    z-index: 999999;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+
+@media only screen and (max-width: 768px) {
+
+    .sign-up_container {
+        width: 100%;
+        background-color: #1e1e2d;
+    }
+
+    .title_main_block h1 {
+        color: #FFF;
+    }
+
+    .support_sign-up_main_block a {
+        color: #FFF;
+    }
+
+    .white_apple_logo {
+        display: block;
+    }
+
+    .dark_apple_logo {
+        display: none;
+    }
+
+    .image_container {
+        display: none;
+    }
+
+}
+
+
+@media only screen and (max-width: 425px) {
+
+    .main_block_sign-up_container {
+        padding: 100px 30px;
+    }
+
+    .support_sign-up_main_block {
+        width: 100%;
+    }
+
+    .support_sign-up_main_block a {
+        padding: 10px;
+    }
+
+    .support_sign-up_main_block a img {
+        margin-right: 10px;
+    }
+
+    form {
+        max-width: 425px;
+        margin: 0;
+    }
+
+    .input_forms_sign-up form label, button {
+        width: calc(100% - 60px);
+    }
+    
+    .input_forms_sign-up form label input {
+        width: calc(100% - 100px);
+        padding: 12px 15px;
+        border: 1px solid #a1a5b7;
+        border-radius: 5px;
+    }
+
+    .check_successfully_password {
+        width: calc(100% - 70px);
+    }
+
+    .validate_check_password {
+        font-size: 10px;
+    }
+
+    .check_validate_account {
+        margin: 10px 0 0 35px;
+    }
+
+}
+
+
+@media only screen and (max-width: 375px) {
+
+    .main_block_sign-up_container {
+        padding: 100px 10px;
+    }
+
+    .support_sign-up_main_block {
+        width: 100%;
+    }
+
+    .support_sign-up_main_block a {
+        padding: 10px;
+    }
+
+    .support_sign-up_main_block a img {
+        margin-right: 10px;
+    }
+
+    form {
+        max-width: 375px;
+        margin: 0;
+    }
+
+    .input_forms_sign-up form label, button {
+        width: calc(100% - 60px);
+    }
+    
+    .input_forms_sign-up form label input {
+        width: calc(100% - 100px);
+        padding: 12px 15px;
+        border: 1px solid #a1a5b7;
+        border-radius: 5px;
+    }
+
+    .check_successfully_password {
+        width: calc(100% - 70px);
+    }
+
+    .validate_check_password {
+        font-size: 10px;
+    }
+
+}
+
+
+
+@media only screen and (max-width: 320px) {
+
+    .main_block_sign-up_container {
+        padding: 100px 10px;
+    }
+
+    .support_sign-up_main_block {
+        width: 100%;
+    }
+
+    .support_sign-up_main_block a {
+        width: 40%;
+        padding: 10px;
+    }
+
+    .support_sign-up_main_block a img {
+        margin-right: 10px;
+    }
+
+    form {
+        max-width: 320px;
+        margin: 0;
+    }
+
+    .input_forms_sign-up form label, button {
+        width: calc(100% - 60px);
+    }
+    
+    .input_forms_sign-up form label input {
+        width: calc(100% - 100px);
+        padding: 12px 15px;
+        border: 1px solid #a1a5b7;
+        border-radius: 5px;
+        margin: 0;
+    }
+
+    .check_successfully_password {
+        width: calc(100% - 70px);
+    }
+
+    .validate_check_password {
+        font-size: 10px;
+        margin: 10px 1px 20px 1px;
+    }
+
+}

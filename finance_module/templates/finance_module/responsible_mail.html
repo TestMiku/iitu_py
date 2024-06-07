@@ -1,0 +1,10 @@
+Добрый день,<ul>
+  {% for mandatory_payment_seizure in mandatory_payment_seizures %}
+    <li>
+      Оплата <a href="{{domain}}">{{ mandatory_payment_seizure.mandatory_payment.name }}</a> {{ mandatory_payment_seizure.sum }} с расчётного счета {{ mandatory_payment_seizure.account }}, статус:
+      {{ mandatory_payment_seizure.status }};{% if mandatory_payment_seizure.is_rejected and mandatory_payment_seizure.rejected_mandatory_payment_seizure_status and  mandatory_payment_seizure.rejected_mandatory_payment_seizure_status.comment %}
+        <br />Причина отклонение: {{ mandatory_payment_seizure.rejected_mandatory_payment_seizure_status.comment }};
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>

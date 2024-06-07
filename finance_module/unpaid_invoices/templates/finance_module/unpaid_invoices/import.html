@@ -1,0 +1,45 @@
+{% extends 'finance_module/unpaid_invoices/base.html' %}
+{% block unpaid_invoices_active_breadcrump %}
+  Импорт
+{% endblock %}
+
+{% block unpaid_invoices_content %}
+  <div class="d-flex align-items-center justify-content-center flex-column">
+    <form method="post" enctype="multipart/form-data" class="d-flex align-items-center mb-2">
+      {% csrf_token %}
+
+      <div class="card">
+        <div class="card-header">
+            <h6 class="mb-0">
+                Импорт реестра неоплаченных счетов
+
+            </h6>
+        </div>
+
+        <div class="card-body">
+          <input type="hidden" name="post-type" value="import-19-33-1" />
+          <div>
+            <label class="form-label" for="file-input">19.33.1</label>
+            <input type="file" name="file" id="file-input" class="form-control" />
+            <div class="form-text">Если не выбирать, оно возмётся из сетевой папки.</div>
+          </div>
+          
+        </div>
+        <div class="card-footer d-flex align-items-center justify-content-end">
+          <button class="btn btn-secondary me-2" form="import-work-statuses-form">Импортировать статусы работ</button>
+          <button class="btn btn-secondary me-2" form="import-payment-destination-codes-form">Импортировать КНП</button>
+          <button class="btn btn-primary" type="submit">Импорт</button>
+        </div>
+      </div>
+    </form>
+
+    <form id="import-work-statuses-form" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="post-type" value="import-work-statuses" />
+    </form>
+    <form action="" id="import-payment-destination-codes-form" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="post-type" value="import-payment-destination-codes" />
+    </form>
+  </div>
+{% endblock %}

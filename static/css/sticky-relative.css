@@ -1,0 +1,7 @@
+.sticky-relative {
+    position: sticky !important;
+}
+
+.sticky-relative:where(.sticky-relative-left.sticky-relative-top, .on-top) {
+    z-index: 24;
+}

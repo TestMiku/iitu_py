@@ -1,0 +1,181 @@
+.project-region-tr:has(input[type="number"]:focus-visible) {
+    background-color: #cdd8f6;
+    color: #5a5c69 !important;
+}
+
+.max-height-200-px-with-scroll {
+    max-height: 200px;
+    overflow-y: scroll;
+    user-select: none;
+}
+
+.max-height-200-px-with-scroll::-webkit-scrollbar {
+    display: none;
+
+}
+
+
+.project-region-table {
+    border-spacing: 10px;
+    border-collapse: separate;
+}
+
+.interdivisional-debts-table {
+    font-size: 0.75em;
+}
+
+.interdivisional-debts-table :where(th, td) {
+    border: 1px solid black;
+    padding: 0.125em 0.5em;
+}
+
+.interdivisional-debts-table__project-region-column {
+    min-width: 120px;
+    vertical-align: middle;
+}
+
+.interdivisional-debts-table__project-region-column-text-container {
+    height: 92px;
+    overflow-y: scroll;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.interdivisional-debts-table__project-region-column-text-container::-webkit-scrollbar {
+    display: none;
+}
+
+.interdivisional-debts-table__project-region-row {
+    vertical-align: middle;
+}
+
+.interdivisional-debts-table-container {
+    background-color: white;
+    max-height: 50vh;
+    overflow: scroll;
+}
+
+.interdivisional-debts-table__project-region-row-text-container {
+    max-height: 43px;
+    overflow-y: scroll;
+    /* display: flex;
+    align-items: center;
+    justify-content: center; */
+    text-align: center;
+}
+
+.interdivisional-debts-table__project-region-row-text-container::-webkit-scrollbar {
+    display: none;
+}
+
+.td-center {
+    vertical-align: middle !important;
+}
+
+.td-white-space-nowrap {
+    white-space: nowrap;
+}
+
+.td-max-width-120-px {
+    width: 120px;
+}
+
+.paid-invoices-table {
+    background-color: white;
+    white-space: nowrap;
+    font-family: Arial, sans-serif;
+    font-size: 21px;
+    color: black;
+}
+
+.paid-invoices-table-container {
+    overflow: scroll;
+    max-height: 50vh;
+}
+
+.paid-invoices-table :where(.paid-invoices-table__column_color-1, .paid-invoices-table__column_color-2, th) {
+    border: 0.5pt solid black;
+}
+
+
+.paid-invoices-table__th {
+    background-color: #D0CECE;
+    color: black;
+    text-align: center;
+    font-weight: bold;
+}
+
+.paid-invoices-table__contractor-th {
+    background-color: #FF9999;
+}
+
+.paid-invoices-table__column-number {
+    mso-number-format: "\# \#\#0\,00\;\-\# \#\#0\,00";
+}
+
+.paid-invoices-table__column_color-1 {
+    background-color: #76FF4B;
+}
+
+.paid-invoices-table__column_color-2 {
+    background-color: #fff2cc;
+}
+
+.paid-invoices-table__column_color-3 {
+    background-color: #ff9;
+}
+
+
+.project-region__list {
+    height: 300px;
+    overflow-y: scroll;
+}
+
+.project-region__list-item:has(.project-region__process-radio:checked) {
+    color: #293c74;
+    background-color: #cdd8f6;
+}
+
+
+#project-regions-container {
+    overflow: scroll;
+    height: 69vh;
+}
+
+#project-regions-container::-webkit-scrollbar {
+    display: none;
+}
+
+#all-container::-webkit-scrollbar {
+    display: none;
+}
+
+
+.mandatory-payments-table1__project-region {
+    text-align: center;
+    min-width: 6rem;
+    max-width: 6rem;
+    font-size: 0.7em;
+    font-weight: bold;
+}
+
+.mandatory-payments-table1__mandatory-payment {
+    white-space: nowrap;
+}
+
+.mandatory-payments-table1__deadline-header {
+    min-width: 5rem;
+    text-align: center;
+    background-color: #D9D9D9;
+}
+
+.mandatory-payments-table1__deadline {
+    text-align: center;
+    background-color: #FFF2CC;
+    font-weight: bold;
+    white-space: nowrap;
+
+}
+

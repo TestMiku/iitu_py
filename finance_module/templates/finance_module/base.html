@@ -1,0 +1,358 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Финансовый модуль{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{% static 'css/sticky-relative.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/excel-table.css' %}" />
+    <link rel="stylesheet" href="{% static 'vendor/smart-table/smart-table.css' %}" />
+    {% block links %}{% endblock %}
+    <style type="text/css">
+        /* Стили для ползунка */
+      *::-webkit-scrollbar {
+        width: 6px; /* Толщина скроллбара */
+        height: 6px; /* Толщина скроллбара */
+      }
+
+      *.thin-scrollbar::-webkit-scrollbar {
+        width: 3px; /* Толщина скроллбара */
+        height: 3px; /* Толщина скроллбара */
+      }
+
+      /* Стили для трека */
+      *::-webkit-scrollbar-track {
+        background: transparent; /* Цвет трека */
+      }
+
+
+      /* Стили для ползунка */
+      *::-webkit-scrollbar-thumb {
+        background-color: #dddddd; /* Цвет ползунка */
+        border-radius: 0.25em; /* Скругление углов ползунка */
+      }
+
+        .icon-container {
+            display: inline-block;
+            width: 30px; /* Задаем фиксированную ширину для всех иконок */
+            text-align: center; /* Центрируем иконку внутри контейнера */
+        }
+
+        .profile-link:link {
+            color: black;
+            background-color: transparent;
+            text-decoration: none;
+        }
+        .profile-link:visited {
+            color: black;
+            background-color: transparent;
+            text-decoration: none;
+        }
+        .dropdown-submenu .dropdown-toggle::after {
+            position: absolute; /* Абсолютное позиционирование позволит разместить стрелку в любом месте элемента */
+            top: 55%; /* Центрирование стрелки по вертикали */
+            right: 5px; /* Отступ справа, адаптируйте это значение по вашему дизайну */
+            transform: translateY(-50%); /* Смещение вверх на половину высоты, чтобы центрировать стрелку точно по центру по вертикали */
+            border-top: .3em solid transparent;
+            border-bottom: .3em solid transparent;
+            border-left: .3em solid;
+        }
+
+        .dropdown-menu-right .dropdown-submenu {
+            position: relative;
+        }
+        .dropdown-menu-right .dropdown-submenu>.dropdown-menu {
+            top: 0;
+            left: 100%;
+            margin-top: -6px;
+            margin-left: -1px;
+            border-radius: 0.25rem;
+        }
+        .dropdown-menu-right .dropdown-submenu:hover>.dropdown-menu {
+            display: block;
+        }
+        .navbar-search {
+            position: relative;
+            width: 250px;
+        }
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .search-input {
+            padding-right: 40px; /* Делаем место для иконки */
+        }
+        .search-icon {
+            position: absolute;
+            right: 10px; /* Позиционируем иконку внутри input */
+        }
+        .search-results {
+            display: none; /* По умолчанию скрыт */
+            position: absolute;
+            width: 100%; /* Подстраивается под ширину поля ввода */
+            background-color: white;
+            max-height: 240px; /* Высота под 6 элементов, если каждый ~40px */
+            overflow-y: auto; /* Включаем прокрутку, если элементов больше, чем влезает */
+            box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+            z-index: 1000; /* Убедитесь, что выпадающий список будет над другими элементами */
+            border-radius: 10px; /* Скругление только нижних углов */
+        }
+        .search-results .section-item {
+            display: flex;
+
+            font-weight: bold;
+        }
+
+        .search-results i {
+            margin-right: 8px; /* Устанавливаем фиксированное расстояние между иконкой и текстом */
+        }
+        .search-results ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .search-results li {
+            padding: 8px 16px;
+        }
+        .search-results li:hover {
+            background-color: #f1f1f1;
+            cursor: pointer;
+        }
+        .search-results li a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 300px;
+            background: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+        }
+        .notification-dropdown ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .notification-dropdown li {
+            padding: 8px 16px;
+        }
+        .notification-dropdown li:hover {
+            background-color: #f1f1f1;
+            cursor: pointer;
+        }
+        .notification-dropdown li a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .show-all {
+            display: block;
+            text-align: center;
+            padding: 8px 0;
+            background-color: #f8f9fa;
+            border-top: 1px solid #ddd;
+        }
+        .show-all a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        .show-all a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    {% block styles %}{% endblock %}
+</head>
+<body>
+<div class="vh-100 d-flex flex-column">
+    <header style="position: relative; z-index: 100; background-color: #0d6efd40 " class="header shadow-sm p-3">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center justify-content-between">
+                <nav aria-label="breadcrumb">
+                    <div class="d-flex align-items-center">
+                        <a href="/"><i class="fa-solid fa-house"></i></a>
+                        <span class="mx-3 text-primary"><i class="fa-solid fa-chevron-right"></i></span>
+                        <a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-0-hover" href="{% url 'finance_module:index' %}">Финансовый модуль</a>
+                        <span class="mx-3 text-primary"><i class="fa-solid fa-chevron-right"></i></span>
+
+                    {% block breadcrumbs %}
+                        <div class="dropdown" id="menu" style="display: flex; align-items: center">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                {% block active_breadcrump %}
+                                Платежи
+                                {% endblock %}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                <!-- Menu will be populated here -->
+                            </ul>
+                        {% endblock %}
+                        </div>
+                    </div>
+                </nav>
+                <div class="navbar-search" style="width: 400px">
+                        <div class="search-box">
+                            <input class="search-input form-control" type="search" placeholder="Поиск...">
+                            <i class="fa fa-search search-icon"></i>
+                        </div>
+
+                        <div class="search-results">
+                            <ul id="search-results-list"></ul>
+                        </div>
+                    </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="position-relative">
+                        <a href="#" class="btn" id="notification-button">
+                            <i class="fa-solid fa-bell"></i>
+
+                        </a>
+                        <div class="notification-dropdown">
+                            <ul id="notification-list">
+                                <!-- Notification items will be populated here -->
+                            </ul>
+                            <div class="show-all">
+                                <a href="{% url 'notifications:list' %}">Показать все</a>
+                            </div>
+                        </div>
+                    </div>
+                    <a class="profile-link" href="/profile_view" style="padding-top: 3px">
+                        <img class="img-profile rounded-circle" style="width: 30px" src="{{ user.avatar.url }}" alt="">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main class="main flex-fill d-flex flex-column py-2 position-relative" style="overflow-y: scroll;">
+        {% block finance_module_main %}
+        <div class="container-fluid flex-fill">
+            {% block finance_module_content %}{% endblock %}
+        </div>
+        {% endblock %}
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="{% static 'vendor/smart-table/smart-table.js' %}"></script>
+<script src="{% static 'js/sticky-relative.js' %}"></script>
+<script>
+    const sections = {{ sections|safe }};
+    $(document).ready(function() {
+        const menu = $('#menu .dropdown-menu:not(.ignore)');
+        const notificationList = $('#notification-list');
+        const results = $('#search-results-list');
+        $.each(sections, function(section, details) {
+            // Populate menu and submenus
+            let icon;
+            let link;
+            if (Object.keys(details.subsections).length > 0) {
+                const submenu = $('<ul>').addClass('dropdown-menu');
+                $.each(details.subsections, function(subsection, subdetails) {
+                    const sublink = $('<a>').addClass('dropdown-item').attr('href', subdetails.url);
+                    const subicon = $('<div>').addClass('icon-container').html('<i class="' + subdetails.icon + '"></i>');
+                    sublink.append(subicon).append(subsection);
+                    submenu.append($('<li>').append(sublink));
+                });
+                link = $('<a>').addClass('dropdown-item dropdown-toggle').attr('href', details.url).attr('role', 'button').attr('data-bs-toggle', 'dropdown').attr('aria-haspopup', 'true').attr('aria-expanded', 'false');
+                icon = $('<div>').addClass('icon-container').html('<i class="' + details.icon + '"></i>');
+                link.append(icon).append(section);
+                const sublist = $('<li>').addClass('dropdown-submenu').append(link).append(submenu);
+                menu.append(sublist);
+            } else {
+                link = $('<a>').addClass('dropdown-item').attr('href', details.url);
+                icon = $('<div>').addClass('icon-container').html('<i class="' + details.icon + '"></i>');
+                link.append(icon).append(section);
+                menu.append($('<li>').append(link));
+            }
+        });
+
+
+        // Populate notifications
+        $.ajax({
+            url: "{% url 'notifications:latest' %}",
+            method: "GET",
+            success: function(data) {
+                notificationList.empty();
+                data.forEach(function(notification) {
+                    const listItem = $('<li>').append($('<a>').text(notification.title));
+                    notificationList.append(listItem);
+                });
+            }
+        });
+
+        // Toggle notification dropdown
+        $('#notification-button').on('click', function(event) {
+            event.preventDefault();
+            $('.notification-dropdown').toggle();
+        });
+
+        // Hide notification dropdown when clicking outside
+        $(document).on('click', function(event) {
+            if (!$(event.target).closest('#notification-button').length && !$(event.target).closest('.notification-dropdown').length) {
+                $('.notification-dropdown').hide();
+            }
+        });
+
+        // Search functionality
+        $('.search-input').on('input', function() {
+            const searchValue = $(this).val().toLowerCase();
+            results.empty();
+
+            let found = false;
+            if (searchValue.length > 0) {
+                $.each(sections, function(section, details) {
+                    if (section.toLowerCase().includes(searchValue)) {
+                        const sectionItem = $('<li>').append($('<a>').attr('href', details.url).append($('<div>').addClass('icon-container').html('<i class="' + details.icon + '"></i>'),
+                            section)).addClass('section-item');
+                        results.append(sectionItem);
+                        found = true;
+                    }
+                    $.each(details.subsections, function(subsection, subdetails) {
+                        if (subsection.toLowerCase().includes(searchValue)) {
+                            const subsectionItem = $('<li>').append($('<a>').attr('href', subdetails.url).append($('<div>').addClass('icon-container').html('<i class="' + subdetails.icon + '"></i>'),
+                                section + ' - ', $('<strong>').text(subsection)));
+
+                            results.append(subsectionItem);
+                            found = true;
+                        }
+                    });
+                });
+                if (!found) {
+                    results.append($('<li>').text("Ничего не найдено").addClass('not-found'));
+                }
+                $('.search-results').show();
+            } else {
+                $('.search-results').hide();
+            }
+        });
+
+        // Make the entire list item clickable
+        $(document).on('click', '.search-results li', function() {
+            const link = $(this).find('a').attr('href');
+            if (link) {
+                window.location.href = link;
+            }
+        });
+
+        // Hide search results when clicking outside
+        $(document).on('click', function(event) {
+            if (!$(event.target).closest('.navbar-search').length) {
+                $('.search-results').hide();
+            }
+        });
+    });
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

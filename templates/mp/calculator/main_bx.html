@@ -1,0 +1,116 @@
+{% extends 'base_bx.html' %}
+{% load static %}
+{% block title %}Калькулятор цен с подрядчиками{% endblock %}
+
+
+{% block chapter %} 
+{% endblock %}
+
+{% block content %}
+<style>
+    *{
+        scroll-behavior: smooth;
+    }
+    .fixed-container {
+        position: fixed;
+        top: 150px;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        z-index: 999;
+        width:600px;
+    }
+    .col-md-6{
+        flex: 0 0 calc(100% / 7) !important;
+    }
+    .even{
+        background: #f6f6ff;
+    }
+    .odd{
+        background: #ffffff;
+    }
+    .custom-table-container {
+        {% comment %} max-height: 70vh;  {% endcomment %}
+        {% comment %} overflow-y: auto;  {% endcomment %}
+    }
+</style>
+
+<div class="row d-flex align-items-center">
+    <h1>Калькулятор цен с подрядчиками </h1>
+</div>
+
+<hr>
+<div class="d-flex justify-content-between">
+<form id="find_order_form" method="GET">
+    <input type="hidden" name="user_email" value="{{user.email}}" id="id_user_email">
+    <div class="row">
+        <div 
+            class="form-row mb-3 col-sm-6"
+            style="min-width:750px;"
+        >
+            <div class="col">
+                <input 
+                    name="order_number"
+                    type="text"
+                    class="form-control"
+                    autofocusr
+                    required
+                    title="Введите от 4 до 12 символов"
+                    placeholder="Номер заказа"
+                >
+            </div>
+            <div class="col">
+                <input type="submit" class="btn btn-primary" value="Найти">
+                {% if user.email == '20114@avh.kz' or user.email == '709@avh.kz' or user.email == 'admin@mail.ru' or user.email == '22050@avh.kz' or user.email == '22279@avh.kz' or user.email == '22054@avh.kz' or user.email == '20611@avh.kz' or user.email == '22486@avh.kz' %}
+                    <button onclick="openHeaderPager('bx')" class="btn btn-warning">Новая страница</button>
+                {% endif %}
+            </div>
+        </div>  
+    </div>  
+</form>
+
+<div id="html-download-button" style="display:none;">
+    <button onclick="html_download()" class="btn btn-success btn-icon-split">
+        <span class="icon text-white-50">
+            <i class="fas fa-download"></i>
+        </span>
+        <span class="text">Скачать как HTML</span>
+    </button>
+</div>
+
+</div>
+
+<div class="card shadow mb-4" id="main-table-container">
+
+</div>
+
+
+
+
+
+<div class="fixed-container">
+    <div class="container text-center d-flex flex-column">
+
+    <div class=" alert alert-danger alert-dismissible fade show"  style="display:none;"  id="dangerAlertCount" role="alert">
+        Количество превышает максимально допустимое значение!
+        <button type="button" class="close" data-dismiss="alert" aria-label="Закрыть">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="alert alert-danger alert-dismissible fade show"  style="display:none;"  id="dangerAlertPrice" role="alert">
+        Цена превышает максимально допустимое значение!
+        <button type="button" class="close" data-dismiss="alert" aria-label="Закрыть">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+</div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+<script src="{% static 'js/calculator/html_generator.js' %}"></script>
+<script src="{% static 'js/calculator/methods.js' %}"></script>
+{% endblock %}

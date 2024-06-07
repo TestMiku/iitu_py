@@ -1,0 +1,153 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 50%;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+}
+
+form {
+    margin-top: 20px;
+}
+
+input[type="text"], textarea, input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+input[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+p {
+    text-align: center;
+    margin-top: 20px;
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+.search-box {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+#filterButton {
+    font-family: Arial, Helvetica, sans-serif;
+    display: inline-block;
+    padding: 5px 10px;
+    font-size: 13px;
+    font-weight: 10;
+    color: #fff;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+#filterButton:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+}
+
+#filterButton:active {
+    background-color: #3e8e41;
+    transform: translateY(1px);
+}
+
+#handbook-container{
+    color: black;
+}
+
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto; /* Center the table */
+}
+
+.table th, .compact-table td {
+    padding: 5px; /* Reduce padding */
+    text-align: left;
+    border: 1px solid #ddd; /* Add border to cells */
+}
+
+.table th {
+    background-color: #f2f2f2; /* Optional: Add background color to header */
+    font-weight: bold;
+}
+
+.table td {
+    font-size: 14px;
+    color: black; /* Adjust font size if needed */
+}
+
+.table-container {
+    padding: 10px; /* Adjust the padding of the container */
+    margin: 0 auto;
+    width: fit-content;
+}
+
+.add-more-btn-container {
+    text-align: right;
+    margin-right: 10px; /* Adjust as needed */
+}
+
+.add-more-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 10px;
+    background-color: #28a745; /* Green background */
+    color: white; /* White text */
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    border-radius: 10px; /* Rounded corners */
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+.add-more-btn:hover {
+    background-color: #218838; /* Darker green on hover */
+}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+
+
+{% block title %}Редактирование Документов аренды{% endblock %}
+{% block chapter %}Заявка №{{ request.request_number }} - Редактирование Документов аренды{% endblock %}
+
+
+
+{% block content %}
+  <div class="container">
+
+    <!-- Вывод информации о заявке -->
+    <p>Регион: {{ request.region }}</p>
+    <p>Наименование БС: {{ request.bis_name }}</p>
+    <p>Номер заказа: {{ request.order_number }}</p>
+    <p>Статус: {{ request.get_status_display }}</p>
+    <p>Создано: {{ request.created_at }}</p>
+
+    {% if existing_document_rents %}
+      <form method="post" enctype="multipart/form-data" class="mt-3">
+        {% csrf_token %}
+        <div class="list-group">
+            {% for doc_rent in existing_document_rents %}
+              <p>Причина отклонения документа: {{ doc_rent.comment }}</p>
+            <div class="list-group-item list-group-item-action">
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ doc_rent.document_rent.name }}</h5>
+
+
+                  <div class="form-check">
+                  <input type="checkbox" name="documents_rent_to_delete" value="{{ doc_rent.id }}" class="form-check-input">
+                  <label class="form-check-label" for="delete_{{ doc_rent.id }}">Удалить</label>
+                  </div>
+              </div>
+             <label for="documentRent_{{ doc_rent.id }}" class="mb-0 mt-2">Заменить документ аренды:</label>
+                <input type="file" name="documentRent_{{ doc_rent.id }}" id="documentRent_{{ doc_rent.id }}" class="form-control-file">
+            </div>
+          {% endfor %}
+        </div>
+         {% if not request.isapproved %}
+        <button type="submit" name="status" value="pending2" class="btn btn-warning">Отправить в финансовый отдел для частичного закрытия</button>
+             {%  endif %}
+        <br>
+        <br>
+          {% if request.isapproved %}
+        <button type="submit" name="status" value="pending3" class="btn btn-success">Отправить в финансовый отдел для полного закрытия</button>
+           {% endif%}
+      </form>
+
+    {% else %}
+      <p class="mt-3">У данной заявки нет отклоненных документов аренды</p>
+    {% endif %}
+
+
+
+  </div>
+{% endblock %}

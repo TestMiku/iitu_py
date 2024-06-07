@@ -1,0 +1,111 @@
+{% extends 'notifications/base.html' %}
+
+{% load static %}
+
+{% block active_breadcrumb %}
+    Уведомления
+{% endblock %}
+
+{% block title %}
+    Уведомления
+{% endblock %}
+
+{% block links %}
+    <link rel="stylesheet" href="{% static 'notifications/notifications.css' %}">
+    <style>
+        .table thead th, .table tbody td {
+            border-right: 1px solid #dee2e6; /* Добавление вертикальной черты */
+        }
+        .table thead th:last-child, .table tbody td:last-child {
+            border-right: none; /* Убираем черту для последней колонки */
+        }
+        .short-info {
+            text-decoration: none;
+            color: inherit;
+            width: 100%;
+            height: 100%;
+            text-align: start;
+        }
+    </style>
+{% endblock %}
+
+{% block finance_module_content %}
+    <div class="container-fluid notifications-main">
+        <div class="row">
+            <div class="col-12">
+                <h2>Уведомления - {{ notifications_count }} </h2>
+                <form method="post">
+                    {% csrf_token %}
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="width: 70px;"><input type="checkbox" id="select_all"> Все</th>
+                                <th scope="col">Дата</th>
+                                <th scope="col">Описание</th>
+                                <th scope="col">От кого</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for notification in notifications %}
+                                <tr class="{% if notification.is_read %}table-secondary{% endif %}">
+                                    <td style="width: 70px;">
+                                        <label>
+                                        <input type="checkbox" name="selected_notifications" value="{{ notification.id }}">
+                                        </label>
+                                    </td>
+                                    <td>{{ notification.date_str }}</td>
+                                    <td class="notification-summary" data-id="{{ notification.id }}">
+                                        <div class="btn btn-link short-info" data-bs-toggle="collapse" href="#notification{{ notification.id }}" role="button" aria-expanded="false" aria-controls="notification{{ notification.id }}">
+                                            {{ notification.title }}
+                                        </div>
+                                        <div class="collapse" id="notification{{ notification.id }}">
+                                            <div class="card card-body">
+                                                {{ notification.body }}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ notification.from_whom.get_full_name }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <button type="submit" class="btn btn-danger" name="delete_selected">Удалить выбранные</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        document.getElementById('select_all').onclick = function() {
+            const checkboxes = document.getElementsByName('selected_notifications');
+            for (const checkbox of checkboxes) {
+                checkbox.checked = this.checked;
+            }
+        }
+
+        $(document).ready(function() {
+            $('.notification-summary').on('click', function() {
+                const notificationId = $(this).data('id');
+                const $row = $(this).closest('tr');
+                const $collapse = $(this).find('.collapse');
+
+                $.ajax({
+                    url: '{% url "notifications:mark_as_read" %}',
+                    method: 'POST',
+                    data: {
+                        'id': notificationId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $row.addClass('table-secondary');
+                            $collapse.collapse('toggle');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

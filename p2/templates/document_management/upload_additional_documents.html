@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Загрузка дополнительных документов для заявки {{ request.request_number }}{% endblock %}
+{% block chapter %}Загрузка дополнительных документов для заявки {{ request.request_number }}{% endblock %}
+
+{% block back_button %}
+<div class="d-flex align-items-center">
+    <a class="btn btn-primary mb-2" href="{% url 'distributor' %}">На главную страницу</a>
+    <a class="btn btn-primary ml-2 mb-2" href="{% url 'edit_document' request_number=request.request_number %}">Исправить существующие документы</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="container mt-2 col-6" >
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="request_id" value="{{ request.request_number }}">
+            
+            {% for work_type in work_types %}
+                <div class="form-group">
+                    <label for="work_type">{{ work_type.name }}:</label>
+                    <input type="file" name="documents_{{ work_type.id }}" class="form-control"  multiple>
+                </div>
+            {% endfor %}
+            <div class="col-12 d-flex justify-content-center">
+            
+            {% if not request.isapproved %}
+                <button type="submit" name="status" value="pending2" class="btn btn-success btn-block">Отправить в финансовый отдел</button>
+            {% endif %}
+            <br>
+            <br>
+            {% if request.isapproved %}
+                <button type="submit" name="status" value="pending3" class="btn btn-success btn-block">Отправить в финансовый отдел</button>
+            {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <div class="col-6">
+        <h6 class="mt-2">Комментарии:{{request}}</h6>
+        <span id="comments-history{{request.request_number}}">
+            {% for comment in request.get_comments %}
+            <p class="ml-4"><i class="fas fa-comment"></i> {{comment|safe}}</p>
+            {% endfor %}
+        </span>
+        <form action="" id="form_comment{{request.request_number}}" method="post" class="container">
+            <div class="row">
+                <input type="text" id="form_comment_comment_value{{request.request_number}}" name="comment" required placeholder="Ваш комментарий" class="form-control col-5 ml-4">
+                <input type="submit" class="btn btn-primary col-2 ml-2" onclick="mycustomsubmite({{request.request_number}})">                                            
+                {% csrf_token %}
+            </div>
+        </form>
+    </div>
+</div>
+    
+
+    
+<script>
+    function mycustomsubmite(request_number){
+        event.preventDefault();
+        let form = document.getElementById("form_comment"+request_number);
+        var xhr = new XMLHttpRequest();
+        var formData = new FormData(form);
+        xhr.open("POST", `/p2/comments/Request/${request_number}`, true); // исправленный адрес запроса
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                document.getElementById("comments-history"+request_number).innerHTML = xhr.responseText;
+                console.log("comments-history"+request_number);
+                console.log(xhr.responseText);
+                console.log(document.getElementById("comments-history"+request_number).innerHTML);
+                document.getElementById("form_comment_comment_value"+request_number).value = ""
+
+            } else{
+                console.log(xhr.responseText);
+            }
+        };
+        xhr.send(formData);
+    }
+</script>
+{% endblock %}

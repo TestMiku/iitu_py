@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}
+Конструктор заявок на оборудование
+{% endblock %}
+
+{% block links %}
+<link rel="stylesheet" href="{% static 'designer_requests_for_equipment/css/main.css' %}">
+{% endblock %}
+
+
+{% block chapter %}
+Kcell заявки на оборудование
+{% endblock %}
+
+{% comment %}{% block back_button %}
+Кнопка Назад (По умолчанию назад на прошлую веб страницу)
+{% endblock %}{% endcomment %}
+
+{% block content %}
+
+<div class=" main-block main-block-0 m-5">
+    <div class="form-block">
+        <div class="col-2 main-form" id="main-form-0">
+            <div class="row main-form-block">
+                <label for="site_name">Имя сайта:</label>
+                <input id="site_name" type="text" class="form-control main-form-input">
+            </div>
+            <div class="row">
+                <label for="jr_number">JR номер:</label>
+                <input id="jr_number" type="text" class="form-control main-form-input">
+            </div>
+            <div class="row">
+                <label for="address">Адрес:</label>
+                <input id="address" type="text" class="form-control main-form-input">
+            </div>
+            <div>
+                <button id="showBtn" class="btn btn-secondary add-btn btn-block" hidden onclick="showList()"><i
+                        class="fas fa-arrow-down"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="list-block">
+        <div class="list" hidden>
+            {% for equipment in equip_btns %}
+            <div class="btn-group dropright btn-mb">
+                {% if equipment.sub_equipment.exists %}
+                {% with subequip=equipment.sub_equipment.first %}
+                {% if subequip.base_equipment_name|length > 0 %}
+                <button type="button" class="btn btn-secondary dropdown-toggle  add-btn ml-5 btn-lg list-btn"
+                    data-toggle="dropdown" aria-expanded="false">
+                    {{ equipment.title_name }}
+                </button>
+                <div class="dropdown-menu">
+                    {% for sub_equip in equipment.sub_equipment.all %}
+                    <!---->
+                    <div class="dropdown-item"
+                        onclick="addToTable('{{ sub_equip.base_equipment_name }}', '{{ sub_equip.id }}')"
+                        data-toggle="modal" data-target="#transition-backdrop">
+                        {{ sub_equip.base_equipment_name }}</div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <button type="button" class="btn btn-secondary dropdown-toggle  add-btn ml-5 btn-lg list-btn"
+                    onclick="addToTable('{{ equipment.title_name }}', null)" data-toggle="modal"
+                    data-target="#transition-backdrop">
+                    {{equipment.title_name }}</button>
+                {% endif %}
+                {% endwith %}
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="transition-tbl" hidden>
+            <table class="table col-auto ml-auto table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Наименование</th>
+                        <th scope="col">Кол-во</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<button type="button" class="btn btn-success btn-lg down-btn" id="downloadBtn" data-toggle="modal"
+    data-target="#choices-backdrop" onclick="choiceMainRow()">
+    Экспорт в Excel
+</button>
+<a type="button" class="btn btn-info btn-lg down-btn" id="" href="/designer-rfe/import-constructor">
+    Изменить данные
+</a>
+
+<div class="modal fade" id="choices-backdrop" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Выберите строку для объект запуска</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="choices-modal-body">
+                ...
+            </div>
+            {% csrf_token %}
+            <!-- <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            </div> -->
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="transition-backdrop" data-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Таблица</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="transition-modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="addRowsBtn" class="btn btn-primary" onclick="addRows()"
+                    hidden>Добавить</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<button class="btn btn-primary btn-lg btn-block add-btn" style="max-width: 300px; transform: translate(366%, 0%);"
+    onclick="createTransitionBlock()" id="addBtn" hidden>Добавить</button>
+<div class="horizontal-line"></div>
+
+
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'designer_requests_for_equipment/js/script.js' %}"></script>
+{% endblock %}

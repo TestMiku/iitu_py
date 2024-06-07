@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+
+{% block chapter %}{{page_name}}{% endblock chapter %}
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="rejected">
+        <label for="comment">Название:</label>
+        <input name="name" id="id_name" class="form-control" value="{% if obj %}{{obj.name}}{% endif %}">
+        <br>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+    <hr>
+    <a href="{{back_page_url}}">Назад к списку</a>
+{% endblock %}

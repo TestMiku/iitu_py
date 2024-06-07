@@ -1,0 +1,29 @@
+{% extends "finance_module/base.html" %}
+
+{% block active_breadcrump %}
+Долги между подразделениями
+{% endblock %}
+{% block title %}
+Долги между подразделениями
+{% endblock %}
+{% block breadcrumbs %}
+{{block.super}} <span class="mx-3 text-primary"><i class="fa-solid fa-chevron-right"></i></span>
+<div class="dropdown">
+    <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      {% block interdivisional_debts_active_breadcrump %}Платежи{% endblock %}
+    </button>
+    <ul class="dropdown-menu ignore">
+        <li><a class="dropdown-item {% if request.resolver_match.url_name == 'interdivisional_debts_import' %}active{% endif %}" href="{% url 'finance_module:interdivisional_debts_import' %}"><i class="fas fa-file-invoice"></i> Импорт</a></li>
+        <li><a class="dropdown-item {% if request.resolver_match.url_name == 'interdivisional_debts_table' %}active{% endif %}" href="{% url 'finance_module:interdivisional_debts_table' %}"><i class="fas fa-file-invoice"></i> Таблица "Долги между подразделениями"</a></li>
+        <li><a class="dropdown-item {% if request.resolver_match.url_name == 'lend_company' %}active{% endif %}" href="{% url 'finance_module:lend_company' %}"><i class="fas fa-file-invoice"></i> Дать долг от имени компаний</a></li>
+        <li><a class="dropdown-item {% if request.resolver_match.url_name == 'unload_debts' %}active{% endif %}" href="{% url 'finance_module:unload_debts' %}"><i class="fas fa-file-invoice"></i> Выгрузка</a></li>
+    </ul>
+  </div>
+{% endblock %}
+{% block finance_module_content %}
+<div>
+    {% block interdivisional_debts_content %}
+
+    {% endblock %}
+</div>
+{% endblock %}

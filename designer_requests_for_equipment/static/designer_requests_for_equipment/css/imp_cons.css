@@ -1,0 +1,19 @@
+.input-from{
+    margin-bottom: 20px;
+}
+a{
+    cursor: pointer;
+}
+.quantity-input{
+    width: 100px;
+    height: 30px;
+}
+
+.text-input{
+    height: 30px;
+}
+
+.checkbox-input{
+    width: 18px;
+    height: 18px;
+}

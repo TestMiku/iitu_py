@@ -1,0 +1,15 @@
+{% extends 'finance_module/interdivisional_debts/base.html' %}
+{% load static %}
+
+{% block interdivisional_debts_active_breadcrump %} Выгрузка {% endblock %}
+
+{% block title %} Выгрузка {% endblock %}
+
+{% block interdivisional_debts_content %}
+    <div>
+        <form method="GET">
+            <label for="file"></label><input type="text" name="file" id="file" hidden="hidden">
+            <button class="btn btn-primary" type="submit" name="unload_debts">Выгрузка</button>
+        </form>
+    </div>
+{% endblock %}

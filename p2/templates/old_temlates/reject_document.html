@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+
+
+{% block title %}Отклонение документа{% endblock %}
+{% block chapter %}Отклонение документа{% endblock %}
+
+
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="rejected">
+        <label for="comment">Комментарий:</label>
+        <textarea name="comment" id="comment" rows="4" cols="50"></textarea>
+        <br>
+        <button type="submit">Отклонить</button>
+    </form>
+    <a href="{% url 'document_list' %}">Назад к списку документов</a>
+{% endblock %}

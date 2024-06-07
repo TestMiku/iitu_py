@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %} Отчет КарТел {% endblock %}
+
+{% block chapter %} Отчет КарТел {% endblock %}
+
+{% block links %}
+    <link href="{% static 'report_kartel/style.css' %}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block content %}
+
+    <body>
+        <h2>Текущий месяц</h2>
+        <table class="sum_table" border="2">
+            <thead>
+                <tr style="background:grey">
+                    <th style="min-width: 200px; color: white; border: 2px solid black">{{ current_month }}</th>
+                    <th style="min-width: 200px; color: white; border: 2px solid black">Сумма по заказу</th>
+                    <th style="min-width: 200px; color: white; border: 2px solid black">Факт {{ current_month }}</th>
+                    <th style="min-width: 600px; color: white; border: 2px solid black">к закрытию+на проверке+на подписи (сумма заказа) {{ current_month }}</th>
+                    <th style="min-width: 200px; color: white; border: 2px solid black">Итого {{ current_month }}</th>
+                    <th style="min-width: 200px; color: white; border: 2px solid black">выполнение в %</th>           
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style = "border: 2px solid black; color: black">{{ sum_by_plan }}</td>
+                    <td style = "border: 2px solid black; color: black">{{ sum_by_release }}</td>
+                    <td style = "border: 2px solid black; color: black">{{ sum_plan_not }}</td>
+                    <td style = "border: 2px solid black; color: black">{{ sum_plan_in }}</td>
+                    <td style = "border: 2px solid black; color: black">{{ sum_overall }}</td>
+                    <td style = "border: 2px solid black; color: black">{{ sum_percentage }}</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+
+
+        <h2>За прошлый месяц</h2>
+        <table class="sum_table" border="2">
+            <thead>
+                <tr style="background:grey">
+                    <th style="min-width: 200px; color: white; border: 2px solid black ">{{ previous_month }}</th>
+                    <th style="min-width: 200px; color: white; border: 2px solid black ">Сумма по заказу</th>
+                    <th style="min-width: 200px; color: white; border: 2px solid black ">Факт {{ previous_month }}</th>
+                    <th style="min-width: 600px; color: white; border: 2px solid black ">к закрытию+на проверке+на подписи (сумма заказа) {{ previous_month }}</th>
+                    <th style="min-width: 200px; color: white; border: 2px solid black ">Итого {{ previous_month }}</th>
+                    <th style="min-width: 200px; color: white; border: 2px solid black ">выполнение в %</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style = "border: 2px solid black; color: black">{{ sum_by_plan_prev }}</td>
+                    <td style = "border: 2px solid black; color: black">{{ sum_by_release_prev }}</td>
+                    <td style = "border: 2px solid black; color: black">{{ sum_plan_not_prev }}</td>
+                    <td style = "border: 2px solid black; color: black">{{ sum_plan_in_prev }}</td>
+                    <td style = "border: 2px solid black; color: black">{{ sum_overall_prev }}</td>
+                    <td style = "border: 2px solid black; color: black">{{ sum_percentage_prev }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </body>
+    </html>
+{% endblock %}

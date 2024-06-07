@@ -1,0 +1,38 @@
+{% extends 'finance_module/mandatory_payments/base.html' %}
+{% block mandatory_payments_active_breadcrump %}
+Создать исключение для ПМ
+{% endblock %}
+{% block finance_module_mandatory_payments_content %}
+<div class="d-flex justify-content-center">
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                <input type="hidden" name="post-type" value="create-access-to-others-exception-for-project-manager">
+                {% csrf_token %}
+                <div class="d-flex align-items-center">
+                    <select name="project-manager-id" id="project-manager-id-select" required class="form-select w-auto me-2">
+                        <option value="" selected disabled>Выберите ПМ</option>
+                        {% for project_manager in project_managers %}
+                        <option value="{{project_manager.id}}">{{project_manager}}</option>
+                        {% endfor %}
+                    </select>
+                    <button class="btn btn-danger">Создать исключение</button>
+                </div>
+            </form>
+            {% if create_access_to_others_exception_for_project_managers %}
+            <hr>
+            <h5>Все исключение на сегодня</h5>
+            {% for create_access_to_others_exception_for_project_manager in create_access_to_others_exception_for_project_managers %}
+            <div>
+                {{create_access_to_others_exception_for_project_manager.project_manager}} 
+            </div>
+            {% endfor %}
+            {% endif %}
+            
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

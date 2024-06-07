@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}{% endblock %}
+
+{% block links %}{% endblock %}
+
+{% block chapter %}{% endblock %}
+
+{% block back_button %}{% endblock %}
+
+{% block content %}
+
+{% if can_change_status %}
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group col-md-4">
+        <label for="sorted_by">Сортировка:</label>
+        <select class="form-control" style="background-color: {{request.status.color}}" name="status" id="id_status">
+            {% for status in statuses %}
+            <option value="{{status.id}}" style="background-color: {{status.color}}" {% if status == request.status %}selected{% endif %}>{{status}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <button type="submit">Submit</button>
+</form>
+{% else %}
+<div>
+    <div class="form-group col-md-4">
+        <select class="form-control" style="background-color: {{request.status.color}}" disabled="true">
+            <option selected style="background-color: {{request.status.color}}">{{request.status}}</option>
+        </select>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+
+{% block scripts %}
+
+{% endblock %}

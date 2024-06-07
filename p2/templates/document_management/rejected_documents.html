@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Отклоненные документы{% endblock %}
+{% block chapter %}Отклоненные документы{% endblock %}
+
+
+{% block back_button %}
+<div class="mb-4">
+    <a class="btn btn-primary" href="{% url 'distributor' %}">На главную страницу</a>
+    <br>
+    <label for="searchInput">Поиск:</label>
+    <input type="text" id="searchInput" oninput="searchTable()" class="form-control">
+</div>
+{% endblock %}
+
+
+{% block content %}
+
+    {% if rejected_documents %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="sortable" data-index="0">Номер заявки&#8593; &#8595;</th>
+                    <th class="sortable" data-index="1">Тип работы</th>
+                    <th class="sortable" data-index="2">Название документа</th>
+
+                    <th class="sortable" data-index="4">Дата и время отклонения</th>
+                    <th class="sortable" data-index="5">Отклонил</th>
+                                        <th class="sortable" data-index="3">Скачать</th>
+                    <th class="sortable" data-index="6">Причина отклонения</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for rejected_doc in rejected_documents %}
+                    <tr>
+                        <td>{{ rejected_doc.request_number }}</td>
+                        {% if rejected_doc.documentRent %}
+                            <td>{{ rejected_doc.documentRent.workRent_type.name }}</td>
+                            <td>{{ rejected_doc.documentRent.documentRent.name }}</td>
+                            <td>{{ rejected_doc.documentRent.request.modified_at }}</td>
+                            <td>{{ rejected_doc.documentRent.modified_by }}</td>
+                            <td>
+                                <a class="btn btn-primary" href="{{ rejected_doc.documentRent.documentRent.url }}" download>Скачать</a>
+                            </td>
+
+                        {% else %}
+                            <td>{{ rejected_doc.document.work_type.name }}</td>
+                            <td>{{ rejected_doc.document.document.name }}</td>
+
+                            <td>{{ rejected_doc.document.request.modified_at }}</td>
+                            <td>{{ rejected_doc.document.modified_by }}</td>
+                            <td>
+                                <a class="btn btn-primary" href="{{ rejected_doc.document.document.url }}" download>Скачать</a>
+                            </td>
+                        {% endif %}
+                        <td>{{ rejected_doc.rejection_reason }}</td>
+
+
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Нет отклоненных документов.</p>
+    {% endif %}
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            function searchTable() {
+                const input = document.getElementById('searchInput').value.toLowerCase();
+                const table = document.querySelector('.table');
+                const rows = Array.from(table.querySelectorAll('tbody tr'));
+
+                rows.forEach(row => {
+                    const textContent = row.textContent.toLowerCase();
+                    row.style.display = textContent.includes(input) ? '' : 'none';
+                });
+            }
+
+            $(document).ready(function () {
+                $('.sortable').click(function () {
+                    const table = $(this).parents('table').eq(0);
+                    const index = $(this).data('index');
+                    const rows = table.find('tr:gt(0)').toArray().sort(comparer(index));
+                    this.asc = !this.asc;
+                    if (!this.asc) {
+                        rows.reverse();
+                    }
+                    for (let i = 0; i < rows.length; i++) {
+                        table.append(rows[i]);
+                    }
+                });
+
+                function comparer(index) {
+                    return function (a, b) {
+                        const valA = getCellValue(a, index);
+                        const valB = getCellValue(b, index);
+                        return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+                    };
+                }
+
+                function getCellValue(row, index) {
+                    return $(row).children('td').eq(index).text();
+                }
+            });
+        </script>
+
+{% endblock %}

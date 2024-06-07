@@ -1,0 +1,16 @@
+{% extends "finance_module/base.html" %}
+{% block active_breadcrump %}
+Для казначеев
+{% endblock %}
+{% block breadcrumbs %}
+{{block.super}}
+<span class="mx-3 text-primary"><i class="fa-solid  fa-chevron-right"></i></span>
+<div class="dropdown">
+    <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      {% block for_treasurers_active_breadcrump %}{% endblock %}
+    </button>
+    <ul class="dropdown-menu ignore">
+        <li><a class="dropdown-item {% if request.resolver_match.view_name == 'finance_module:for_treasurers:confirmation' %}active{% endif %}" href="{% url 'finance_module:for_treasurers:confirmation' %}"><i class="fas fa-file-invoice"></i> Подтверждение платежей</a></li>
+    </ul>
+  </div>
+{% endblock %}

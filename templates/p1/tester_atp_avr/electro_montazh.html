@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Таблица выполненных работ и материалов</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .total {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2>ВЕДОМОСТЬ ИСПОЛНЕНИЯ РАБОТ</h2>
+<table>
+    <thead>
+        <tr>
+            <th>№ п/п</th>
+            <th>НАИМЕНОВАНИЕ И ПОСЛЕДОВАТЕЛЬНОСТЬ ВЫПОЛНЕНИЯ ЭТАПОВ РАБОТ (ВИДОВ РАБОТ)</th>
+            <th>Ед. изм</th>
+            <th>Кол-во</th>
+            <th>Полная стоимость работ в тенге без НДС</th>
+            <th>Сроки начала и окончания работ</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in rows_work %}
+        <tr>
+            <td>{{ r.0 }}</td>
+            <td>{{ r.1 }}</td>
+            <td>{{ r.2 }}</td>
+            <td>{{ r.3 }}</td>
+            <td>{{ r.5 }}</td>
+            <td>Согласно план-графика</td>
+        </tr>
+        {% endfor %}
+        <tr class="total">
+            <td colspan="4">Итого работа</td>
+            <td colspan="2">{{ total_work }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>МАТЕРИАЛЫ</h2>
+<table>
+    <thead>
+        <tr>
+            <th>№ п/п</th>
+            <th>НАИМЕНОВАНИЕ МАТЕРИАЛОВ</th>
+            <th>Ед. изм</th>
+            <th>Кол-во</th>
+            <th>Полная стоимость материалов в тенге без НДС</th>
+            <th>Сроки поставки</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in rows_materials %}
+        <tr>
+            <td>{{ r.0 }}</td>
+            <td>{{ r.1 }}</td>
+            <td>{{ r.2 }}</td>
+            <td>{{ r.3 }}</td>
+            <td>{{ r.5 }}</td>
+            <td>Согласно план-графика</td>
+        </tr>
+        {% endfor %}
+        <tr class="total">
+            <td colspan="4">Итого материалы</td>
+            <td colspan="2">{{ total_materials }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<table>
+    <tbody>
+        <tr class="total">
+            <td colspan="4">Итого:</td>
+            <td colspan="2">{{ total_overall }}</td>
+        </tr>
+        <tr class="total">
+            <td colspan="4">НДС 12%</td>
+            <td colspan="2">{{ total_vat }}</td>
+        </tr>
+        <tr class="total">
+            <td colspan="4">Всего с НДС:</td>
+            <td colspan="2">{{ total_with_vat }}</td>
+        </tr>
+        <tr class="total">
+            <td colspan="4">Всего (общая стоимость работ по ведомости):</td>
+            <td colspan="2">{{ total_with_vat }} ({{ total_with_vat_str }}) тенге 00 тиын с учетом НДС 12%</td>
+        </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

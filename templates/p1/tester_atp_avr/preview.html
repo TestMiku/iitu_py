@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+            integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+            crossorigin="anonymous"
+    >
+    <style>
+        .main-container {
+            font-family: "Times New Roman", Times, serif;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid main-container" style="">
+
+    {{ table|safe }}
+
+    <table class="table table-bordered">
+        <tr>
+            <td class="font-weight-bold">Итого:</td>
+            <td>{{ data.total }}</td>
+        </tr>
+        <tr>
+            <td class="font-weight-bold">НДС {{ data.vat }}%:</td>
+            <td>{{ data.total_vat }}</td>
+        </tr>
+        <tr>
+            <td class="font-weight-bold">Всего с учетом НДС:</td>
+            <td>{{ data.total_with_vat }}</td>
+        </tr>
+        <tr>
+            <td class="font-weight-bold">Разница с заказом:</td>
+            <td>{{ data.order_difference }}</td>
+        </tr>
+    </table>
+    <div class="mb-5 font-weight-bold">
+        {% for total_as_words in data.totals_as_words %}
+            <p>{{ total_as_words }}</p>
+        {% endfor %}
+    </div>
+    <div>
+        {% for change in data.changes %}
+            {{ change }};<br/>
+        {% endfor %}
+    </div>
+</div>
+
+</body>
+</html>

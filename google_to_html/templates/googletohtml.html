@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-center">
+    <h2>Google to HTML</h2>
+</div>
+<div class="d-flex align-items-center justify-content-center">
+    <form onsubmit="event.preventDefault(); exportToExcel()">
+        <label for="search_key" class="m-1">Введите номер АПП: </label>
+        <input class="form-control w-auto m-1" type="text" name="search_key" id="search-key">
+        <button class="btn btn-outline-primary m-1">Показать</button>
+
+    </form>
+</div>
+
+
+<div id="loading" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+    <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
+
+<div class="d-flex align-items-center justify-content-center mt-3" id="btn-block">
+    <input type="text" class="form-control mr-2" id="input-text" placeholder="'П-94080-22' или 'П-94080-22,П-94240-20'">
+    <button class="btn btn-primary" onclick="addToAllRows()">Добавить</button>
+</div>
+
+<table id="data-table" class="display" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+    <thead>
+        <tr id="table-header"></tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+</table>
+
+<button class="btn btn-primary" id="get-import" style="margin-top: 20px; display: none;"
+    onclick="getImportData()">Получить в импорт</button>
+
+<style>
+    #data-table th {
+        background-color: #adc8ea;
+        color: #fff;
+        padding: 10px;
+        text-align: left;
+    }
+
+    #data-table td,
+    #data-table th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+</style>
+
+<script>
+    let savedJson = null;
+
+    function showLoading() {
+        document.getElementById("loading").style.display = "block";
+    }
+
+    function hideLoading() {
+        document.getElementById("loading").style.display = "none";
+    }
+
+    function addToAllRows() {
+        const inputValue = document.getElementById("input-text").value;
+        if (inputValue) {
+            savedJson.rows.forEach(row => {
+                row[6] += `, ${inputValue}`;
+            });
+            console.log(JSON.stringify(savedJson, null, 4));
+            document.getElementById("input-text").value = ""; // Очистить поле ввода после добавления значения
+        }
+    }
+
+    function exportToExcel() {
+        showLoading();
+        const url = "{% url 'googtogtml' %}";
+        const searchKey = document.getElementById("search-key").value;
+        fetch(url + `?search_key=${searchKey}`).then(response => response.json()).then(json => {
+            savedJson = json;
+            hideLoading();
+            console.log(json)
+            if (json.rows.length > 0) {
+                const headers = {
+                    1: "Ключ поиска",
+                    2: "Наименование работ c подрядчиком",
+                    3: "Кол-во от ПМ",
+                    32: "Цена от ПМ"
+                };
+
+                const tableHeader = document.getElementById("table-header");
+                const tableBody = document.getElementById("table-body");
+                tableHeader.innerHTML = "";
+                tableBody.innerHTML = "";
+                Object.keys(headers).forEach(index => {
+                    const th = document.createElement("th");
+                    th.innerText = headers[index];
+                    tableHeader.appendChild(th);
+                });
+
+                json.rows.forEach(row => {
+                    const tr = document.createElement("tr");
+                    Object.keys(headers).forEach(index => {
+                        const td = document.createElement("td");
+                        const columnIndex = Number(index);
+                        td.innerText = row[columnIndex];
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
+                document.getElementById("get-import").style.display = "block";
+                $('#data-table').DataTable();
+            } else {
+                console.log("No matching rows found.");
+            }
+        });
+    }
+
+
+    function calculateTotalPrice(row) {
+        const quantity = parseFloat(row[6].replace(/[\s\u00a0]/g, ''));
+        const enteredPrice = parseFloat(row[3].replace(/[\s\u00a0]/g, ''));
+        return quantity * enteredPrice;
+    }
+
+
+    function getImportData() {
+        const jsonData = {
+            "import_data": [{ "Спецификация счёта": [] }]
+        };
+
+        let lineNumber = 10;
+        let invoiceString = 10;
+        let newRow;
+        savedJson.rows.forEach(row => {
+            orderTempArr = []
+            totalSum = parseFloat(row[32].replace(/\s/g, '').replace(',', '.'))
+            row[6].split(',').forEach(function (order) {
+                let quantity = parseInt(row[3]) / row[6].split(',').length;
+                let orderTotal = totalSum / row[6].split(',').length;
+                orderTempArr.push({
+                    "Количество введённое": typeof quantity === "number" ? truncateToTwoDecimals(quantity) : quantity,
+                    "Заказ": order,
+                    "Спецификация заказа": 10,
+                    "Итоговая сумма": typeof orderTotal === "number" ? truncateToTwoDecimals(orderTotal) : orderTotal,
+                });
+            });
+            if (totalSum > 0) {
+                var newRow = {
+                    "Номер строки": lineNumber,
+                    "Ключ поиска": row[1],
+                    "Количество (в счете)": parseInt(row[3]), //row[28]
+                    "Введённая цена": parseFloat(row[32].replace(/\s/g, '').replace(',', '.')),
+                    "Налог": "НДС 12%",
+                    "Связь заказ/счёт": orderTempArr
+                }
+            } else {
+                var newRow = {
+                    "Номер строки": lineNumber,
+                    "Ключ поиска": row[1],
+                    "Количество (в счете)": parseInt(row[3]), //row[28]
+                    "Введённая цена": parseFloat(row[32].replace(/\s/g, '').replace(',', '.')),
+                    "Налог": "НДС 12%",
+                }
+            }
+            lineNumber += 10;
+            jsonData.import_data[0]["Спецификация счёта"].push(newRow);
+        });
+        const importData = document.createElement("import_data");
+        importData.hidden = true;
+        importData.textContent = JSON.stringify(jsonData, null, 4);
+        const blob = new Blob([importData.outerHTML], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'import_data.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+    }
+
+    function truncateToTwoDecimals(num) {
+        return Math.trunc(num * 100) / 100;
+    }
+
+</script>
+{% endblock %}

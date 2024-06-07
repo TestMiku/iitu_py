@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Документ - {{ document }}
+{% endblock %}
+
+{% block chapter %}
+    {{ document }}
+{% endblock %}
+
+
+{% block back_button %}
+    <a class="btn btn-light btn-icon-split mb-4"
+       href="{{ document.back_url }}">
+                        <span class="icon text-gray-600">
+                            <i class="fas fa-arrow-left"></i>
+                        </span>
+        <span class="text">Назад к {% if document.parent is None %}корневой
+            папке{% else %}папке {{ document.parent }}{% endif %}</span>
+    </a>
+    {% if document.parent is not None %}
+        <a class="btn btn-primary btn-icon-split mb-4 ml-2"
+           href="{% url "documents:list" %}">
+                        <span class="icon">
+                            <i class="fas fa-arrow-up"></i>
+                        </span>
+            <span class="text">Назад к корневой папке</span>
+        </a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="modal fade" id="properties-modal" tabindex="-1" aria-labelledby="properties-modal-label"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="properties-modal-label">Свойства</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    {% if document.description %}
+                        <h6>Описание</h6>
+                        <p class="text-monospace">{{ document.description }}</p>
+                    {% endif %}
+                    <h6>Для ролей</h6>
+                    <p class="text-monospace">{{ document.for_roles.all|join:", " }}
+                    </p>
+                    <h6>Создан</h6>
+                    <p class="text-monospace">{{ document.created_at }} - {{ document.uploaded_by }}</p>
+
+                    {#                    <div id="sorts">#}
+                    {##}
+                    {#                    </div>#}
+                    {#                    <button type="button" class="btn btn-primary" id="add-sort">Добавить поле для сортировки</button>#}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex align-items-center">
+        <a class="btn btn-primary mr-2" href="{% url "documents:update_with_path" path=document.path %}">
+                        <span class="icon">
+                            <i class="fas fa-pen"></i>
+                        </span>
+            Редактировать
+        </a>
+        <button class="btn btn-primary mr-2" data-toggle="modal" data-target="#properties-modal">
+            <i class="fas fa-code"></i>
+            Свойства
+        </button>
+        <a class="btn btn-primary mr-2" href="{{ document.document_file.url }}" download>
+                        <span class="icon">
+                            <i class="fas fa-download"></i>
+                        </span>
+            Скачать
+        </a>
+        <a class="btn btn-danger " href="{% url "documents:delete_with_path" path=document.path %}">
+            <span class="icon">
+                <i class="fas fa-trash"></i>
+            </span>
+            Удалить
+        </a>
+
+    </div>
+    <hr>
+    <div>
+        <embed src="{{ document.document_file.url }}"/>
+    </div>
+{% endblock %}

@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {{user.get_full_name}}
+{% endblock %}
+
+{% block links %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/css/all.min.css" integrity="sha256-2XFplPlrFClt0bIdPgpz8H7ojnk10H69xRqd9+uTShA=" crossorigin="anonymous" />
+    <!-- Используемые ссылки в пустом разделе -->
+{% endblock %}
+
+{% block chapter %}
+
+{% endblock %}
+
+{% block back_button %}
+<div class="row">
+    <button class="btn btn-light btn-icon-split mb-2" onclick="window.history.back();">
+        <span class="icon text-gray-600">
+            <i class="fas fa-arrow-left"></i>
+        </span>
+        <span class="text">Назад</span>
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<style>
+    body {
+        margin-top: 20px;
+        color: #9b9ca1;
+    }
+    .bg-secondary-soft {
+        background-color: rgba(208, 212, 217, 0.1) !important;
+    }
+    .py-5 {
+        padding-top: 3rem !important;
+        padding-bottom: 3rem !important;
+    }
+    .px-4 {
+        padding-right: 1.5rem !important;
+        padding-left: 1.5rem !important;
+    }
+    .file-upload .avatar-circle {
+        height: 250px;
+        width: 250px;
+        margin: auto;
+        vertical-align: middle;
+        border: 1px solid ;
+        background-color: #e5dfe4;
+        border-radius: 50%; /* Делает div круглым */
+        overflow: hidden; /* Скрывает части изображения, выходящие за пределы круга */
+    }
+    .text-secondary {
+        --bs-text-opacity: 1;
+        color: rgba(208, 212, 217, 0.5) !important;
+    }
+    .btn-success-soft {
+        color: #28a745;
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+    .btn-danger-soft {
+        color: #dc3545;
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+    .form-control {
+        display: block;
+        width: 100%;
+        padding: 0.5rem 1rem;
+        font-size: 0.9375rem;
+        font-weight: 400;
+        line-height: 1.6;
+        color: #29292e;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #e5dfe4;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        border-radius: 5px;
+        -webkit-transition: border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    .avatar-image {
+        width: 100%;  /* Заполняет ширину div */
+        height: 100%; /* Заполняет высоту div */
+        object-fit: cover; /* Обрезает изображение для заполнения контейнера без искажения */
+        object-position: center; /* Центрирует изображение в div */
+        border-radius: 50%; /* Делает изображение круглым */
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Page title -->
+            <div class="my-5">
+                <h3>Мой профиль</h3>
+                <hr>
+            </div>
+            <!-- Form START -->
+            <form class="file-upload">
+                <div class="row mb-5 gx-6">
+                    <!-- Contact detail -->
+                    <div class="col-sm-8 mb-5 mb-sm-0">
+                        <div class="bg-secondary-soft px-3 py-2 rounded">
+                            <div class="row g-3">
+                                <h4 class="mb-4 mt-0 container-fluid">Contact detail</h4>
+                                <!-- First Name -->
+                                <div class="col-md-6 mb-1">
+                                    <label class="form-label">Имя</label>
+                                    <input type="text" class="form-control" placeholder="" aria-label="First name" value="{{ user.first_name }}" disabled>
+                                </div>
+                                <!-- Last name -->
+                                <div class="col-md-6 mb-1">
+                                    <label class="form-label">Фамилия</label>
+                                    <input type="text" class="form-control" placeholder="" aria-label="Last name" value="{{ user.last_name }}" disabled>
+                                </div>
+                                <!-- Phone number -->
+                                <div class="col-md-6 mb-1">
+                                    <label class="form-label">Внутренний номер</label>
+                                    <input type="text" class="form-control" placeholder="" aria-label="Phone number" value="{{ user.work_number }}" disabled>
+                                </div>
+                                <!-- Mobile number -->
+                                <div class="col-md-6 mb-1">
+                                    <label class="form-label">Мобильный номер</label>
+                                    <input type="text" class="form-control" placeholder="" aria-label="Phone number" value="{{ user.phone_number}}" disabled>
+                                </div>
+                                <!-- Email -->
+                                <div class="col-md-6 mb-1">
+                                    <label class="form-label">Email</label>
+                                    <input type="text" class="form-control" placeholder="" aria-label="Email" value="{{ user.email }}" disabled>
+                                </div>
+
+                                <div class="col-md-6 mb-1 align-content-end">
+                                    {% if user.send_notifications_to_email == True %}
+                                        <p class="ml-4 mt-2 align-items-end" onclick="window.location.href='profile/send_notifications_to_email/1'">
+                                            <input type="checkbox" checked>
+                                            <span class="ml-2">Отправлять уведомления по почте</span>
+                                        </p>
+                                    {% else %}
+                                        <p class="ml-4 mt-2 align-items-end" onclick="window.location.href='profile/send_notifications_to_email/0'">
+                                            <input type="checkbox">
+                                            <span class="ml-2">Отправлять уведомления по почте</span>
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div> <!-- Row END -->
+                        </div>
+                    </div>
+                    <!-- Upload profile -->
+                    <div class="col-sm-4">
+                        <div class="bg-secondary-soft px-4 py-5 rounded">
+                            <div class="row g-3 d-flex justify-content-center">
+                                <h4 class="mb-4 mt-0 container text-center">Avatar</h4>
+                                <div class="text-center">
+                                    <!-- Image upload -->
+                                    <div class="avatar-circle position-relative display-2 mb-3 rounded-div">
+                                        <img class="card-img-top avatar-image" src="media/{{ user.avatar }}" alt="Profile image">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- Row END -->
+
+                <!-- Skills detail -->
+                <div class="row mb-5 gx-5">
+                    <div class="col-sm-12">
+                        <div class="bg-secondary-soft px-4 py-2 rounded">
+                            <div class="row g-3">
+                                <h4 class="my-4 container-fluid">Skills</h4>
+                                <div class="container-fluid align-items-end" id="skills-list">
+                                    {% if user.skills %}
+                                        {% for skill in user.skills %}
+                                            <div class="container-fluid mb-3">
+                                                <label class="form-label">{{ skill.name }}</label>
+                                                <input type="range" class="form-range" min="1" max="100" value="{{ skill.level }}" disabled style="width: 100%;">
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-center">Навыки еще не добавлены</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- Row END -->
+
+                <!-- button -->
+                <div class="gap-3 d-md-flex justify-content-md-end text-center">
+                    <a class="btn btn-primary btn-lg" href="/profile/edit">
+                        <span class="icon">
+                            <i class="fas fa-edit"></i>
+                        </span>
+                        <span class="text">Изменить</span>
+                    </a>
+                </div>
+            </form> <!-- Form END -->
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

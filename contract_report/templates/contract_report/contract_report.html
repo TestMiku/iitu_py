@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}
+    Проверка неоплаченных счетов
+{% endblock %}
+
+
+{% block links %}
+
+{% endblock %}
+    
+
+{% block chapter %}
+Проверка неоплаченных счетов
+{% endblock %}
+
+
+
+
+{% block content %}
+<br>
+<form method="post" action="{% url 'import_esf_a77_data' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="upload-file"><i class="fas fa-file-excel">ЭСФ А77</i></label>
+    <input type="file" name="excel_file" id="upload-file" accept=".xlsx, .xls" required>
+    <input type="submit" class="btn btn-primary" value="Загрузить">
+    <a href="{% url 'suppliers' %}" class="btn btn-info" >Добавить поставщиков</a>
+</form>
+<br>
+
+{% if merged_data %}
+<div style="max-height: 40vh; overflow-y: scroll">
+    <table class="table table-bordered table-striped" id="dataTable" width="100%" cellspacing="0" role="grid"
+    aria-describedby="dataTable_info" style="width: 100%;">
+        <thead>
+            <tr>
+                <th style="top:0; position:sticky; background-color: #f8f9fc;">Дата на сегодня</th>
+                <th style="top:0; position:sticky; background-color: #f8f9fc;">№ ДО</th>
+                <th style="top:0; position:sticky; background-color: #f8f9fc;">№ Счета</th>
+                <th style="top:0; position:sticky; background-color: #f8f9fc;">Дата счета</th>
+                <th style="top:0; position:sticky; background-color: #f8f9fc;">TOO</th>
+                <th style="top:0; position:sticky; background-color: #f8f9fc;">Поставщик</th>
+                <th style="top:0; position:sticky; background-color: #f8f9fc;">ИИН</th>
+                <th style="top:0; position:sticky; background-color: #f8f9fc;">Неоплаченная сумма 1С</th>
+                <th style="top:0; position:sticky; background-color: #f8f9fc;">Сумма лимита</th>
+                <th style="top:0; position:sticky; background-color: #f8f9fc;">Срок лимита (в днях)</th>
+                <th style="top:0; position:sticky; background-color: #f8f9fc;">Сколько прошло дней с даты счета</th>
+                <th style="top:0; position:sticky; background-color: #f8f9fc;">Дней до оплаты</th>
+                <th style="top:0; position:sticky; background-color: #f8f9fc;">Дата оплаты</th>
+                <th style="top:0; position:sticky; background-color: #f8f9fc;">Проект</th>
+                <th style="top:0; position:sticky; background-color: #f8f9fc;">Дата накладной</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in merged_data %}
+                {% if item.matched %}
+                    <tr>
+                        <td>{{ item.get_current_date }}</td>
+                        <td>{{ item.documentno|default:'' }}</td>
+                        <td>{{ item.nscheta|default:'' }}</td>
+                        <td>{{ item.datascheta|date:"d.m.Y"|default:'-'}}</td>
+                        <td>{{ item.too|default:'' }}</td>
+                        <td>{{ item.postavshik|default:'' }}</td>
+                        <td>{{ item.bin|default:'' }}</td>
+                        <td>{{ item.notpayamt1ckzt|default:''}}</td>
+                        <td>{{ item.get_supplier_sum_of_limit|default:'-' }}</td>
+                        <td>{{ item.get_supplier_limit_days|default:'Лимит не был указан'}}
+                        <td>{{ item.how_many_days_have_passed|default:'-'}}</td>
+                        <td>{{ item.days_before_payment|default:'-'}}</td>
+                        <td>{{ item.date_of_payment |date:"d.m.Y"|default:'-'}}</td>
+                        <td>{{ item.gruppa_proekrov|default:'' }}</td>
+                        <td>{{ item.docdate |date:"d.m.Y"|default:'-'}}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+    <br>
+    <h5 style="color:#BE0404;">Не найденные в 19_20</h5>
+    <br>
+    <div style="max-height: 40vh; overflow-y: scroll">
+    <table class="table table-bordered table-striped" id="dataTable" width="100%" cellspacing="0" role="grid"
+    aria-describedby="dataTable_info" >
+    <thead>
+        <tr>
+            <th style="top:0; position:sticky; background-color: #f8f9fc;">Покупатель</th>
+            <th style="top:0; position:sticky; background-color: #f8f9fc;">Контрагент</th>
+            <th style="top:0; position:sticky; background-color: #f8f9fc;">БИН / ИИН</th>
+            <th style="top:0; position:sticky; background-color: #f8f9fc;">Сумма документа</th>
+            <th style="top:0; position:sticky; background-color: #f8f9fc;">Дата оборота</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in merged_data %}
+            {% if not item.matched %}
+                <tr>
+                    <td>{{ item.too|default:'-'}}</td>
+                    <td>{{ item.postavshik|default:'-'}}</td>
+                    <td>{{ item.bin |default:'-'}}</td>
+                    <td>{{ item.notpayamt1ckzt|default:'-'}}</td>
+                    <td>{{ item.docdate |date:"d.m.Y"|default:'-'}}</td>
+                </tr>
+
+            {% endif %}
+                {% empty %}
+                <tr>
+                    <td colspan="5">Нет данных для отображения</td>
+                </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+</div>
+
+{% else %}
+
+<table class="table table-bordered table-striped" id="dataTable" width="100%" cellspacing="0" role="grid"
+aria-describedby="dataTable_info" style="width: 100%;">
+    <thead>
+        <tr>
+            <th>Дата на сегодня</th>
+            <th>№ ДО</th>
+            <th>№ Счета</th>
+            <th>Дата счета</th>
+            <th>TOO</th>
+            <th>Поставщик</th>
+            <th>ИИН</th>
+            <th>Неоплаченная сумма 1С</th>
+            <th>Срок лимита (в днях)</th>
+            <th>Сколько прошло дней с даты счета</th>
+            <th>Дней до оплаты</th>
+            <th>Дата оплаты(формула)</th>
+            <th>Проект</th>
+            <th>Дата накладной</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td colspan="14">Нет данных для отображения</td>
+        </tr>
+    </tbody>
+</table>
+
+{% endif %}
+
+
+{% comment %} <form method="post" enctype="multipart/form-data" >
+    {% csrf_token %}
+    <label for="upload-file"><i class="fas fa-file-excel"></i>Excel</label>
+    <input type="file" name="excel_file" id="upload-file" accept=".xlsx, .xls" required>
+    <input type="submit" class="btn btn-primary" value="Загрузить">
+    <a href="{% url 'suppliers' %}" class="btn btn-info" >Добавить поставщиков</a>
+</form>
+<div class="card-body custom-table-container">
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped" id="dataTable" width="100%" cellspacing="0" role="grid"
+               aria-describedby="dataTable_info" style="width: 100%;">
+            <thead>
+            <tr role="row">
+                {% for head in dataheaders %}
+                <th>{{head}}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+
+                {% for i in data %}
+                <tr>
+                    <td>{{ i.data_1|default:'' }}</td>
+                    <td>{{ i.data_2|default:'' }}</td>
+                    <td>{{ i.data_3|default:'' }}</td>
+                    <td>{{ i.data_4|default:'' }}</td>
+                    <td>{{ i.data_5|default:'' }}</td>
+                    <td>{{ i.data_6|default:'' }}</td>
+                    <td>{{ i.data_7|default:'' }}</td>
+                    <td>{{ i.data_8|default:'' }}</td>
+                    <td>{{ i.data_9|default:'' }}</td>
+                    <td>{{ i.data_10|default:'' }}</td>
+                    <td>{{ i.data_11|default:'' }}</td>
+                    <td>{{ i.data_12|default:'' }}</td>
+                    <td>{{ i.data_13|default:'' }}</td>
+                    <td>{{ i.data_14|default:'' }}</td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+</div> {% endcomment %}
+
+
+{% endblock %}
+
+
+
+{% block scripts %}
+    <script>
+        if (window.history.replaceState) {
+            window.history.replaceState( null, null, window.location.href );
+        }
+    </script>
+{% endblock %}

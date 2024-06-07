@@ -1,0 +1,125 @@
+/* Reset some default styles */
+body, h1, p, ul, li {
+    margin: 0;
+    padding: 0;
+}
+
+/* Basic styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 0;
+}
+
+nav ul {
+    list-style: none;
+    text-align: right; /* Align the menu items to the right */
+    margin-top: 5px; /* Add some top margin */
+}
+
+nav ul li {
+    display: inline-block;
+    margin: 0 15px; /* Adjust the spacing between menu items */
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.3s; /* Add a smooth color transition */
+}
+
+nav ul li a:hover {
+    color: #f0ad4e; /* Change color on hover */
+}
+
+.main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.intro {
+    text-align: center;
+    padding: 50px 10px 0;
+}
+
+/* Form styling */
+.input-container {
+    display: flex;
+    align-items: flex-start;
+}
+
+#inputData {
+    padding: 10px;
+    width: 200px; /* Adjust the width as needed */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+/* Tables will be inline-blocks */
+.table-container {
+    display: inline-block;
+    vertical-align: top; /* Align the containers to the top */
+    margin-right: 50px;/* Adjust this value for more spacing */
+}
+
+#submitButton {
+    padding: 10px 20px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.toggle-button {
+    padding: 10px 20px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+/* Table styling */
+.data-section {
+    padding: 0 20px 20px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    border: 2px solid #000000; /* Change border color to more contrasting color */
+    margin-bottom: 20px;
+}
+
+th, td {
+    border: 2px solid #000000;
+    padding: 5px;
+    text-align: left;
+    height: 30px;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+#table1 th:nth-child(2),
+#table2 th:nth-child(2){
+    width: 45%; /* Adjust the width as needed */
+}
+
+
+footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+}

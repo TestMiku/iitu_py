@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+
+{% block title %}Загрузите документы{% endblock %}
+{% block chapter %}Загрузите документы{% endblock %}
+
+{% block back_button %}
+<div>
+    <a class="btn btn-primary mb-2" href="{% url 'distributor' %}">На главную страницу</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <form method="post" enctype="multipart/form-data" id="uploadForm" class="col-12">
+        {% csrf_token %}
+        <input type="hidden" name="request" id="request-number" />
+{% comment %} 
+        <div class="form-group">
+            <label for="{{ form.project.id_for_label }}">Проект:</label>
+            {{ form.project }}
+        </div> {% endcomment %}
+
+        
+        <div class="form-group">
+            <label for="id_project">Проект:</label>
+            <select name="project" id="id_project" class="form-control">
+                <option value="" selected disabled>Выберите проект</option>
+                {% for value, label in form_project_choices %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+
+
+        <div class="form-group">
+            <label for="{{ form.doc_type.id_for_label }}">Вид работ:</label>
+            <select name="doc_type" id="id_doc_type" class="form-control">
+                <option value="" selected disabled>Выберите вид работ</option>
+                {% for doc_type in doc_types %}
+                    <option value="{{ doc_type.id }}">{{ doc_type.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+</div>
+<div class="row d-flex">
+
+    <div class="col-4">
+        <form action="{% url 'create_request' %}" method="post" class="" id="request-form">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-body">
+
+                    <div class="form-group row">
+                        <label for="{{ request_form.region.id_for_label }}" class="col-sm-4 col-form-label">Регион</label>
+                        <div class="col-sm-12">
+                            <select name="region" id="id_region" class="form-control">
+                                <option value="" selected disabled>Выберите регион</option>
+                                <option value="Алматы">Алматы</option>
+                                <option value="Акмолинская область">Акмолинская область</option>
+                                <option value="Туркестанская область">Туркестанская область</option>
+                                <option value="Абайская область">Абайская область</option>
+                                <option value="Актюбинская область">Актюбинская область</option>
+                                <option value="Алматинская область">Алматинская область</option>
+                                <option value="Атырауская область">Атырауская область</option>
+                                <option value="Восточно-Казахстанская область">Восточно-Казахстанская область</option>
+                                <option value="Жамбылская область">Жамбылская область</option>
+                                <option value="Жетысуска область">Жетысуска область</option>
+                                <option value="Западно-Казахстанская область">Западно-Казахстанская область</option>
+                                <option value="Карагандинская область">Карагандинская область</option>
+                                <option value="Костанайская область">Костанайская область</option>
+                                <option value="Кызылординская область">Кызылординская область</option>
+                                <option value="Мангистауская область">Мангистауская область</option>
+                                <option value="Павлодарская область">Павлодарская область</option>
+                                <option value="Северо-Казахстанская область">Северо-Казахстанская область</option>
+                                <option value="Улытауская область">Улытауская область</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="{{ request_form.bis_name.id_for_label }}" class="col-sm-4 col-form-label">Наименование БС:</label>
+                        <div class="col-sm-12">
+                            <input type="text" pattern="[0-9a-zA-Z_]+" id="id_bis_name" name="bis_name" required placeholder="EXM_Example" class="form-control">
+                            <!-- {{ request_form.bis_name }} -->
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="form-group row">
+                        <label for="{{ request_form.order_number.id_for_label }}" class="col-sm-4 col-form-label">Номер заказа</label>
+                        <div class="col-sm-12">
+                            <input type="number" id="id_order_number" name="order_number" required placeholder="XXXX" class="form-control">
+                            <!-- {{ request_form.order_number }} -->
+                        </div>
+                    </div>
+
+
+                    <div class="form-group row">
+                        <label for="{{ request_form.order_date.id_for_label }}" class="col-sm-4 col-form-label">Дата заказа</label>
+                        <div class="col-sm-12">
+                            <!-- {{ request_form.order_date }} -->
+                            <input type="date" list="order_date_variants" class="form-control" name="order_date" id="order_date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row">
+                        <label for="{{ request_form.comment.id_for_label }}" class="col-sm-4 col-form-label">Комментаний</label>
+                        <div class="col-sm-12">
+                            <textarea id="{{ request_form.comment.id_for_label }}" name="{{ request_form.comment.name }}" rows="3" class="form-control"></textarea>
+                        </div>
+                    </div>
+                    
+
+                    <input type="hidden" name="request_id" id="request_id" value="">
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+
+
+    <div class="col-4">
+        <div class="" id="workTypes"></div>
+    </div>
+
+    <div class="col-4">
+        <button class="btn btn-secondary btn-block" id="upload-documents-none" hidden>Подготовка документов</button>
+        <button class="btn btn-warning btn-block" id="upload-documents" hidden>Отправить в финансовый отдел для частичного закрытия</button>
+        <button class="btn btn-success btn-block" id="upload-documents-full" hidden>Отправить в финансовый отдел для полного закрытия</button>
+        <button class="btn btn-primary btn-block" id="upload-documents-torent" hidden >Отправить к отделу аренды и выкупа</button>
+
+        <p class="text-center mt-4" id="message"></p>
+    </div>
+</div>
+
+
+
+    <style>
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+    </style>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+    <script>
+
+        $(document).ready(function () {
+            function updateWorkTypes() {
+                var workTypesDiv = $("#workTypes");
+                workTypesDiv.empty();
+            }
+
+            function updateDocTypes() {
+                var projectSelect = $("#id_project");
+                var docTypeSelect = $("#id_doc_type");
+                docTypeSelect.empty();
+                var project_id = projectSelect.val();
+
+                docTypeSelect.append('<option value="" selected disabled>Выберите вид работ</option>');
+                if (project_id) {
+                    $.ajax({
+                        url: "{% url 'get_doc_types' %}",
+                        data: {'project_id': project_id},
+                        dataType: 'json',
+                        success: function (data) {
+                            $.each(data, function (index, docType) {
+                                docTypeSelect.append('<option value="' + docType.id + '">' + docType.name + '</option>');
+                            });
+                            updateWorkTypes();
+
+
+
+                        }
+                    });
+                }
+            }
+
+            $("#id_project").change(updateDocTypes);
+            $("#id_doc_type").change(updateWorkTypes);
+
+        });
+    </script>
+
+
+    <script>
+        $(document).ready(function () {
+            $("#create-request-btn").on('click', function () {
+                $(this).hide();
+            });
+        });
+    </script>
+    <script>
+        let workTypes = null;
+        let requestNumber = null;
+        $(document).ready(function () {
+            $("#request-form").hide();
+
+            $("#upload-documents-none").on("click", function () {
+                submitForm("pending-none");
+            });
+
+            $("#upload-documents").on("click", function () {
+                submitForm("pending2");
+            });
+
+            $("#upload-documents-torent").on("click", function () {
+                submitForm("pending");
+            });
+            $("#upload-documents-full").on("click", function () {
+                submitForm("pending3");
+            });
+
+        function submitForm(status) {
+
+            $("#workTypes").clone().addClass("d-none").appendTo("#uploadForm");
+
+            $("<input>").attr({
+                type: "hidden",
+                name: "status",
+                value: status,
+            }).appendTo("#uploadForm");
+            $.ajax({
+                url: "{% url 'create_request' %}",
+                method: "POST",
+                data: $("#request-form").serialize() + "&doc_type=" + $("#id_doc_type").val(),
+                success(data) {
+                    $("#request-number").val(data.requestNumber);
+                    $("#uploadForm").submit();
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            let workTypes = null;
+            let requestNumber = null;
+
+
+            function updateWorkTypes() {
+                var docTypeSelect = $("#id_doc_type");
+                var workTypesDiv = $("#workTypes");
+
+                var doc_type_id = docTypeSelect.val();
+                workTypesDiv.empty();
+
+                if (doc_type_id) {
+                    $("#request-form").show();
+
+                    $.ajax({
+                        url: "{% url 'get_work_types' %}",
+                        data: {'doc_type_id': doc_type_id},
+                        dataType: 'json',
+                        success: function (data) {
+                            workTypes = data;
+                            $.each(workTypes, function (index, workType) {
+                                const div = $(`<div class="mb-2">`);
+                                var workTypeDiv = $("<div class='custom-file'>");
+                                var label = $('<label class="custom-file-label" for="work_type_' + workType.id + '">' + workType.name + '</label>');
+                                var input = $('<input class="custom-file-input" type="file" name="work_type_' + workType.id + '_documents" required multiple>');
+                                var hideButton = $('<button class="btn btn-dark btn-sm text-light hide-work-type">Скрыть</button>');
+                                var showButton = $('<button class="btn btn-dark btn-sm text-light show-work-type">Показать</button>');
+
+                                 if (workType.name !== 'АТП в WORD' && workType.name !== 'АТП в PDF') {
+                                     hideButton.show();
+                                 } else {
+                                     hideButton.hide();
+                                 }
+                                showButton.hide();
+                                workTypeDiv.append(label);
+                                workTypeDiv.append(input);
+                                div.append(workTypeDiv);
+                                div.append(hideButton);
+                                div.append(showButton);
+                                workTypesDiv.append(div);
+
+                                hideButton.on('click', function () {
+                                    workTypeDiv.hide();
+                                    hideButton.hide();
+                                    showButton.show();
+                                });
+
+                                showButton.on('click', function () {
+                                    workTypeDiv.show();
+                                    hideButton.show();
+                                    showButton.hide();
+                                });
+
+                                input.on('change', function () {
+                                    label.html(Array.from(this.files).map(file => file.name).join(", "));
+                                });
+
+
+                            });
+                            $("#request_id").val(data.id);
+                            $("#uploadForm").show();
+                            document.getElementById("upload-documents-none").removeAttribute("hidden");
+                            document.getElementById("upload-documents").removeAttribute("hidden");
+                            document.getElementById("upload-documents-full").removeAttribute("hidden");
+                            if (doc_type_id === '1') {
+                                document.getElementById("upload-documents-torent").removeAttribute("hidden");
+
+                            }else{
+                               document.getElementById("upload-documents-torent").hidden = true
+                            }
+
+                        }
+                    });
+                } else {
+                    $("#requestForm").hide();
+                    $("#uploadForm").hide();
+                }
+            }
+
+            $("#id_doc_type").change(updateWorkTypes);
+        });
+
+            $("#request-form").on('submit', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: $(this).attr('action'),
+                    data: $(this).serialize(),
+                    success: function (data) {
+                        $("#request-number").val(data.requestNumber);
+                        var workTypesDiv = $("#workTypes");
+                        $.each(workTypes, function (index, workType) {
+                            var workTypeDiv = $("<div class='custom-file mb-2'>");
+                            workTypeDiv.append('<label class="custom-file-label" for="work_type_' + workType.id + '">Вид работ: ' + workType.name + '</label>');
+                            workTypeDiv.append('<input class="custom-file-input" type="file" name="work_type_' + workType.id + '_documents" required multiple>');
+                            workTypesDiv.append(workTypeDiv);
+                            $('.custom-file-input').on('change', function () {
+                               $(this).prev('.custom-file-label').html(Array.from(this.files).map(file => file.name).join(", "));
+                            });
+                        });
+                        $("#request_id").val(data.id);
+                        $("#uploadForm").show();
+                        document.getElementById("upload-documents").removeAttribute("hidden");
+                    },
+                    error: function () {
+                        $("#message").text("Произошла ошибка при создании заявки.");
+                    }
+                });
+            });
+
+        });
+
+        $('.custom-file-input').on('change', function () {
+            var fileNames = $(this).val().split("\\").pop();
+            $(this).prev('.custom-file-label').html(fileNames.join(', '));
+        });
+    </script>
+
+
+    <p id="message"></p>
+{% endblock %}

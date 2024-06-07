@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Egov - Создание заявок {% endblock %}
+
+{% block chapter %} Egov - Создание заявок {% endblock %}
+
+{% block links %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'egov_modules/css/style.css' %}"/>
+{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="form_block_create_order">
+            <h2>Приобретение прав на земельные участки, которые находятся в государственной собственности, не требующее проведения торгов (конкурсов, аукционов)</h2>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <label for="choice-licensor">
+                    <h1>Выберите лицензиара</h1>
+                    <input class="form-control" type="text" id="choice-licensor" name="choice_licensor" placeholder="Выберите лицензиара">
+                </label>
+                <label for="full-name-representative">
+                    <h1>ФИО представителя</h1>
+                    <input class="form-control" type="text" id="full-name-representative" name="full_name_representative" placeholder="ФИО представителя">
+                </label>
+                <label for="phone-number">
+                    <h1>Номер телефона</h1>
+                    <input class="form-control" type="text" id="phone-number" name="phone_number" placeholder="Номер телефона">
+                </label>
+                <label for="location-land-plot">
+                    <h1>Местоположение земельного участка</h1>
+                    <input class="form-control" type="text" id="location-land-plot" name="location_land_plot" placeholder="Местоположение земельного участка">
+                </label>
+                <label for="requested-right-use">
+                    <h1>Испрашиваемое право пользования</h1>
+                    <input class="form-control" type="text" id="requested-right-use" name="requested_right_use" placeholder="Испрашиваемое право пользования">
+                </label>
+                <label for="area">
+                    <h1>Площадь</h1>
+                    <input class="form-control" type="text" id="area" name="area" placeholder="Площадь">
+                </label>
+                <label for="purpose-use-land-plot">
+                    <h1>Цель использования земельного участка</h1>
+                    <input class="form-control" type="text" id="purpose-use-land-plot" name="purpose_use_land_plot" placeholder="Цель использования земельного участка">
+                </label>
+                <label for="schema-plan-land-plot">
+                    <h1>Схема (план) испрашиваемого земельного участка</h1>
+                    <input class="form-control" type="file" id="schema-plan-land-plot" name="schema_plan_land_plot">
+                </label>
+
+                <button class="btn btn-primary" type="submit" id="submit-button">Отправить</button>
+            </form>
+        </div>
+    </div>
+
+    {% block scripts %}
+
+        <script>
+            function handleClick() {
+                let button = document.querySelector('#submit-button');
+                {#button.disabled = true;#}
+                button.innerHTML = '<span class="loader"></span> Загрузка...';
+            }
+        </script>
+
+    {% endblock %}
+
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block chapter %}
+
+{%endblock %}
+
+{% block title %}
+    Заведенные счета
+{% endblock %}
+
+{% block links %}
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'calculator_emr/css/main.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mb-4" style="display: block;" id="main-container">
+
+    <import_data hidden>
+
+
+
+    </import_data>
+
+    <div id="hidden-div-to-import" hidden>
+
+    </div>
+    <h1 style="color:#fff;" id="margin-delete">.</h1>
+
+    <div class="row mt-0 ml-4 mr-4" id="notes-info" style="display:none;">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-danger">Превышение по пунктам</h6>
+            </div>
+            <div class="card-body" id="notes-info-text">
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Номер заказа
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="">
+                                {{ order_num }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-info fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                КОЛИЧЕСТВО Поставщиков
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="">
+                                {{ orders.count }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Общая стоимость
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money-format" id="">
+                                {% firstof totallines_sum '0.00' %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Оплаченная сумма (1С) с возвратом
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money-format" id="">
+                                {% firstof payamt1c_sum '0.00' %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Неоплаченная сумма (1С) с возвратом
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money-format" id="">
+                                {% firstof notpayamt1c_sum '0.00' %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12" role="document">
+            <div class="modal-content rounded-4 shadow">
+
+                <div class="card-body custom-table-container">
+                    <div class="table-responsive">
+                        <table class="table table-bordered dataTable" id="dataTable" width="100%" cellspacing="0"
+                            role="grid" aria-describedby="dataTable_info" style="width: 100%;">
+                            <thead>
+                                <tr role="row">
+                                    <th style="width: 250.875px">
+                                        Номер заказа
+                                    </th>
+                                    <th style="width: 220.875px">
+                                        № ДО
+                                    </th>
+                                    <th style="width: 220.875px">
+                                        № Счета
+                                    </th>
+                                    <th style="width: 200.875px">
+                                        Поставщик
+                                    </th>
+                                    <th style="width: 350.875px">
+                                        Категория
+                                    </th>
+                                    <th class="sorting sorting_asc" tabindex="0" rowspan="1" colspan="1">
+                                        Общая стоимость
+                                    </th>
+                                    <th style="width: 300.875px">
+                                        Оплаченная сумма (1С) с возвратом
+                                    </th>
+                                    <th class="sorting sorting_asc" tabindex="0" rowspan="1" colspan="1">
+                                        Неоплаченная сумма (1С) с возвратом
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="">
+                                {% for order in orders %}
+                                    <tr role="row" class="even tr-position">
+                                        <th>
+                                            {% for i in order.order_number.split %}
+                                                <p>{{ i }}</p>
+                                            {% endfor %}
+                                        </th>
+                                        <th>
+                                            {{ order.doc_number }}
+                                        </th>
+                                        <th>
+                                            {{ order.account_number }}
+                                        </th>
+                                        <th>
+                                            {{ order.supplier }}
+                                        </th>
+                                        <th>
+                                            {{ order.name }}
+                                        </th>
+                                        <th>
+                                            {{ order.totallines }}
+                                        </th>
+                                        <th>
+                                            {{ order.payamt1c }}
+                                        </th>
+                                        <th>
+                                            {{ order.notpayamt1c }}
+                                        </th>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

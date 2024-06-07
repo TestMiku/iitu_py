@@ -1,0 +1,375 @@
+<span id="import_data" style="display:none;">
+{% load mathfilters %}
+{% load to_dot %}
+{% load to_float %}
+    
+
+</span>
+
+<div class="container-fluid mb-4">
+    <h1 style="color:#fff;" id="margin-delete"> .</h1>
+
+    <div class="row mt-0 ml-4 mr-4" id="notes-info" style="display:none;">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-danger">Превышение по пунктам</h6>
+            </div>
+            <div class="card-body" id="notes-info-text">
+                
+            </div>
+        </div>
+    </div>
+    <h5 id="bs-comments">{{ order.comments }}</h5>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Номер заказа
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="order-number">
+                                {{ order.number }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-info fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Заказчик
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="order_customer_name">
+                                {{ order.customer_name }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-info fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Количество пунктов
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ order.positions.all|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Общая сумма
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 " id="total-summ">
+                                1 000 000.00
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                ПРЕВЫШЕНИЕ цен и количества
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+
+                                <span id="danger-rows-couts">4</span> пункта
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Автор
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="resp-name-id">
+                                {{ user.first_name }} {{ user.last_name }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Почта автора
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" >
+                                {{ user.email }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-envelope fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4" hidden>
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                На какую сумму заведены ДО
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format">
+                                {{ order.buyigrandtotal }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4" hidden>
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Фактически потрачено на заказ
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format" id="money_wasted">
+                                {{ order.money_wasted }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if user.email == '20114@avh.kz' or user.email == '709@avh.kz' or user.email == 'admin@mail.ru' or user.email == '22050@avh.kz' %}
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Маржинальность
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format" id="morzh">
+                                1000
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+
+    <div class="card-body custom-table-container">
+        <div class="table-responsive">
+            <table class="table table-bordered dataTable" id="dataTable" width="100%" cellspacing="0" role="grid"
+                   aria-describedby="dataTable_info" style="width: 100%;">
+                <thead>
+                <tr role="row">
+                    <th style="width: 110.393px;">
+                        Артикул
+                    </th>
+                    <th style="width: 303.554px;">
+                        Наименование работ с заказчиком
+                    </th>
+                    <th style="width: 303.554px;">
+                        Пункт ТЦП с подрядчиком
+                    </th>
+                    <th style="width: 122.393px;">
+                        Использовано
+                    </th>
+                    <th style="width: 122.393px;">
+                        Цена исп.
+                    </th>
+                    <th style="width: 122.393px;">
+                        Кол-во исп.
+                    </th>
+                    <th style="width: 122.393px;">
+                        Кол-во
+                    </th>
+                    <th style="background:#ccccff; width: 122.393px;">
+                        Кол-во от ПМ
+                    </th>
+                    <th style="width: 200.393px;">
+                        Цена
+                    </th>
+                    <th tabindex="0" rowspan="1" colspan="1" style="width: 200.393px;background:#ccccff;">
+                        Цена от ПМ
+                    </th>
+                    <th class="sorting sorting_asc" tabindex="0" rowspan="1" colspan="1" style="width: 200.098px;">
+                        Сумма
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for postiton in order.positions.all %}
+
+                    {% if postiton.position.find_key == nan or postiton.position.find_key == "nan" or postiton.position.find_key == 0 or postiton.position.find_key == "0" %}
+
+                        <tr style="background: #e2e2e2;" id="tr-none-{{ postiton.id }}">
+                            <td></td>
+                            <td class="custom-info">{{ postiton.position_name }}</td>
+                            <td class="positionContractor">{{ postiton.position.contractor }}</td>
+                            <td>{{postiton.used_count}}</td>
+                            <td>{{postiton.used_summ}}</td>
+                            <td>{{postiton.used_quantity}}</td>
+                            <td>{{postiton.quantity}}</td>
+                            <td style="background: #e2e2e2;"></td>
+                            <td></td>
+                            <td style="background: #e2e2e2;"></td>
+                            <td></td>
+                            <td hidden id='projectgroup'>{{ postiton.project_group }}</td>
+                        </tr>
+                    {% elif postiton.position %}
+                        <tr
+                                class="{% cycle 'even' 'odd' %} tr-position"
+                                id="tr-{{ postiton.id }}"
+                        >
+                            <td>
+                                <span id="note-{{ postiton.id }}" style="display:none;"
+                                      class="position_notes"></span>
+                                <span class="json_nomenclatures">{{ postiton.position.find_key }}</span></td>
+                            <td class="custom-info">{{ postiton.position.customer }}</td>
+                            <td class="positionContractor">{{ postiton.position.contractor }}</td>
+                            <td style="padding-top:20px;">{{ postiton.used_count }}</td>
+                            <td style="padding-top:20px;" class="money_format">{{ postiton.used_summ }}</td>
+                            <td style="padding-top:20px;">{{ postiton.used_quantity }}</td>
+                            <td style="padding-top:20px;">{{ postiton.quantity|sub:postiton.used_quantity }}</td>
+                            <td class="td-in" id="td-count-{{ postiton.id }}">
+                                <input
+                                        id="position-count-{{ postiton.id }}"
+                                        min="0"
+                                        style="background:#e1e8ff; width:100px;"
+                                        class="form-control position-count input-out json_initial_coutn"
+                                        type="number"
+                                        value="{{ postiton.get_max_count|sub:postiton.used_quantity|to_float }}"
+                                        oninput="change_sum('{{ postiton.id }}', '{{ postiton.quantity|sub:postiton.used_quantity|to_float }}', '{{ postiton.get_max_price }}', 'count', '{{ postiton.quantity|sub:postiton.used_quantity|to_float }}')"
+                                >
+                                <span id="span-count-{{ postiton.id }}" style="width:100px; display:none;"
+                                      class="text_version json_new_count">{{ postiton.quantity|sub:postiton.used_quantity }}</span>
+                            </td>
+                            <td style="padding-top:20px;"
+                                class="money_format">{{ postiton.position.get_default_price }}</td>
+                            <td class="td-in" id="td-price-{{ postiton.id }}">
+                                <input
+                                        min="0"
+                                        id="position-sum-{{ postiton.id }}"
+                                        style="background:#e1e8ff; width:150px;"
+                                        class="form-control position-sum input-out"
+                                        type="number"
+                                        value="{{ postiton.get_max_price }}"
+                                        oninput="change_sum('{{ postiton.id }}', '{{ postiton.quantity|sub:postiton.used_quantity|to_float }}', '{{ postiton.get_max_price }}', 'price', '{{ postiton.get_max_price }}')"
+                                >
+                                <span id="span-price-{{ postiton.id }}" style="width:100px; display:none;"
+                                      class="text_version json_new_price">{{ postiton.get_max_price }}</span>
+                            </td>
+                            <td style="padding-top:20px;" class="total-sum-td  json_total_sum money_format"
+                                id="total-sum-{{ postiton.id }}">
+                                {% if '-' not in postiton.get_default_sum %}
+                                {{ postiton.get_default_sum }}
+                                {% else %}
+                                0
+                                {% endif %}</td>
+                            <td hidden id='projectgroup'>{{ postiton.project_group }}</td>
+                            
+                        </tr>
+                        {% else %}
+                        <tr style="background: #e2e2e2;" id="tr-none-{{ postiton.id }}">
+                            <td></td>
+                            <td>{{ postiton.position_name }}</td>
+                            <td></td>
+                            <td></td>
+                            <td style="background: #e2e2e2;"></td>
+                            <td></td>
+                            <td style="background: #e2e2e2;"></td>
+                            <td></td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<span id="span_csrf_token" style="width: 0;height: 0;overflow: hidden; display: none;">{% csrf_token %}</span>
+
+<script>
+    function flashBorderColor(elementId) {
+        location.href = "#" + elementId
+
+        let element = document.getElementById(elementId);
+
+        if (element) {
+            let originalBorderStyle = element.style.border;
+
+            element.style.border = "3px solid red";
+
+            setTimeout(function () {
+                element.style.border = originalBorderStyle;
+            }, 3000);
+        }
+    }
+</script>

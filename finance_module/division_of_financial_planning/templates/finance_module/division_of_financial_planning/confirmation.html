@@ -1,0 +1,280 @@
+{% extends 'finance_module/division_of_financial_planning/base.html' %}
+{% load static number_format %}
+{% block division_of_financial_planning_active_breadcrump %}
+Подтверждение платежей
+{% endblock %}
+{% block title %}
+Подтверждение платежей
+{% endblock %}
+
+{% block finance_module_main %}
+<div class="card flex-fill rounded-0 border-end-0 border-start-0">
+  <div class="card-header bg-white">
+    <ul class="nav nav-tabs card-header-tabs" id="tabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="mandatory-payment-seizures-tab" data-bs-toggle="tab" data-bs-target="#mandatory-payment-seizures-tab-pane" type="button"
+          role="tab" aria-controls="mandatory-payment-seizures-tab-pane" aria-selected="true">
+          Обязательные платежи
+        </button>
+      </li>
+    </ul>
+  </div>
+  <div class="card-body">
+    <div class="h-100 position-relative">
+      <div class="position-absolute top-0 bottom-0 end-0 start-0" style="overflow-y: scroll;">
+        <div class="tab-content" id="myTabContent">
+          <div class="tab-pane fade show active" id="mandatory-payment-seizures-tab-pane" role="tabpanel" aria-labelledby="mandatory-payment-seizures-tab"
+            tabindex="0">
+            <table class="table border-black table-bordered" id="mandatory-payment-seizures-table">
+              <thead>
+                <tr class="table-light border-black">
+                  <th data-st-field="responsible" class="align-middle" scope="col">Ответственный</th>
+                  <th data-st-field="project_region__name" class="align-middle" scope="col">Регион проект</th>
+                  <th data-st-field="mandatory_payment__name" class="align-middle" scope="col">Статья</th>
+                  <th data-st-field="sum" class="align-middle" scope="col">Хочет оплатить сумму</th>
+                  <th data-st-field="account__name" class="align-middle" scope="col">С расчётного счета</th>
+                  <th data-st-field="account__number" class="align-middle" scope="col">Номер р/с</th>
+                  <th data-st-field="datetime" data-st-type="date" class="align-middle" scope="col">Время отправки</th>
+                  <th data-st-field="status__name" class="align-middle" scope="col">Подтверждение</th>
+                </tr>
+              </thead>
+              <tbody id="mandatory-payment-seizures-table-rows">
+
+                <tr id="mandatory-payment-seizures-table-last-row">
+                  <td class="text-center" colspan="8">
+                    <div style="height: 10px;">
+
+                    </div>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-footer bg-white d-flex align-items-center justify-content-end">
+    <form action="" id="confirmation-form">
+      <button class="btn btn-primary">Подтвердить</button>
+    </form>
+  </div>
+</div>
+
+
+{% endblock %}
+{% block scripts %}
+<script>
+  const csrfToken = "{{csrf_token}}";
+  function getModelName() {
+    const $activeNavLink = $("#tabs .nav-link.active");
+    const $tabPane = $($activeNavLink.attr("data-bs-target"));
+    switch ($activeNavLink.attr("aria-controls")) {
+      case "mandatory-payment-seizures-tab-pane":
+        return "MandatoryPaymentSeizure";
+      case "administrative-transfers-tab-pane":
+        return "AdministrativeTransfer";
+      default:
+        return null;
+    }
+  }
+  $(document).on("change", ".confirmation .confirmation-checkbox", async function () {
+    const $confirmation = $(this).closest(".confirmation");
+    $confirmation.find(".confirmation-checkbox").not(this).prop("checked", false);
+    $confirmation.find(".reject-comment-textarea").toggleClass("d-none", !($(this).val() === "reject" && $(this).prop("checked")));
+    event.preventDefault();
+  });
+  $(document).on("click", ".show-payment-confirmation", async function () {
+    const response = await fetch(`/p1/finance-module/api/payment-confirmation?model=${getModelName()}&id=${$(this).data("id")}`);
+    const json = await response.json();
+    const $modal = $(`
+      <div class="modal fade" id="staticBackdrop" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="staticBackdropLabel">Информация о подтверждение платежа</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              ${response.ok ? `
+                <div class="row"><div class="col-4">Статус:</div><div class="col">${json.status}</div></div>
+                <div class="row"><div class="col-4">Дата:</div><div class="col">${new Date(json.created_at).toLocaleString()}</div></div>
+                ${json.responsible ? `<div class="row"><div class="col-4">Ответственный:</div><div class="col">${json.responsible.first_name} ${json.responsible.last_name}</div></div>` : ""}
+                ${json.rejected_comment ? `<div class="row"><div class="col-4">Комментарий:</div><div class="col">${json.rejected_comment}</div></div>` : ``}
+              ` : `
+                <div class="text-danger text-center">Ничего не найдено</div>
+              `}
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
+    $modal.modal("show");
+    $modal.on("hidden.bs.modal", function () {
+      $modal.remove();
+    });
+  });
+  const $confirmationFormLoading = $("#confirmation-form-loading");
+  const $confirmationForm = $("#confirmation-form");
+  let canSubmit = false;
+  let commonRejectComment = null;
+  $confirmationForm.on("submit", async function (event) {
+    event.preventDefault();
+    $confirmationFormLoading.removeClass("d-none");
+    canSubmit = false;
+    commonRejectComment = null;
+    const formData = new FormData(this);
+    const $activeNavLink = $("#tabs .nav-link.active");
+    const $tabPane = $($activeNavLink.attr("data-bs-target"));
+    formData.set("model", getModelName());
+    const $idInput = $tabPane.find(`input[name="id"]`);
+    if ($idInput.length === 0) {
+      $confirmationFormLoading.addClass("d-none");
+      return;
+    }
+    for (const idInput of $idInput) {
+      const id = $(idInput).val();
+      const confirmation = $tabPane.find(`input[name="confirmation-${id}"]:checked`).val();
+      if (!confirmation) {
+        continue;
+      }
+      if (confirmation === "reject") {
+        const $rejectCommentTextarea = $tabPane.find(`textarea[name="reject-comment-${id}"]`);
+        let rejectComment = $rejectCommentTextarea.val();
+        if (!rejectComment.trim()) {
+          if (commonRejectComment) {
+            rejectComment = commonRejectComment;
+          } else {
+            try {
+              await new Promise((resolve, reject) => {
+                const $modal = $(`
+                  <div class="modal fade" tabindex="-1" id="common-reject-comment-modal">
+                    <div class="modal-dialog modal-dialog-centered">
+                      <form class="modal-content" id="common-reject-comment-form">
+                        <div class="modal-body">
+                          <label for="common-reject-comment" class="form-label">Общий комментарий для отклонения</label>
+                          <textarea class="form-control" id="common-reject-comment" rows="3" required placeholder="Введите комментарий"></textarea>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                          <button type="submit" class="btn btn-primary">Сохранить</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                `);
+                function onHidden() {
+                  reject();
+                }
+                $modal.on("submit", "#common-reject-comment-form", function (event) {
+                  event.preventDefault();
+                  $modal.off("hidden.bs.modal", onHidden);
+                  commonRejectComment = $modal.find("#common-reject-comment").val();
+                  $modal.modal("hide");
+                  resolve();
+                });
+                $modal.on("hidden.bs.modal", onHidden);
+                $modal.modal("show");
+              });
+              rejectComment = commonRejectComment;
+            } catch (error) {
+              $rejectCommentTextarea.get(0).setCustomValidity("Укажите комментарий");
+              $rejectCommentTextarea.get(0).reportValidity();
+              $confirmationFormLoading.addClass("d-none");
+              return;
+            }
+          }
+        }
+        formData.append(`reject-comment-${id}`, rejectComment);
+      }
+      formData.append("id", id);
+      formData.append(`confirmation-${id}`, confirmation);
+    }
+    canSubmit = true;
+    if (!canSubmit) {
+      $confirmationFormLoading.addClass("d-none");
+      return;
+    }
+    console.log("SUBMIT", Array.from(formData.entries()));
+    const response = await fetch("/p1/finance-module/division-of-financial-planning/api/confirmation", {
+      method: "POST",
+      body: formData,
+      headers: {
+        "X-CSRFToken": csrfToken
+      }
+    });
+    const json = await response.json();
+    $confirmationFormLoading.addClass("d-none");
+    $tabPane.find(".smart-table").smartTableReload();
+  });
+
+  const numberFormat = Intl.NumberFormat("ru-RU", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  $('#mandatory-payment-seizures-table').smartTableWithVirtualScroll({
+    name: 'division-of-financial-planning-mandatory-payment-seizures-table',
+    firstShowRows: "intersected",
+    defaultOrder: [{ field: "can_be_confirmed", sort: "desc" }, { field: 'datetime', sort: 'desc' }],
+    lastRowTarget: '#mandatory-payment-seizures-table-last-row',
+    rowsTarget: '#mandatory-payment-seizures-table-rows',
+    getValuesUrl: '/p1/finance-module/division-of-financial-planning/smart-tables/mandatory-payment-seizures-get-values',
+    getRowsUrl: '/p1/finance-module/division-of-financial-planning/smart-tables/mandatory-payment-seizures-get-rows',
+    getSubtotalsUrl: '/p1/finance-module/division-of-financial-planning/smart-tables/mandatory-payment-seizures-get-subtotals',
+    loadingHtml: `
+        <tr>
+          <td class="text-center text-primary" colspan="10">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </td>
+        </tr>
+      `,
+    getTr(row) {
+      const $tr = $(`
+        <tr class="${row.status.name === "Подтверждено" ? "table-success" : row.status.name === "Отклонён" ? "table-danger" : ""} border-black">
+          <td class="align-middle">${row.responsible ? `${row.responsible.first_name} ${row.responsible.last_name}` : ''}</td>
+          <td class="align-middle">${row.project_region.name}</td>
+          <td class="align-middle">${row.mandatory_payment ? row.mandatory_payment.name : ''}</td>
+          <td class="align-middle text-end">${numberFormat.format(row.sum)}</td>
+          <td class="align-middle">${row.account.name}</td>
+          <td class="align-middle">${row.account.number}</td>
+          <td class="align-middle text-center">${new Date(row.datetime).toLocaleDateString()}</td>
+          <td class="align-middle confirmation-td">
+            
+          </td>
+        </tr>
+      `);
+      const $confirmationTd = $tr.find(".confirmation-td");
+      if (row.status.name === "Отправлено на первое подтверждение") {
+        $confirmationTd.html(`
+          <div class="confirmation">
+            <div class="d-flex align-items-center justify-content-between gap-5">
+              <input class="mandatory-payment-seizures-id" type="hidden" name="id" value="${row.id}"/>
+              <div class="form-check">
+                <input class="form-check-input confirmation-checkbox" type="checkbox" name="confirmation-${row.id}" value="confirm" id="mandatory-payment-seizures-complete-checkbox-${row.id}">
+                <label class="form-check-label" for="mandatory-payment-seizures-complete-checkbox-${row.id}">
+                  Подтвердить
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input confirmation-checkbox" type="checkbox" name="confirmation-${row.id}" value="reject" id="mandatory-payment-seizures-reject-checkbox-${row.id}">
+                <label class="form-check-label" for="mandatory-payment-seizures-reject-checkbox-${row.id}">
+                  Отклонить
+                </label>
+              </div>
+            </div>
+            <textarea placeholder="Комментарий для отклонения" name="reject-comment-${row.id}" rows="1" class="form-control reject-comment-textarea d-none"></textarea>
+          </div>
+        `);
+      } else if (row.status.name !== "Отправлено на второе подтверждение") {
+        $confirmationTd.html(`<a class="show-payment-confirmation" href="#" data-id="${row.id}">${row.status.name}</a>`);
+      } else {
+        $confirmationTd.html(`${row.status.name}`);
+      }
+      return $tr;
+    }
+  });
+</script>
+{% endblock %}

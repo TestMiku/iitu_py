@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Информация о заявке{% endblock %}
+{% block chapter %}Информация о заявке{% endblock %}
+
+{% block back_button %}
+<div>
+    <a class="btn btn-primary mb-2" href="{% url 'distributor' %}">На главную страницу</a>
+</div>
+{% endblock %}
+
+{% block content %}
+
+    <div class="container mt-5">
+
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <p>Номер заявки: {{ request.request_number }}</p>
+                <p>Регион: {{ request.region }}</p>
+                <p>Номер заказа: {{ request.order_number }}</p>
+                <p>Наименование БС: {{ request.bis_name }}</p>
+                {% for document in documents %}
+                    {% ifchanged document.doc_type.name %}
+                        <p>{{ document.doc_type.name }}</p>
+                    {% endifchanged %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6 offset-md-3">
+                <h2> Список необходимой документации для заявки №{{ request.request_number }}</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Документы</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for document in documents %}
+                            <tr>
+                                <td>{{ document.work_type.name }}:</td>
+                                <td>{{ document.document }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6 offset-md-3">
+                <h2>Добавить документы отдела и аренды и выкупа к заявке</h2>
+
+
+                {% for document_rent in documents_rent %}
+                    <p>{{ document_rent.documentRent }}</p>
+                {% endfor %}
+                <a class="btn btn-primary" href="{% url 'edit_document_rent' request.request_number %}">Посмотреть детали</a>
+                {% if request.status == 'rejected' %}
+                    <p>Заявка была отклонена</p>
+                    <a class="btn btn-primary" href="{% url 'edit_document_rent' request.request_number %}">Посмотреть</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6 offset-md-3">
+                <form method="post" enctype="multipart/form-data">
+                    {% for work_rent in work_rent_types %}
+                        <div class="input-group mb-3">
+                            <div class="custom-file">
+                                <label class="custom-file-label" for="work_rent_type_{{ work_rent.pk }}">{{ work_rent }} </label>
+                                <input name="documentRent_{{ work_rent.pk }}" id="work_rent_type_{{ work_rent.pk }}" type="file" class="custom-file-input" onchange="updateLabel(this)">
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <button class="btn btn-warning btn-block" name="submit_button" value="pending2">Отправить в финансовый отдел для частичного закрытия</button>
+                    <button class="btn btn-success btn-block" name="submit_button" value="pending3">Отправить в финансовый отдел для полного закрытия</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        function updateLabel(input) {
+            var fileName = input.files[0].name;
+            var label = input.closest('.custom-file').querySelector('.custom-file-label');
+            label.textContent = fileName;
+        }
+        function updateStatus(newStatus) {
+            var hiddenInput = document.createElement("input");
+            hiddenInput.setAttribute("type", "hidden");
+            hiddenInput.setAttribute("name", "new_status");
+            hiddenInput.setAttribute("value", newStatus);
+            document.getElementById("statusForm").appendChild(hiddenInput);
+            
+            document.getElementById("statusForm").submit();
+        }
+    </script>
+{% endblock %}
+

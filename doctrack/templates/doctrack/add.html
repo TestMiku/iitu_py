@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}
+    <!-- Тайтлд пустой страницы -->
+{% endblock %}
+
+{% block links %}
+    <!-- Используемые ссылки в пустом разделе -->
+{% endblock %}
+
+
+{% block chapter %}
+Создание заявки
+<!-- Название пустого раздела -->
+{% endblock %}
+
+{% block back_button %}
+    {% comment %} Кнопка Назад (По умолчанию назад на прошлую веб страницу) {% endcomment %}
+{% endblock %}
+
+{% block content %}
+    {% comment %} <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+            {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form> {% endcomment %}
+
+    <form method="post" class="row collapse show" id="collapseOne">
+        {% csrf_token %}
+        <div class="col-4">
+            <div class="form-group">
+                <label for="id_project">Проект:</label>
+                <select onchange="hide_work_types()" class="form-control" name="project" id="id_project">
+                    <option value="">---</option>
+
+                    {% for project in projects %}
+                    <option value="{{project.id}}">{{project.name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_work_type">Вид работ:</label>
+                <select class="form-control" name="work_type" id="id_work_type">
+                    <option value="">---</option>
+                    {% for work_type in work_types %}
+                    {% if 'старый' not in work_type.name %}
+                    <option value="{{work_type.id}}" style="display: none;" class=" project-{{work_type.project.id}}">
+                        {{work_type.name}}
+                    </option>
+                    {% endif %} 
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_region">Регион:</label>
+                <select class="form-control" name="region" id="id_region">
+                    <option value="">---</option>
+                    {% for region in regions %}
+                    <option value="{{region.id}}">
+                        {{region.name}}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="form-group">
+                <label for="id_order_bs_name">Название Базовой станции:</label>
+                <input class="form-control" type="text" name="order_bs_name" id="id_order_bs_name" required>
+            </div>
+            <div class="form-group">
+                <label for="id_order_number">Номер заказа:</label>
+                <input class="form-control" type="text" id="id_order_number" name="order_number" required>
+            </div>
+            <div class="form-group">
+                <label for="id_order_date">Дата заказа:</label>
+                <input class="form-control" type="date" name="order_date" id="id_order_date" required>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="form-group">
+                <label for="id_status">Статус:</label>
+                <select class="form-control" name="status" id="id_status" disabled>
+                    <option style="background-color: {{statuses.first.color}};" value="{{statuses.first.id}}" selected >
+                        {{statuses.first.name}}
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_comment">Комментарии при создании:</label>
+                <textarea class="form-control" name="comment" id="id_comment"
+                    rows="3" placeholder=""></textarea>
+            </div>
+        </div>
+        <div class="row col-12">
+            <i class="col-5"></i>
+            <button type="submit" class="btn btn-primary col-2">Сохранить</button>
+            <i class="col-5"></i>
+        </div>
+    </form>
+{% endblock %}
+
+
+{% block scripts %}
+    <!-- Скрипты пустого раздела -->
+    <script>
+        function hide_work_types(){
+            let project_id = document.getElementById('id_project').value
+            
+            let work_types = document.getElementsByClassName('project-' + project_id)
+            for (let i = 0 ; i < work_types.length; i++){
+                work_types[i].style.display = 'initial'
+            }
+
+        }
+    </script>
+{% endblock %}

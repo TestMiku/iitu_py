@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block chapter %}
+Дедлайн
+{%endblock %}
+
+{% block title %}
+Дедлайн
+{% endblock %}
+
+{% block links %}
+<link rel="stylesheet" type="text/css" href="{% static 'visual_deadline/css/main.css' %}">
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="" id="main-view">
+  <!-- <div class="col-3">
+
+    <form method="post" enctype="multipart/form-data" action="{% url 'file_upload' %}" class="form-to-data">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-secondary btn-data"><i class="fas fa-calendar fa-lg"
+          alt="Иконка"></i></button>
+      <label class="file-input-container">
+        Выбрать файл
+        <input type="file" id="fileInput" name="file_upload" required>
+      </label>
+    </form>
+    <div class="d-flex mt-1 projects-tebles">
+      <table class="table table-hover" id="projectsTable">
+        <thead>
+          <tr>
+            <th scope="col" style="border-bottom: 0px;">
+              <div class="row">
+                <form class="" class="form-inline">
+                  <input class="form-control mr-sm-2" type="search" aria-label="Search" id="searchInput">
+                </form>
+                <div class="dropdown no-select">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+                    data-bs-auto-close="outside" aria-expanded="false" data-toggle="dropdown" aria-haspopup="true">
+                    Счет
+                  </button>
+                  <div class="dropdown-menu mr-sm-2" aria-labelledby="dropdownMenuButton">
+                    <div class="form-check">
+                      <input class="form-check-input order-form-check" type="checkbox" value="ГП" id="flexCheckGP"
+                        checked>
+                      <label class="form-check-label" for="flexCheckGP">
+                        ГП
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input order-form-check" type="checkbox" value="П/О" id="flexCheckPO"
+                        checked>
+                      <label class="form-check-label" for="flexCheckPO">
+                        П/О
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input order-form-check" type="checkbox" value="АПП" id="flexCheckAPP"
+                        checked>
+                      <label class="form-check-label" for="flexCheckAPP">
+                        АПП
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input order-form-check" type="checkbox" value="onlynum" id="flexCheckPZ"
+                        checked>
+                      <label class="form-check-label " for="flexCheckPZ">
+                        ПЗ
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input order-form-check" type="checkbox" value="БН" id="flexCheckBN"
+                        checked>
+                      <label class="form-check-label hover" for="flexCheckBN">
+                        БН
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input order-form-check" type="checkbox" value="None" id="flexCheckEmptys"
+                        checked>
+                      <label class="form-check-label " for="flexCheckEmptys">
+                        Пустые
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div class="dropdown no-select">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownProjectButton"
+                    data-bs-auto-close="outside" aria-expanded="false" data-toggle="dropdown" aria-haspopup="true">
+                    Проект
+                  </button>
+                  <div class="dropdown-menu mr-sm-2" aria-labelledby="dropdownProjectButton" id="dropdownProject">
+
+                  </div>
+                </div>
+                <div class="dropdown no-select">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenegerButton"
+                    data-bs-auto-close="outside" aria-expanded="false" data-toggle="dropdown" aria-haspopup="true">
+                    Менеджер
+                  </button>
+                  <div class="dropdown-menu mr-sm-2" aria-labelledby="dropdownMenegerButton"
+                    id="dropdownProjectManager">
+                  </div>
+                </div>
+                <button class="btn btn-secondary" type="button" onclick="filterProjectsByColor(1)" id="sort-btn">
+                  <i class="fas fa-sort"></i>
+                </button>
+              </div>
+            </th>
+          </tr>
+          {% if name_with_deadline %}
+          {% for item in name_with_deadline %}
+          <p name-item-deadline="{{ item.name }}" deadline-day="{{ item.deadline }}" id="{{ item.name }}"
+            class="item-deadline" style="display: none;">
+          </p>
+          {% endfor%}
+          {% endif %}
+        </thead>
+        <tbody id="mainTable">
+          {% for item in unique_names %}
+          <tr class="dropright filtered-item" id="">
+            <th scope="row" id="table-item" class="tableItem dropdown table-item" name-item="{{ item.name }}"
+              onclick="handleChoiceItems('{{ item.name }}')" data-toggle="dropdown">
+              {{ item.name }}
+              <div class="dropdown-menu">
+
+              </div>
+            </th>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div> -->
+
+  <div class=""
+    style=" height: 250px; width: 250px; background-color: white; border: #9b9898 1px solid; border-radius: 5px;">
+
+  </div>
+
+  <div class="">
+    <div class="row" data-spy="scroll" data-offset="0" old-style="height: 250px; margin-bottom: 20px;"
+      id="table-scroll">
+      <div style="width: max-content;" id="overlay">
+        <table class="table table-wrap table-shadow table-bordered fixed-header table-striped"
+          style="width: max-content; margin-bottom: 0px;" id="dataTable">
+          <thead class="thead-light text-center ">
+            <tr>
+              <th scope="text-center">Осталось дней <button id="sortButton" class="btn">
+                  <i class="fas fa-sort"></i></button>
+              </th>
+              <th scope="text-center">Покупатель <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">Номер заказа <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">Дата подписания <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">Дата оконч. договора <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">Срок выпол. работ <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">№ счет фактуры 1С <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">Группа проектов <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">Менеджер проекта <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">Дата внес. заказа <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">Поставщик <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">Дата выстав. счёта <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">Объект/Сайт <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">Ответственный за продажу <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">№ Контракта (Номер ДС) <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">Дата подписания контракта <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">Сумма по заказу <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">Сумма по счёту <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+              <th scope="text-center">Долг заказчика по счету <button id="" class="btn">
+                  <i class="fas fa-sort-down"></i></button></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            {% for item in all_data %}
+            <tr class="tr-body text-center">
+              <td class="text-center" id="deadlineDay">{{item.deadline}}</td>
+              <td class="text-center" id="customerTable" scope="row">{{item.name}}</td>
+              <td class="text-center" id="docNumTable">{{item.document_number}}</td>
+              <td class="text-center" id="startDateTable">{{item.start_date}}</td>
+              <td class="text-center" id="endDateTable">{{item.end_date}}</td>
+              <td class="text-center" id="deadlineTable">{{item.max_deadline}}</td>
+              <td class="text-center" id="NumFaktura">{{item.no_invoice_1C}}</td>
+              <td class="text-center" id="projectGroup">{{item.project_group}}</td>
+              <td class="text-center" id="projectManager">{{item.project_manager}}</td>
+              <td class="text-center" id="dateOrderEntered" scope="row">{{item.order_date}}</td>
+              <td class="text-center" id="provider">{{item.provider}}</td>
+              <td class="text-center" id="invoiceDate">{{item.invoice_date}}</td>
+              <td class="text-center" id="projectData">{{item.project}}</td>
+              <td class="text-center" id="">{{item.responsible_sale}}</td>
+              <td class="text-center" id="">{{item.contract_number}}</td>
+              <td class="text-center" id="">{{item.date_document_signed}}</td>
+              <td class="text-center" id="">{{item.order_sum}}</td>
+              <td class="text-center" id="">{{item.account_amount}}</td>
+              <td class="text-center" id="">{{item.customer_debt}}</td>
+            </tr>
+            {% endfor %}
+            <!-- <tr class="tr-body text-center">
+              <td class="text-center" id="deadlineDay">0</td>
+              <td class="text-center" id="customerTable" scope="row">-</td>
+              <td class="text-center" id="docNumTable">-</td>
+              <td class="text-center" id="startDateTable">-</td>
+              <td class="text-center" id="endDateTable">-</td>
+              <td class="text-center" id="deadlineTable">-</td>
+              <td class="text-center" id="NumFaktura">-</td>
+              <td class="text-center" id="projectGroup">-</td>
+              <td class="text-center" id="projectManager">-</td>
+              <td class="text-center" id="dateOrderEntered" scope="row">-</td>
+              <td class="text-center" id="provider">-</td>
+              <td class="text-center" id="invoiceDate">-</td>
+              <td class="text-center" id="projectData">-</td>
+              <td class="text-center" id="">-</td>
+              <td class="text-center" id="">-</td>
+              <td class="text-center" id="">-</td>
+              <td class="text-center" id="">-</td>
+              <td class="text-center" id="">-</td>
+              <td class="text-center" id="">-</td>
+            </tr> -->
+          </tbody>
+        </table>
+        </table>
+      </div>
+    </div>
+    <!-- <div class="" hidden> 
+      <div class="calendar col ">
+        <div class="cal-header">
+          <div class="prev-month" onclick="changeMonth(-1)">❮</div>
+          <div id="currentMonth">Месяц</div>
+          <div id="currentYear">Год</div>
+          <div class="next-month" onclick="changeMonth(1)">❯</div>
+        </div>
+        <div class="days">
+          <div class="day">Пн</div>
+          <div class="day">1</div>
+        </div>
+      </div>
+    </div> -->
+  </div>
+</div>
+<script src="{% static 'visual_deadline/js/script.js' %}"></script>
+{% endblock %}

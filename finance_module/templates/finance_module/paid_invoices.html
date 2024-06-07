@@ -1,0 +1,88 @@
+{% extends 'finance_module/base.html' %}
+{% load static %}
+{% block active_breadcrump %}
+ Реестр оплаченных счетов
+{% endblock %}
+{% block title %}
+  Реестр оплаченных счетов
+{% endblock %}
+{% block links %}
+  <link rel="stylesheet" href="{% static 'finance_module/main.css' %}" />
+{% endblock %}
+
+{% block finance_module_content %}
+<div class="d-flex align-items-center mb-2">
+    <button class="btn btn-info " id="copy-table-btn"><i class="far fa-clipboard"></i></button>
+    <input type="checkbox" id="include-header-checkbox" class="ml-2"> <label for="include-header-checkbox" class="mb-0 ml-1">Копировать загаловок</label>
+</div>
+<div class="paid-invoices-table-container">
+    <table class="paid-invoices-table" id="paid-invoices-table">
+        <thead>
+            <tr>
+                <td class="paid-invoices-table__th">ДО</td>
+                <td class="paid-invoices-table__th">Дата входящего</td>
+                <td class="paid-invoices-table__th">№ счёта</td>
+                <td class="paid-invoices-table__th">Дата счёта</td>
+                <td class="paid-invoices-table__th">Проект</td>
+                <td class="paid-invoices-table__th">Ответ.</td>
+                <td class="paid-invoices-table__th">Утверд.</td>
+                <td class="paid-invoices-table__th">Компания</td>
+                <td class="paid-invoices-table__th paid-invoices-table__contractor-th">Контрагенты</td>
+                <td class="paid-invoices-table__th">Описание</td>
+                <td class="paid-invoices-table__th">Валюта</td>
+                <td class="paid-invoices-table__th">Сумма для таблицы</td>
+                <td class="paid-invoices-table__th">Категория счета</td>
+                <td class="paid-invoices-table__th">Статьи доходов/расходов</td>
+                <td class="paid-invoices-table__th">Номер заказа</td>
+                <td class="paid-invoices-table__th">БИН/ИИН</td>
+                <td class="paid-invoices-table__th">Сумма документа</td>
+                <td class="paid-invoices-table__th">Номер р/с</td>
+                <td class="paid-invoices-table__th">ИИК</td>
+                <td class="paid-invoices-table__th">КНП</td>
+                <td class="paid-invoices-table__th">Факт номер договора</td>
+                <td class="paid-invoices-table__th">Сумма по счету</td>
+                <td class="paid-invoices-table__th">Оплаченная сумма ранее</td>
+                <td class="paid-invoices-table__th">Оплачено</td>
+                <td class="paid-invoices-table__th">Дата оплаты</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for paid_invoice in paid_invoice_list %}
+            <tr class="paid-invoices-table__row">
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-center">{{paid_invoice.number}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-center">{{paid_invoice.date|date:"d.m.Y"}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-center">{{paid_invoice.invoice_number}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-center">{{paid_invoice.invoice_date|date:"d.m.Y"}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-center">{{paid_invoice.project}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-center">{{paid_invoice.responsible_user_id}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-center">{{paid_invoice.approver}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1">{{paid_invoice.llc}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1">{{paid_invoice.contractor}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1">{{paid_invoice.comment}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1">{{paid_invoice.currency}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-right" data-format-number="number-2">{{paid_invoice.sum}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1">{{paid_invoice.invoice_category}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-center">{{paid_invoice.revenue_expense_articles}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-center">{{paid_invoice.sales_order}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-center" data-format-number="number-2">{{paid_invoice.bin_or_iin}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-center">{% firstof paid_invoice.document_amount "" %}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-center">{{paid_invoice.account.number}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-center">{{paid_invoice.iic}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-center">{{paid_invoice.payment_destination_code|default:""}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-center">{{paid_invoice.contract_number}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-right" data-format-number="number-2">{{paid_invoice.invoice_amount}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-1 text-right" data-format-number="number-2">{{paid_invoice.paid_amount_1c}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-2 text-right" data-format-number="number-2">{{paid_invoice.paid}}</td>
+                <td class="paid-invoices-table__column paid-invoices-table__column_color-3 text-center">{{paid_invoice.at|date:"d.m.Y"}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'finance_module/unpaid-invoices.js'%}"></script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Удаление папки - {{ object }}
+{% endblock %}
+
+{% block chapter %}
+    Удаление {{ object }}
+{% endblock %}
+
+{% block back_button %}
+    <a class="btn btn-light btn-icon-split mb-4"
+       href="{{ object.back_url }}">
+                        <span class="icon text-gray-600">
+                            <i class="fas fa-arrow-left"></i>
+                        </span>
+        <span class="text">Назад к {% if object.parent is None %}корневой
+            папке{% else %}папке {{ object.parent }}{% endif %}</span>
+    </a>
+    {% if object.parent is not None %}
+        <a class="btn btn-primary btn-icon-split mb-4 ml-2"
+           href="{% url "documents:list" %}">
+                        <span class="icon">
+                            <i class="fas fa-arrow-up"></i>
+                        </span>
+            <span class="text">Назад к корневой папке</span>
+        </a>
+    {% endif %}
+
+{% endblock %}
+
+{% block content %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-sm-12 col-md-6 col-xl-3">
+                <div>Вы действительно хотите удалить <a href="{{ object.get_absolute_url }}">{{ object }}</a>?</div>
+                <button class="btn btn-primary w-100">Удалить</button>
+            </div>
+        </div>
+    </form>
+{% endblock %}

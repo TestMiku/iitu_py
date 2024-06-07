@@ -1,0 +1,37 @@
+<div class="nav-item dropright drophover">
+    <a class="dropdown-toggle nav-link d-flex justify-content-between" type="button" aria-haspopup="true"
+       aria-expanded="false" href="{{ chapter_group.get_absolute_url }}">
+        {{ chapter_group.icon | safe }} {{ chapter_group.title|truncatechars:36 }}
+    </a>
+
+    <ul class="dropdown-menu ml-0">
+        {% if chapter_group.chapter_set.exists or chapter_group.chaptergroup_set.exists %}
+            {% for chapter_group in chapter_group.chaptergroup_set.all %}
+                {% if user.is_authenticated and user.role in chapter_group.roles.all or chapter_group.is_default %}
+                    {% if chapter_group.is_active %}
+                        {% include "main/chapter_group.html" %}
+                        <div class="dropdown-divider"></div>
+                    {% endif %}
+
+                {% endif %}
+
+
+            {% endfor %}
+            {% for chapter in chapter_group.chapter_set.all %}
+                {% if user.is_authenticated and user.role in chapter.roles.all or chapter.is_default %}
+                    {% if chapter.is_active %}
+                        {% include "main/chapter.html" %}
+                        <div class="dropdown-divider"></div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <li class="nav-item">
+                <span class="nav-link"> Нет доступных разделов</span>
+            </li>
+        {% endif %}
+
+    </ul>
+</div>
+
+

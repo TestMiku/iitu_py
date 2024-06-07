@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+          <div class="mt-4">
+          <a class="btn btn-outline-secondary" href="{% url 'finance_module:show_begunok' %}"> &#8592;</a>
+        </div>
+        <h2 class="text-center mb-4">Добавить бегунок</h2>
+        <form method="post" enctype="multipart/form-data" id="uploadForm">
+          {% csrf_token %}
+          <div class="mb-3">
+            <div class="me-2">
+              <input type="file" class="form-control" name="file" id="file" accept=".xlsx, .xls" required>
+              <label class="form-label" for="file" id="fileLabel">Выберите файл</label>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Отправить</button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('file').addEventListener('change', function() {
+      const fileName = this.files[0].name;
+      document.getElementById('fileLabel').innerText = fileName;
+    });
+  </script>
+{% endblock %}

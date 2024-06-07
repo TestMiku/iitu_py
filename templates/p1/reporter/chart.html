@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+Отчет
+{% endblock %}
+
+{% block chapter %}
+Отчет
+{% endblock %}
+
+{% block content %}
+
+<div class="" style="display: flex; justify-content: space-around;">
+    <table class="table table-bordered table-hover col-2" style="align-self: flex-start; background-color: white;">
+        <thead>
+            <tr>
+                <th class="text-center sort" scope="col" style="position: relative;">
+                    <!-- <button class="btn btn-outline-primary" style="position: absolute; left: 0;">d</button> -->
+                    <span>Имя процесса</span>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for process, count in data.items %}
+            <tr>
+                <td count="{{count}}" class="clickable-area-156">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="{{process}}" id="{{process}}">
+                        <label class="form-check-label" for="{{process}}"
+                            style="width: 100%; height: 200%; cursor: pointer; user-select: none;">
+                            {{process}}
+                        </label>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="col-9">
+        <canvas style="background-color: white; margin-left: 5px; height: 600px;" id="myChart"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script>
+    var dataset = [];
+    const baseUrl = window.location.origin;
+    var ctx = document.getElementById('myChart').getContext('2d');
+
+
+
+    // Функция для загрузки данных с сервера
+    function loadData(datas) {
+        const apiUrl = new URL(`${baseUrl}/p1/reporter/chart/get-chiced-value/`);
+
+        // Добавление параметра process к URL
+        apiUrl.searchParams.append('process', JSON.stringify(datas));
+
+        fetch(apiUrl, {
+            method: 'GET',
+        })
+            .then(response => response.json())
+            .then(data => {
+                const dateCounter = [];
+                const uniqueDates = [];
+
+                function hasItem(process, date) {
+                    return !!getData(process, date);
+                }
+
+                function getData(process, date) {
+                    for (const item of dateCounter) {
+                        if (process == item[0] && date == item[1]) {
+                            return item[2];
+                        }
+                    }
+                    return null;
+                }
+
+                function addItem(process, date, data) {
+                    dateCounter.push([process, date, data]);
+                }
+
+                function keys() {
+                    let result = new Set();
+                    for (const item of dateCounter) {
+                        result.add(item[0]);
+                    }
+                    return Array.from(result);
+                }
+
+                function values() {
+                    let result = [];
+                    for (const item of dateCounter) {
+                        result.push(item[2]);
+                    }
+                    return result;
+                }
+
+                let formattedDate;
+                data.forEach(item => {
+                    const date = new Date(item.created_at);
+                    const day = date.getDate();
+                    const month = date.getMonth() + 1; // Месяцы в JavaScript начинаются с 0
+                    const year = date.getFullYear();
+
+                    // Форматируем дату в "день месяц год"
+                    const formattedDate = `${day < 10 ? '0' : ''}${day}.${month < 10 ? '0' : ''}${month}.${year}`;
+
+                    // Увеличиваем счетчик для текущей даты
+                    //dateCounter[formattedDate] = ((dateCounter[formattedDate] || 0) + 1);
+                    if (!hasItem(item.process, formattedDate)) {
+                        addItem(item.process, formattedDate, {
+                            count: 1,
+                            value: formattedDate,
+                        });
+                    } else {
+                        getData(item.process, formattedDate).count++;
+                    }
+
+                    if (!uniqueDates.includes(formattedDate)) {
+                        uniqueDates.push(formattedDate);
+                    }
+
+                });
+
+                const backGColor = [
+                    'rgba(157,15,0, 0.5)',
+                    'rgba(98,98,98, 0.5)',
+                    'rgba(255, 152, 0, 0.5)',
+                    'rgba(18,87,173, 0.5)',
+                    'rgba(0,179,179, 0.5)',
+                    'rgba(149,106,106, 0.5)',
+                    'rgba(0, 120, 179, 0.5)',
+                    'rgba(133,12,73, 0.5)',
+                    'rgba(255, 64, 0, 0.5)',
+                    'rgba(0, 102, 204, 0.5)',
+                    'rgba(255, 99, 132, 0.5)',
+                    'rgba(75, 192, 192, 0.5)',
+                    'rgba(255, 205, 86, 0.5)',
+                    'rgba(54, 162, 235, 0.5)',
+                    'rgba(255, 159, 64, 0.5)',
+                    'rgba(153, 102, 255, 0.5)',
+                    'rgba(255, 77, 77, 0.5)',
+                    'rgba(120, 221, 109, 0.5)',
+                    'rgba(240, 173, 78, 0.5)',
+                    'rgba(66, 209, 244, 0.5)',
+                ];
+                index = 0
+                const processValue = keys();
+
+                const chartData = {
+                    labels: uniqueDates,
+                    datasets: processValue.map(process => ({
+                        label: process,
+                        data: uniqueDates.map(date => getData(process, date)?.value == date ? getData(process, date).count : 0),
+                        backgroundColor: backGColor[index++ % backGColor.length],
+                    })),
+                };
+                // Теперь chartData можно использовать для отображения графика в Chart.js
+                updateChart(chartData)
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    $(document).ready(function () {
+        // Добавляем обработчик события "change" для всех чекбоксов с классом "form-check-input"
+        $('.form-check-input').on('change', function () {
+            // Получаем значение чекбокса
+            var value = $(this).val();
+
+            // Проверяем, выбран ли чекбокс
+            if ($(this).is(':checked')) {
+                dataset.push(value);
+                // Здесь вы можете выполнить дополнительные действия при выборе чекбокса
+            } else {
+                const indexToRemove = dataset.indexOf(value);
+                if (indexToRemove !== -1) {
+                    dataset.splice(indexToRemove, 1);
+                }
+                // Здесь вы можете выполнить дополнительные действия при отмене выбора чекбокса
+            }
+            loadData(dataset);
+        });
+    });
+
+
+    // Функция для обновления графика
+    function updateChart(datas) {
+        if (Chart.instances) {
+            var chartsArray = Object.values(Chart.instances);
+
+            // Получаем текущее количество графиков
+            var chartCount = chartsArray.length;
+
+            // Удаляем все графики, кроме последнего
+            for (var i = 0; i < chartCount; i++) {
+                chartsArray[i].destroy();
+            }
+        }
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: datas,
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        type: 'category',
+                        title: {
+                            display: true,
+                            text: 'Дата',
+                        },
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Количество использований',
+                        },
+                    },
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                },
+            },
+        });
+    }
+
+    // Вызывайте эту функцию при загрузке страницы и при выборе процесса
+    nal = {
+        labels: [''],
+        datasets: [{
+            label: '',
+            data: [0]
+        }],
+    };
+
+    updateChart(nal);
+</script>
+{% endblock %}

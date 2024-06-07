@@ -1,0 +1,676 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %} Отчет КарТел {% endblock %}
+
+{% block chapter %} Отчет КарТел {% endblock %}
+
+{% block links %}
+    <link href="{% static 'report_kartel/style.css' %}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block content %}
+    <div class="content">
+
+        {% if user.is_authenticated and request.user.first_name == "Алёна" and request.user.last_name == "Носикова" or user.is_authenticated and request.user.first_name == "Гульжана" and request.user.last_name == "Ахметова"%}
+        <div style="text-align: right; margin-bottom: 10px; color: darkblue;">
+          
+            <a href="/report-kartel/test">
+                <button class="btn btn-primary">Загрузить 7.23</button>
+            </a>
+            
+            <a href="/report-kartel/upload-google">
+              <button class="btn btn-primary">Загрузить Весь Отчет</button>
+            </a>
+
+            <a href="/report-kartel/update-pm">
+                <button class="btn btn-primary">Поменять ПМ'a</button>
+            </a>
+            
+            <a href="/report-kartel/sum-itogi">
+              <button class="btn btn-primary">Промеж итоги</button>
+            </a>
+
+            <button id="upload_button" class="btn btn-primary">Выгрузить</button>
+
+            
+        </div>
+
+        
+
+
+        {% endif %}
+
+        {% if user.is_authenticated and request.user.first_name == "Анастасия" and request.user.last_name == "Пастухова" %}
+        <div style="text-align: right; margin-bottom: 10px; color: darkblue;">
+          <a href="/report-kartel/test">
+            <button class="btn btn-primary">Загрузить 7.23</button>
+          </a>
+
+          <a href="/report-kartel/upload-google">
+            <button class="btn btn-primary">Загрузить Весь Отчет</button>
+          </a>
+
+          <button id="upload_button" class="btn btn-primary">Выгрузить</button>
+        </div>
+        {% endif %}
+
+        
+        <div>
+            <form id= "filterForm" method="GET">
+                <input class="filter-input" type="text" name="order_number" placeholder="Номер заказа" value="{{request.GET.order_number}}">
+                <input class="filter-input" type="text" name="activity_type" placeholder="Вид деятельности" value="{{request.GET.activity_type}}">
+                <input class="filter-input" type="text" name="on_who" placeholder="На ком висит заказ" value="{{request.GET.on_who}}">
+                <input class="filter-input" type="text" name="region" placeholder="Регион" value="{{request.GET.region}}">
+                {% if user.is_authenticated and request.user.first_name == "Алёна" and request.user.last_name == "Носикова" or user.is_authenticated and request.user.first_name == "Гульжана" and request.user.last_name == "Ахметова" or user.is_authenticated and request.user.first_name == "Анастасия" and request.user.last_name == "Пастухова"%}
+                <select name="pm" id="pm">
+                  <option> </option>
+                  {% for pm in pms %}
+                  <option value="{{ pm }}">{{ pm }}</option>
+                  {% endfor %}
+                </select>
+                {% endif %}
+
+                <button type="submit" class="btn btn-primary">Фильтровать</button>
+                <button type="submit" name="reset_filter" value="1" class="btn btn-secondary" onclick="resetSearch()">Сбросить фильтр</button>
+            </form> 
+        </div>
+        
+    
+        <p>Показаны строки для {{ request.user.first_name }} {{ request.user.last_name }}</p>
+
+        {% now "F" as current_month %}
+        <div class="table_div" id="table-div-object">
+            <table border="2" style="border-radius: 10px" class="table_data_display" height="10px" id="dataTable">
+                <thead>
+                    <tr border="2">
+                        <th onlick="sortTable(0)" style="background-color: #85EEFF; color: black">№</th>
+                        <th style="background-color: #85EEFF; color: black">Номер заказа</th>
+                        <th style="background-color: #59FF51; color: black">Дата внесения заказа в систему</th>
+                        {% comment %} <th style="background-color: darkblue; color: white">Дата внесения заказа в систему(месяц)</th>
+                        <th style="background-color: darkblue; color: white">Дата внесения заказа в систему(год)</th> {% endcomment %}
+                        <th style="background-color: #59FF51; color: black">Дата передачи в подряд</th>
+                        {% comment %} <th style="background-color: darkblue; color: white">Дата передачи в подряд(месяц)</th>
+                        <th style="background-color: darkblue; color: white">Дата передачи в подряд(год)</th> {% endcomment %}
+                        <th style="background-color: #85EEFF; color: black">№ заказа на работу</th>
+                        <th style="background-color: #59FF51; color: black">Дата подписания заказа заказчиком</th>
+                        {% comment %} <th style="background-color: darkblue; color: white">Дата подписания заказа заказчиком (МЕСЯЦ)</th>
+                        <th style="background-color: darkblue; color: white">Дата подписания заказа заказчиком (ГОД)</th> {% endcomment %}
+                        <th style="background-color: #59FF51; color: black">Срок выполнения работ, дней</th>
+                        <th style="background-color: #85EEFF; color: black">Дата выполнения работ по плану</th>
+                        <th style="background-color: #85EEFF; color: black">Дней осталось до планируемой даты</th>
+                        <th style="background-color: #85EEFF; color: black">Статус согласования</th>
+                        <th style="background-color: #ffa8e7; color: black">Покупатель</th>
+                        {% comment %} <th style="background-color: darblack; color: white">Поставщик</th> {% endcomment %}
+                        <th style="background-color: yellow; color: black">ПМ</th>
+                        <th style="background-color: #85EEFF; color: black">Проект</th>
+                        <th style="background-color: #85EEFF; color: black">Приложение к договору</th>
+                        {% comment %} <th style="background-color: darblack; color: white">Подразделение</th> {% endcomment %}
+                        <th style="background-color: #59FF51; color: black">Группа проектов</th>
+                        <th style="background-color: #ffa8e7; color: black">Регион</th>
+                        <th style="background-color: #ffa8e7; color: black">Сфера деятельности</th>
+                        <th style="background-color: #ffa8e7; color: black">Вид деятельности</th>
+                        <th style="background-color: #85EEFF; color: black">Номенклатура услуг</th>
+                        <th style="background-color: #85EEFF; color: black">Комментарий</th>
+                        <th style="background-color: #85EEFF; color: black">№ Контракта (Номер ДС)</th>
+                        <th style="background-color: #85EEFF; color: black">Дата подписания контракта</th>
+                        <th style="background-color: #59FF51; color: black; min-width: 150px">Сумма по заказу, с НДС</th>
+                        <th style="background-color: #85EEFF; color: black; min-width: 100px">План на месяц</th>
+                        <th style="background-color: #85EEFF; color: black; min-width: 100px">План на год</th>
+                        <th style="background-color: yellow; color: black">План на месяц(новый)</th>
+                        <th style="background-color: yellow; color: black">План на год(новый)</th>
+                        <th style="background-color: #FF0000; color: black">Ошибка</th>
+                        <th style="background-color: #85EEFF; color: black">Комментарий фин. отдела</th>
+                        <th style="background-color: yellow; color: black">Коментарий ПМ</th>
+                        <th style="background-color: #85EEFF; color: black">№ счета авансового платежа, с НДС</th>
+                        <th style="background-color: #85EEFF; color: black">Дата выставления счёта</th>
+                        <th style="background-color: #85EEFF; color: black">Дата выставления счёта авансового платежа (МЕСЯЦ)</th>
+                        <th style="background-color: #85EEFF; color: black">Дата выставления счёта авансового платежа (ГОД)</th>
+                        <th style="background-color: #85EEFF; color: black; min-width: 150px">Сумма по счёту авансового платежа, с НДС</th>
+                        <th style="background-color: #85EEFF; color: black">Номер счёта №</th>
+                        <th style="background-color: #85EEFF; color: black">№ счет фактуры 1С</th>
+                        <th style="background-color: #59FF51; color: black">Дата выставления счёта</th>
+                        <th style="background-color: #59FF51; color: black">Дата выставления счёта (МЕСЯЦ)</th>
+                        <th style="background-color: #59FF51; color: black">Дата выставления счёта (ГОД)</th>
+                        <th style="background-color: #85EEFF; color: black; min-width: 150px">Сумма по счёту</th> 
+                        <th style="background-color: #ffa8e7; color: black">Тип проекта(работ)</th>
+                        <th style="background-color: #85EEFF; color: black;">На ком висит заказ:</th>
+                        <th style="background-color: #85EEFF; color: black;">Статус работ</th> 
+                        <th style="background-color: #00AEFF; color: black;">Месяц выполнения работ</th>
+                        <th style="background-color: #00AEFF; color: black;">Год выполнения работ</th>
+                        <th style="background-color: #00AEFF; color: black;">Статус подписания (отправлено/не отправлено) для неподписанных заказов</th>
+                        <th style="background-color: #00AEFF; color: black;">Дата отправки заказа заказчику</th>
+                        <th style="background-color: #02ECCC; color: black;">Планируемая дата платежа счёт-фактуры</th>
+                        <th style="background-color: #02ECCC; color: black;">Фактическая дата платежа счёт-фактуры</th>
+                        <th style="background-color: #02ECCC; color: black;">Дата факторинга</th>
+                        {% comment %} DO NOT DELETE THE COMMENTED ROWS ABOVE {% endcomment %}
+                    </tr> 
+                    <tr id="sum-row" style="background: #B3EBB3">
+                      <td>ИТОГО</td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td style="width: 200px"> {{ total_sum_vat }}</td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td>{{ total_avans_sum }}</td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td>{{ total_account_sum }}</td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr> 
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                    {% if row.pm == "N/A" %}
+                        <tr data-model-id="{{row.id}}" height="20" style="background-color: rgba(255, 0, 0, 0.5);">
+                    {% else %}
+                        <tr data-model-id="{{row.id}}" height="20" >
+                    {% endif %}
+                        
+                            <td style='font-size: 14px; text-decoration: underline;'>{{ data.start_index|add:forloop.counter0 }}</td>
+                            <td>{% firstof row.order_number '&nbsp;' %}</td>
+                            <td class='date-cell'>{% firstof row.order_entered_date '&nbsp;' %}</td>
+                            {% comment %} <td>{% firstof row.order_entered_date_month '&nbsp;' %}</td>
+                            <td>{% firstof row.order_entered_date_year '&nbsp;' %}</td> {% endcomment %}
+                            <td class='date-cell'>{% firstof row.podryad_transfer '&nbsp;' %}</td>
+                            {% comment %} <td>{% firstof row.podryad_transfer_month '&nbsp;' %}</td>
+                            <td>{% firstof row.podryad_transfer_year '&nbsp;' %}</td> {% endcomment %}
+                            <td>{% firstof row.order_number_for_work '&nbsp;' %}</td>
+                            <td class='date-cell'>{% firstof row.signed_order_date '&nbsp;' %}</td>
+                            {% comment %} <td>{% firstof row.signed_order_date_month '&nbsp;' %}</td>
+                            <td>{% firstof row.signed_order_date_year '&nbsp;' %}</td> {% endcomment %}
+                            <td>{% firstof row.work_period_days '&nbsp;' %}</td>
+                            <td class='date-cell'>{% firstof row.finish_date_plan '&nbsp;' %}</td>
+                            <td>{% firstof row.left_days_to_finish '&nbsp;' %}</td>
+                            <td>{% firstof row.agreement_status '&nbsp;' %}</td>
+                            <td>{% firstof row.customer '&nbsp;' %}</td>
+                            {% comment %} <td>{% firstof row.provider '&nbsp;' %}</td> {% endcomment %}
+                            <td>{% firstof row.pm '&nbsp;' %}</td>
+                            <td>{% firstof row.project '&nbsp;' %}</td>
+                            <td>{% firstof row.agreement_attachment '&nbsp;' %}</td>
+                            {% comment %} <td>{% firstof row.partition '&nbsp;' %}</td> {% endcomment %}
+                            <td>{% firstof row.project_group '&nbsp;' %}</td>
+                            <td>{% firstof row.region '&nbsp;' %}</td>
+                            <td>{% firstof row.activity_field '&nbsp;' %}</td>
+                            <td>{% firstof row.activity_type '&nbsp;' %}</td>
+                            <td class="service_range_block"><div class="inner_scroll">{% firstof row.service_range '&nbsp;' %}</div></td>
+                            <td class="comment_block"><div class="inner_scroll">{% firstof row.comment '&nbsp;' %}</div></td>
+                            <td>{% firstof row.contract_number '&nbsp;' %}</td>
+                            <td class='date-cell'>{% firstof row.contract_sign_date '&nbsp;' %}</td>
+                            <td class="numeric-cell" style="width: 200px">{% firstof row.order_sum_vat '&nbsp;' %}</td>
+                            <td class="plan_month">{% firstof row.plan_month '&nbsp;' %}</td>
+                            <td class="plan_year">{% firstof row.plan_year '&nbsp;' %}</td>
+                            {% comment %} <td class="editable-cell" data-field="plan_month_new">{% firstof row.plan_month_new '&nbsp;' %}</td> {% endcomment %}
+                            <td class="editable-cell" data-field="plan_month_new" data-select=".plan_month_new">
+                                <select class="plan_month_new" {% if row.plan_month|lower == current_month|lower or row.plan_month|lower == "исключен" or row.plan_month|lower == "аннулирован" or row.plan_year|lower == "закрыт" or row.plan_month|lower == "заморожен" %}disabled{% endif %}>
+                                  {% for option in dropdown_month_plan %}
+                                  <option value="{{ option.value }}" {% if row.plan_month_new == option.value %} selected {% endif %}>
+                                    {{ option.label }}
+                                  </option>
+                                  {% endfor %}
+                                </select>
+                              </td>
+                            {% comment %} <td class="editable-cell" data-field="plan_year_new">{% firstof row.plan_year_new '&nbsp;' %}</td> {% endcomment %}
+                            <td class="editable-cell" data-field="plan_year_new" data-select=".plan_year_new">
+                                <select class="plan_year_new" {% if row.plan_month|lower == current_month|lower or row.plan_year|lower == "исключен" or row.plan_year|lower == "аннулирован" or row.plan_year|lower == "закрыт" or row.plan_month|lower == "заморожен" %}disabled{% endif %}>
+                                  {% for option in dropdown_year_plan %}
+                                  <option value="{{ option.value }}" {% if row.plan_year_new == option.value %} selected {% endif %}>
+                                    {{ option.label }}
+                                  </option>
+                                  {% endfor %}
+                                </select>
+                              </td>
+                            <td class="error-cell">{% firstof row.error '&nbsp;' %}</td>
+                            {% if user.is_authenticated and request.user.first_name == "Алёна" and request.user.last_name == "Носикова" or user.is_authenticated and request.user.first_name == "Гульжана" and request.user.last_name == "Ахметова" %}
+                                <td class="editable-cell" data-field="comment_finance">{% firstof row.comment_finance '&nbsp;' %}</td>
+                            {% else %}
+                                <td>{% firstof row.comment_finance '&nbsp;' %}</td>
+                            {% endif %}
+                            
+                            <td class="editable-cell" data-field="comment_pm">{% firstof row.comment_pm '&nbsp;' %}</td>
+
+                            <td>{% firstof row.account_number_avans '&nbsp;' %}</td>
+                            <td class='date-cell'>{% firstof row.date_invoice '&nbsp;' %}</td>
+                            <td class='date-cell'>{% firstof row.date_avans '&nbsp;' %}</td>
+                            <td>{% firstof row.date_avans_year '&nbsp;' %}</td>
+                            <td class="numeric-cell" >{% firstof row.avans_sum '&nbsp;' %}</td>
+                            <td>{% firstof row.account_number '&nbsp;' %}</td>
+                            <td>{% firstof row.invoice_faktura_number '&nbsp;' %}</td>
+                            <td class='date-cell'>{% firstof row.date_invoice_release '&nbsp;' %}</td>
+                            {% if user.is_authenticated and request.user.first_name == "Алёна" and request.user.last_name == "Носикова" or user.is_authenticated and request.user.first_name == "Гульжана" and request.user.last_name == "Ахметова"%}
+                                
+                                <td class="editable-cell" data-field="date_invoice_release_month" data-select=".date_invoice_release_month">
+                                    <select class="date_invoice_release_month" >
+                                      {% for option in dropdown_month %}
+                                      <option value="{{ option.value }}" {% if row.date_invoice_release_month == option.value %} selected {% endif %}>
+                                        {{ option.label }}
+                                      </option>
+                                      {% endfor %}
+                                    </select>
+                                  </td>
+                                <td class="editable-cell" data-field="date_invoice_release_year" data-select=".date_invoice_release_year">
+                                    <select class="date_invoice_release_year" >
+                                      {% for option in dropdown_year %}
+                                      <option value="{{ option.value }}" {% if row.date_invoice_release_year == option.value %} selected {% endif %}>
+                                        {{ option.label }}
+                                      </option>
+                                      {% endfor %}
+                                    </select>
+                                  </td>
+                            {% else %}
+                                <td>{% firstof row.date_invoice_release_month '&nbsp;' %}</td>
+                                <td>{% firstof row.date_invoice_release_year '&nbsp;' %}</td> 
+                            {% endif %}
+                            <td class="numeric-cell">{% firstof row.sum_by_invoice '&nbsp;' %}</td>
+                            <td >{% firstof row.work_type '&nbsp;' %}</td>
+                            <td class="editable-cell" data-field="on_who" data-select=".on_who">
+                                <select class="on_who" >
+                                  {% for option in dropdown_options %}
+                                  <option value="{{ option.value }}" {% if row.on_who == option.value %} selected {% endif %}>
+                                    {{ option.label }}
+                                  </option>
+                                  {% endfor %}
+                                </select>
+                              </td>
+                            <td class="editable-cell" data-field="work_status" data-select=".work_status">
+                                <select class="work_status" >
+                                  {% for option in dropdown_status %}
+                                  <option value="{{ option.value }}" {% if row.work_status == option.value %} selected {% endif %}>
+                                    {{ option.label }}
+                                  </option>
+                                  {% endfor %}
+                                </select>
+                              </td>
+                              <td class="editable-cell" data-field="work_finish_month" data-select=".work_finish_month">
+                                <select class="work_finish_month">
+                                  {% for option in dropdown_month %}
+                                  <option value="{{ option.value }}" {% if row.work_finish_month == option.value %} selected {% endif %}>
+                                    {{ option.label }}
+                                  </option>
+                                  {% endfor %}
+                                </select>
+                              </td>
+                            <td class="editable-cell" data-field="work_finish_year" data-select=".work_finish_year">
+                                <select class="work_finish_year" >
+                                  {% for option in dropdown_year %}
+                                  <option value="{{ option.value }}" {% if row.work_finish_year == option.value %} selected {% endif %}>
+                                    {{ option.label }}
+                                  </option>
+                                  {% endfor %}
+                                </select>
+                              </td>
+                              <td class="editable-cell" data-field="sign_status" data-select=".sign_status">
+                                <select class="sign_status" >
+                                  {% for option in dropdown_sign_status %}
+                                  <option value="{{ option.value }}" {% if row.sign_status == option.value %} selected {% endif %}>
+                                    {{ option.label }}
+                                  </option>
+                                  {% endfor %}
+                                </select>
+                              </td>
+                            <td class='date-cell' >{% firstof row.order_sent_date '&nbsp;' %}</td>
+                            <td class='date-cell' >{% firstof row.invoice_payment_plan_date '&nbsp;' %}</td>
+                            <td class='date-cell' >{% firstof row.invoice_payment_real_date '&nbsp;' %}</td>
+                            <td class='date-cell' >{% firstof row.date_factoring '&nbsp;' %}</td>
+                            {% comment %} DO NOT DELETE THE COMMENTED ROWS ABOVE {% endcomment %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+
+        
+        <div class="pagination d-flex justify-content-between align-items-center">
+            <span class="step-links">
+                {% if data.has_previous %}
+                    <a href="?page=1{% if request.GET.order_number or request.GET.region or request.GET.on_who or request.GET.activity_type or request.GET.pm %}&order_number={{request.GET.order_number}}&region={{request.GET.region}}&on_who={{request.GET.on_who}}&activity_type={{request.GET.activity_type}}&pm={{request.GET.pm}}{% endif %}" class="btn btn-secondary">&laquo; first</a>
+                    <a href="?page={{ data.previous_page_number }}{% if request.GET.order_number or request.GET.region or request.GET.on_who or request.GET.activity_type or request.GET.pm %}&order_number={{request.GET.order_number}}&region={{request.GET.region}}&on_who={{request.GET.on_who}}&activity_type={{request.GET.activity_type}}&pm={{request.GET.pm}}{% endif %}" class="btn btn-secondary">&lt; previous </a>
+                {% endif %}
+        
+                <span class="current">
+                    Page {{ data.number }} of {{ data.paginator.num_pages }}.
+                </span>
+        
+                {% if data.has_next %}
+                    <a href="?page={{ data.next_page_number }}{% if request.GET.order_number or request.GET.region or request.GET.on_who or request.GET.activity_type or request.GET.pm %}&order_number={{request.GET.order_number}}&region={{request.GET.region}}&on_who={{request.GET.on_who}}&activity_type={{request.GET.activity_type}}&pm={{request.GET.pm}}{% endif %}" class="btn btn-secondary">next &gt;</a>
+                    <a href="?page={{ data.paginator.num_pages }}{% if request.GET.order_number or request.GET.region or request.GET.on_who or request.GET.activity_type or request.GET.pm %}&order_number={{request.GET.order_number}}&region={{request.GET.region}}&on_who={{request.GET.on_who}}&activity_type={{request.GET.activity_type}}&pm={{request.GET.pm}}{% endif %}" class="btn btn-secondary">last &raquo;</a>
+                {% endif %}
+            </span>
+        
+            <form class="form-inline" method="get" action="">
+
+                <label class="mr-2" for="page_input">Go to page:</label>
+                {% if request.GET.order_number %}
+                <input type="hidden" name="order_number" value="{{ request.GET.order_number }}">
+                {% endif %}
+
+                {% if request.GET.work_type %}
+                <input type="hidden" name="work_type" value="{{ request.GET.work_type }}">
+                {% endif %}
+
+                {% if request.GET.on_who %}
+                <input type="hidden" name="on_who" value="{{ request.GET.on_who }}">
+                {% endif %} 
+
+                {% if request.GET.region %}
+                <input type="hidden" name="region" value="{{ request.GET.region }}">
+                {% endif %}
+
+                {% if request.GET.pm %}
+                <input type="hidden" name="pm" value="{{ request.GET.pm }}">
+                {% endif %}
+
+                <input type="number" id="page_input" name="page" min="1" max="{{ data.paginator.num_pages }}" class="form-control mr-2">
+                <input type="submit" value="Go" class="btn btn-secondary">
+            </form>
+
+            <form action="{% url 'delete_data' %}" method="post">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-red">Удалить данные</button>
+            </form>
+        </div>
+        
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <script>
+      function resetSearch(){
+        console.log("reset");
+        filters = document.querySelectorAll('.filter-input')
+        filters.forEach(function(item){
+          
+          console.log(item);
+          item.value = "";
+        })
+      }
+
+      function formatDate(dateString) {
+        if (dateString.trim() === '') {
+            return '';
+        }
+        var parts = dateString.split(' ');
+        var dateComponent = parts[0];
+        var dateParts = dateComponent.split('-');
+        var formattedDate = dateParts[2] + '.' + dateParts[1] + '.' + dateParts[0];
+    
+        return formattedDate;
+    }
+
+    var dateCells = document.querySelectorAll('.date-cell');
+    dateCells.forEach(function(cell) {
+        var originalDate = cell.textContent;
+        var formattedDate = formatDate(originalDate);
+        
+        cell.textContent = formattedDate;
+    });
+
+
+
+
+      function formatNumber(number) {
+        return number.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$& ').replace('.', ',');
+      }
+      var elements = document.querySelectorAll('.numeric-cell');
+      
+      elements.forEach(function(element) {
+          var numberText = element.textContent;
+          var number = parseFloat(numberText);
+          if (!isNaN(number)) {
+              element.textContent = formatNumber(number);
+          } else {
+              console.error("Unable to parse number from element:", element);
+          }
+      });
+
+
+      document.getElementById("upload_button")?.addEventListener("click", function(){
+        const a = document.createElement("a")
+        const queryString = new URLSearchParams(new FormData(document.getElementById("filterForm"))).toString()
+        a.href = "/report-kartel/export-data?" + queryString //ОСЫ ЖАКА ФИЛЬТРДАРДЫН ЗАТЫН КОЮ КЕРЕК
+        a.download = "7.23 template.xlsx" // имя для примера
+        document.body.append(a);          
+        a.click();
+      })
+
+      
+        function getCellValue(cell) {
+            const select = $($(cell).data("select"), cell);
+            if (select.length === 0) {
+                return $(cell).text();
+            } else {
+                return select.val();
+            }
+        }
+        $(document).on("plan_month_new-change plan_year_new-change", async function(event) {
+            const parent = $(event.target).parent();
+            
+            const response = await fetch(`{% url "get_error" %}?id=${parent.data("modelId")}`);
+            const json = await response.json();
+            
+            $(".error-cell", parent).text(json.error);
+        });
+
+
+        async function getOrderNumber() {
+            let orderNumber = document.querySelector('#order-number').value;
+            await sendRequestSearchOrderNumber(orderNumber);
+        }
+
+        async function sendRequestSearchOrderNumber(orderNumber) {
+            fetch('/report-kartel/display/?order_number=' + orderNumber)
+                .then(data => {
+                    return data.json();
+                })
+               .then(data => {
+                    console.log(data);
+               })
+            await updateTable();
+        }
+        async function updateTable() {
+            let orderNumber = document.querySelector('#order-number').value;
+            fetch('/report-kartel/display/?order_number=' + orderNumber)
+              .then(data => {
+                    return data.json();
+                })
+             .then(data => {
+                    console.log(data);
+                    let table = document.querySelector('#table-kartel');
+                    table.innerHTML = data.html;
+                })
+        }
+
+        $(document).ready(function() {
+            $('.dropdown-cell').click(function() {
+              var $this = $(this);
+              var $select = $this.find('.dropdown-select');
+              var $valueSpan = $this.find('.cell-value');
+              
+              if ($select.is(':hidden')) {
+                $select.show();
+                $valueSpan.hide();
+              } else {
+                $select.hide();
+                $valueSpan.show();
+              }
+            });
+            
+            $('.dropdown-select').change(function() {
+              var $select = $(this);
+              var $dropdownCell = $select.closest('.dropdown-cell');
+              var $valueSpan = $dropdownCell.find('.cell-value');
+              var selectedValue = $select.val();
+              
+              $valueSpan.text(selectedValue);
+              $select.hide();
+              $valueSpan.show();
+            });
+          });
+
+
+        const cells = document.querySelectorAll('.editable-cell:not(:has(:not([data-select=""])))');
+        console.log(cells);
+        
+         document.addEventListener("keydown", function(event) {
+            if (event.ctrlKey && event.keyCode == 83) {
+                event.preventDefault(); 
+            }
+        });
+        
+        cells.forEach(cell => {
+            cell.addEventListener('dblclick', function() {
+              console.log("clicked:", cell);
+               
+                if (!this.querySelector('input')) {
+                    
+                    const cellContent = this.innerText;
+                    const value = cell.textContent;
+                    this.innerHTML = `<input type="text" value="${cellContent}" />`;
+                    const inputField = this.querySelector('input');
+                    inputField.value = value;
+                    inputField.style.outline = 'none';
+                    inputField.style.border = 'none';
+                    inputField.style.padding = '5px';
+                    inputField.focus();
+                    inputField.addEventListener('dblclick', function(event) {
+                        event.stopPropagation();
+                    });
+                    inputField.addEventListener("focusout", async function() {
+                        cell.textContent = inputField.value;
+                        const field = cell.dataset.field;
+                        const value = inputField.value;
+                        const modelId = cell.parentNode.dataset.modelId;
+                        const response = await fetch("{% url 'update_data' %}", {
+                            method: "POST",
+                            body: JSON.stringify({
+                                field,
+                                value,
+                                modelId
+                            }),
+                            headers: {
+                                "X-CSRFToken": "{{csrf_token}}"
+                            }
+                        });
+                        const json = await response.json();
+                        inputField.remove();
+                        cell.dispatchEvent(new Event(`${field}-change`, {
+                            bubbles: true
+                        }));
+                    });
+                }
+            });
+        });
+
+        $(".editable-cell[data-select]").each(function() {
+            const cell = this;
+            const field = $(this).data("field");
+            const modelId = $(this).parent().data("modelId");
+            $($(this).data("select"), this).on("change", async function() {
+                const value = $(this).val();
+                const response = await fetch("{% url 'update_data' %}", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        field,
+                        value,
+                        modelId
+                    }),
+                    headers: {
+                        "X-CSRFToken": "{{csrf_token}}"
+                    }
+                });
+                const json = await response.json();
+
+                cell.dispatchEvent(new Event(`${field}-change`, {
+                    bubbles: true
+                }));
+            });
+        });
+        function updateData(cell) {
+
+        }
+
+        document.addEventListener('input', function(event) {
+            const inputField = event.target;
+            if (inputField.tagName === 'INPUT') {
+                
+                const updatedContent = inputField.value;
+                const rowId = inputField.closest('.editable-cell').dataset.rowId; 
+            }
+        });
+
+    
+          var currentDate = new Date();
+          var currentMonth = currentDate.toLocaleString('default', { month: 'long' }); // Получаем текущий месяц на русском языке
+          var currentYear = currentDate.getFullYear().toString(); // Получаем текущий год
+
+          var planMonthCell = document.querySelector(".plan_month");
+          var planYearCell = document.querySelector(".plan_year");
+
+          var planMonthNewDropdown = document.querySelector(".plan_month_new");
+          var planYearNewDropdown = document.querySelector(".plan_year_new");
+
+          var planMonth = planMonthCell.innerText;
+          var planYear = planYearCell.innerText;
+
+          console.log(planMonth);
+
+          if ((planMonth.trim() === currentMonth && planYear.trim() === currentYear) || 
+              (planMonth === "исключен" && planYear === "исключен") || 
+              (planMonth === "аннулирован" && planYear === "аннулирован") || 
+              (planMonth === "закрыт" && planYear === "закрыт") || 
+              (planMonth === "заморожен" && planYear === "заморожен")) {
+              planMonthNewDropdown.disabled = true;
+              planYearNewDropdown.disabled = true;
+          }
+        
+        
+    </script>
+    
+{% endblock %}

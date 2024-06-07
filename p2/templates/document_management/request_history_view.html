@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Заявка №{{ request_instance.request_number }} - История изменений{% endblock %}
+{% block chapter %}Заявка №{{ request_instance.request_number }} - История изменений{% endblock %}
+
+{% block back_button %}
+<div>
+    <a class="btn btn-primary mb-2" href="{% url 'distributor' %}">На главную страницу</a>
+</div>
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <p>Регион: {{ request_instance.region }}</p>
+    <p>Наименование БС: {{ request_instance.bis_name }}</p>
+    <p>Номер заказа: {{ request_instance.order_number }}</p>
+    <p>Статус: {{ request_instance.get_status_display }}</p>
+    <p>Создано: {{ request_instance.created_at }}</p>
+
+    {% if latest_entries %}
+      <table class="table mt-3">
+        <thead>
+          <tr>
+            <th>Дата и время</th>
+            <th>Пользователь</th>
+            <th>Статус</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in latest_entries %}
+            <tr>
+              <td>{{ entry.modified_at }}</td>
+              <td>{{ entry.modified_by }}</td>
+              <td>{{ entry.get_status_display }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="mt-3">История изменений отсутствует</p>
+    {% endif %}
+  </div>
+{% endblock %}

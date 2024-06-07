@@ -1,0 +1,32 @@
+{% extends "finance_module/base.html" %}
+
+{% load static %}
+{% block active_breadcrump %}
+Реестр неоплаченных счетов
+{% endblock %}
+{% block title %}
+Реестр неоплаченных счетов
+{% endblock %}
+{% block links %}
+<link rel="stylesheet" href="{% static 'finance_module/main.css' %}">
+{% endblock %}
+{% block breadcrumbs %}
+{{block.super}} <span class="mx-3 text-primary"><i class="fa-solid fa-chevron-right"></i></span>
+<div class="dropdown">
+    <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      {% block unpaid_invoices_active_breadcrump %}{% endblock %}
+    </button>
+    <ul class="dropdown-menu ignore">
+        <li><a class="dropdown-item {% if request.resolver_match.view_name == 'finance_module:unpaid_invoices:import' %}active{% endif %}" href="{% url 'finance_module:unpaid_invoices:import' %}"><i class="fa-solid fa-file-import"></i> Импорт</a></li>
+        <li><a class="dropdown-item {% if request.resolver_match.view_name == 'finance_module:unpaid_invoices:list' %}active{% endif %}" href="{% url 'finance_module:unpaid_invoices:list' %}"><i class="fa-solid fa-table-list"></i> Реестр неоплаченных счетов</a></li>
+        <li><a class="dropdown-item {% if request.resolver_match.view_name == 'finance_module:unpaid_invoices:paid_invoices' %}active{% endif %}" href="{% url 'finance_module:unpaid_invoices:paid_invoices' %}"><i class="fa-solid fa-table-list"></i> Реестр оплат</a></li>
+        <li><a class="dropdown-item {% if request.resolver_match.view_name == 'finance_module:unpaid_invoices:unloading_invoices_paid' %}active{% endif %}" href="{% url 'finance_module:unpaid_invoices:unloading_invoices_paid' %}"><i class="fas fa-file-invoice"></i> Выгрузка</a></li>
+        <li><a class="dropdown-item {% if request.resolver_match.view_name == 'finance_module:unpaid_invoices:pm_sum' %}active{% endif %}" href="{% url 'finance_module:unpaid_invoices:pm_sum' %}"><i class="fa-solid fa-list"></i> Сумма от ПМ</a></li>
+    </ul>
+  </div>
+{% endblock %}
+{% block finance_module_content %}
+{% block unpaid_invoices_content %}
+
+{% endblock %}
+{% endblock %}

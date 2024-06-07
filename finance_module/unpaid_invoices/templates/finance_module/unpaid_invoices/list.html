@@ -1,0 +1,391 @@
+{% extends 'finance_module/unpaid_invoices/base.html' %}
+{% load static %}
+{% block unpaid_invoices_active_breadcrump %}
+Список реестра неоплаченных счетов
+{% endblock %}
+{% block title %}
+Список реестра неоплаченных счетов
+{% endblock %}
+{% block links %}
+<link rel="stylesheet" href="{% static 'finance_module/unpaid-invoices.css' %}">
+{% endblock %}
+{% block unpaid_invoices_content %}
+<div id="unpaid-invoices-table-container">
+  <table id="unpaid-invoices-table">
+    <thead>
+      <tr>
+        <th class="text-danger bg-white" scope="col" style="position: sticky; height: 22.07px; top: 0px" data-st-subtotal="2"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="9"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="9"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="9"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="9"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="9"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="9"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="9"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="9"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+        <th class="text-danger bg-white" scope="col" data-st-subtotal="2"
+          style="position: sticky; height: 22.07px; top: 0px"></th>
+      </tr>
+      <tr>
+        <th style="position: sticky; min-width: 90px; top: 22.07px" class="th" scope="col"
+          data-st-field="number">
+          <div class="th-content">Действие</div>
+        </th>
+        <th style="position: sticky; min-width: 90px; top: 22.07px" class="th" scope="col" data-st-field="number">
+          <div class="th-content">ДО</div>
+        </th>
+        <th style="position: sticky; min-width: 94px;top: 22.07px" class="th" scope="col" data-st-field="date">
+          <div class="th-content">Дата</div>
+        </th>
+        <th style="position: sticky; min-width: 133px;top: 22.07px" class="th" scope="col"
+          data-st-field="invoice_number">
+          <div class="th-content">№ счёта</div>
+        </th>
+        <th style="position: sticky; min-width: 135px;top: 22.07px" class="th" scope="col" data-st-field="invoice_date">
+          <div class="th-content">Дата счёта</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="project">
+          <div class="th-content">Проект</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="responsible_user_id">
+          <div class="th-content">
+            Ответст<br />венный
+          </div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="approver">
+          <div class="th-content">Утвердитель</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="llc">
+          <div class="th-content">ТОО</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="contractor">
+          <div class="th-content">Контрагент</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="comment">
+          <div class="th-content">Комментарий</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="currency">
+          <div class="th-content">Валюта</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="annotated_pm_sum"
+          data-st-type="number">
+          <div class="th-content">Сумма для таблицы</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="invoice_category">
+          <div class="th-content">Категория счёта</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="revenue_expense_articles">
+          <div class="th-content">Статьи доходов/расходов</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="sales_order">
+          <div class="th-content">Заказ на продажу</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="bin_or_iin">
+          <div class="th-content">БИН/ИИН</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="document_amount"
+          data-st-type="number">
+          <div class="th-content">Сумма документа</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col">
+          <div class="th-content">С какого р/с платить</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="iic">
+          <div class="th-content">ИИК</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="payment_destination_code">
+          <div class="th-content">КНП</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="contract_number">
+          <div class="th-content">Фактический номер договора</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="invoice_amount"
+          data-st-type="number">
+          <div class="th-content">Сумма по счёту</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="paid_amount_1c"
+          data-st-type="number">
+          <div class="th-content">Оплаченная ранее сумма (1С)</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="annotated_today_paid"
+          data-st-type="number">
+          <div class="th-content">Оплачено сегодня</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="annotated_planned_payment"
+          data-st-type="number">
+          <div class="th-content">Планируемая оплата</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="annotated_remainder"
+          data-st-type="number">
+          <div class="th-content">Остаток по оплате(1С)</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col"
+          data-st-field="annotated_allowed_payment_amount" data-st-type="number">
+          <div class="th-content">Можно доплатить, тг</div>
+        </th>
+        <th style="position: sticky; top: 22.07px; min-width: 10em;" class="th" scope="col"
+          data-st-field="annotated_pm_sum" data-st-type="number">
+          <div class="th-content">Сумма от ПМ</div>
+        </th>
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="annotated_payment_decision">
+          <div class="th-content">Решение по оплате</div>
+        </th>
+        {% comment %} <th style="top: 22.07px" class="th" scope="col">
+          <div class="th-content">С какого р/с платить</div>
+        </th> {% endcomment %}
+        <th style="position: sticky; top: 22.07px" class="th" scope="col" data-st-field="bank">
+          <div class="th-content">Банк</div>
+        </th>
+        {% comment %} <th class="th" scope="col">
+          <div class="th-content">ТИП</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Статус ДО</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Создатель счёта</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Подр</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Оплатить до(дата)</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Номер документа</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Дата документа</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Закрывающий документ в 1С посажен на сумму</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Закрывающий документ предоставлен на сумму</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Непосаженный ЭАВР (сумма)</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Дата окончания работ</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Условия предоплаты, %</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Ранее оплачено, %</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Можно доплатить, тг</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Статус работ</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Решение по оплате</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Размер превышения, тг</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">% после оплаты</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Стоп лист</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Дата выставления СФ заказчику</div>
+        </th>
+        <th class="th" scope="col">
+          <div class="th-content">Приоритетность оплаты</div>
+        </th> {% endcomment %}
+      </tr>
+    </thead>
+    <tbody id="unpaid-invoices-rows">
+      <tr id="unpaid-invoices-last-row">
+        <td colspan="52">
+          <div style="height: 10px;"></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $(function () {
+    const csrfToken = "{{csrf_token}}";
+    const numberFormat = new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    let unpaidInvoices = {};
+    $("#unpaid-invoices-table").smartTableWithVirtualScroll({
+      name: "unpaid-invoices-unpaid-invoices-table",
+      csrfToken,
+      firstShowRows: "intersected",
+      numberFormat,
+      lastRowTarget: "#unpaid-invoices-last-row",
+      rowsTarget: "#unpaid-invoices-rows",
+      getValuesUrl: "/p1/finance-module/unpaid-invoices/smart-tables/unpaid-invoices-get-values",
+      getRowsUrl: "/p1/finance-module/unpaid-invoices/smart-tables/unpaid-invoices-get-rows",
+      getSubtotalsUrl: "/p1/finance-module/unpaid-invoices/smart-tables/unpaid-invoices-get-subtotals",
+      loadingHtml: `
+            <tr>
+                <td class="text-center p-2" colspan="52">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </td>
+            </tr>
+        `,
+      getTr(row) {
+        unpaidInvoices[row.number] = row;
+        const $tr = $(`
+            <tr data-number="${row.number}" class="unpaid-invoice-row" id="unpaid-invoice-row-${row.id}">
+                <td class="smart-table__always-shown text-center align-middle"><div class="td-content"><button class="menu-btn btn"><i class="fa-solid fa-bars"></i></button></div></td>
+                <td><div class="td-content">${row.number}</div></td>
+                <td><div class="td-content">${row.date}</div></td>
+                <td><div class="td-content">${row.invoice_number}</div></td>
+                <td><div class="td-content">${row.invoice_date}</div></td>
+                <td><div class="td-content" style="width: 90px;">${row.project}</div></td>
+                <td><div class="td-content">${row.responsible_user_id}</div></td>
+                <td><div class="td-content" style="width: 200px;">${row.approver}</div></td>
+                <td><div class="td-content" style="width: 120px;">${row.llc}</div></td>
+                <td><div class="td-content" style="width: 200px;">${row.contractor}</div></td>
+                <td><div class="td-content" style="width: 300px;">${row.comment}</div></td>
+                <td><div class="td-content">${row.currency}</div></td>
+                <td><div class="td-content"></div></td>
+                <td><div class="td-content">${row.invoice_category}</div></td>
+                <td><div class="td-content" style="width: 120px;">${row.revenue_expense_articles || ""}</div></td>
+                <td><div class="td-content" style="width: 90px;">${row.sales_order}</div></td>
+                <td><div class="td-content" style="width: 100px;">${row.bin_or_iin}</div></td>
+                <td><div class="td-content"></div></td>
+                <td><div class="td-content"></div></td>
+                <td><div class="td-content">${row.iic || ""}</div></td>
+                <td><div class="td-content">${row.payment_destination_code || ""}</div></td>
+                <td><div class="td-content">${row.contract_number}</div></td>
+                <td><div class="td-content">${numberFormat.format(row.invoice_amount)}</div></td>
+                <td><div class="td-content">${row.paid_amount_1c ? numberFormat.format(row.paid_amount_1c) : ""}</div></td>
+                <td><div class="td-content">${numberFormat.format(row.today_paid)}</div></td>
+                <td><div class="td-content">${numberFormat.format(row.planned_payment || 0)}</div></td>
+                <td><div class="td-content">${numberFormat.format(row.remainder)}</div></td>
+                <td><div class="td-content">${numberFormat.format(row.allowed_payment_amount)}</div></td>
+                <td></td> 
+                <td><div class="td-payment-decision td-content">${row.payment_decision}</div></td>
+                <td><div class="td-content">${row.bank}</div></td>
+            </tr>
+        `);
+        $tr.toggleClass("bg-success-subtle", row.has_exception);
+        
+        return $tr;
+      }
+    });
+
+    $(document).on("click", ".menu-btn", function() {
+      const $tr = $(this).closest("tr");
+      const number = $tr.data("number");
+      const $modal = $(`
+        <div class="modal fade" tabindex="-1">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Действие</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                  <form id="create-exception-form">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="" id="exception-checkbox">
+                      <label class="form-check-label" for="exception-checkbox">Исключить на сегодня</label>
+                    </div>
+                  </form>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" form="create-exception-form" class="btn btn-primary">Отправить</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `);
+      const $exceptionCheckbox = $("#exception-checkbox", $modal);
+
+      $exceptionCheckbox.prop("checked", unpaidInvoices[number].has_exception)
+      $modal.on("hidden.bs.modal", function () {
+        $modal.remove();
+      });
+      $("#create-exception-form", $modal).on("submit", async function (event) {
+        event.preventDefault();
+        const checked = $exceptionCheckbox.prop("checked");
+        let response = null;
+        try {
+          if (checked) {
+            response = await fetch(`/p1/finance-module/api/create-unpaid-invoice-exception?number=${number}`, { method: "POST" });
+          } else {
+            response = await fetch(`/p1/finance-module/api/delete-unpaid-invoice-exception?number=${number}`, { method: "DELETE" });
+          }
+        } catch (error) {
+          console.error(error)
+        }
+
+        if (response && response.ok) {
+          $tr.toggleClass("bg-success-subtle", checked);
+          unpaidInvoices[number].has_exception = checked;
+        }
+        $modal.modal("hide");
+        return false;
+      });
+      $modal.modal("show");
+    });
+  });
+</script>
+{% endblock %}

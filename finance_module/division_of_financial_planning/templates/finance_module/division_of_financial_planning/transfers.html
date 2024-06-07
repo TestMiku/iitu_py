@@ -1,0 +1,446 @@
+{% extends 'finance_module/division_of_financial_planning/base.html' %}
+{% load static number_format %}
+{% block division_of_financial_planning_active_breadcrump %}
+Переводы
+{% endblock %}
+{% block title %}
+Переводы
+{% endblock %}
+
+{% block finance_module_main %}
+<div class="card rounded-0 border-end-0 border-start-0 mb-2">
+  <div class="card-header bg-white d-flex justify-content-between">
+    <div class="align-self-center d-none" id="project-region-accounts-subdivisions-loading">
+      <div class="spinner-border spinner-border-sm text-primary" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+    </div>
+    <ul id="project-region-accounts-subdivisions" class="nav nav-tabs card-header-tabs align-self-end"></ul>
+    <div class="d-flex align-self-center gap-1">
+      <button id="project-region-accounts-table-toggle-view-button" type="button" class="btn"><i
+          class="fa-solid fa-arrow-right-arrow-left"></i> ПМ</button>
+      <button id="project-region-accounts-table-toggle-collapse-button" class="btn" data-bs-toggle="collapse"
+        data-bs-target="#project-region-accounts-table-collapse" title="Скрыть таблицу расчётных счетов" type="button"
+        aria-expanded="true" aria-controls="project-region-accounts-table-collapse"><i
+          class="fa-regular fa-eye-slash"></i> Скрыть</button>
+      <button id="project-region-accounts-table-reload-button" class="btn" title="Обновить таблицу расчётных счетов"
+        type="button"><i class="fas fa-sync"></i></button>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="collapse show" id="project-region-accounts-table-collapse">
+      <div class="tab-content" id="project-region-accounts-table-container" style="overflow: scroll;"></div>
+    </div>
+  </div>
+</div>
+<div class="card rounded-0 border-end-0 border-start-0 flex-fill mb-2">
+  <div class="card-header bg-white">
+    <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button"
+          role="tab" aria-controls="home-tab-pane" aria-selected="true">На АДМ</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button"
+          role="tab" aria-controls="profile-tab-pane" aria-selected="false">Расчётные</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact-tab-pane" type="button"
+          role="tab" aria-controls="contact-tab-pane" aria-selected="false">ЧСИ</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="disabled-tab" data-bs-toggle="tab" data-bs-target="#disabled-tab-pane"
+          type="button" role="tab" aria-controls="disabled-tab-pane" aria-selected="false">Между р/с</button>
+      </li>
+    </ul>
+  </div>
+  <div class="card-body">
+    <div class="tab-content h-100" id="myTabContent">
+      <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+        <div class="row h-100">
+          <div class="col">
+            <div class="h-100 position-relative">
+              <div class="position-absolute top-0 bottom-0 end-0 start-0" style="overflow: scroll;">
+                <table id="administrative-transfers-table" class="table table-bordered mb-0">
+                  <thead>
+                    <tr class="text-danger">
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th class="text-end" scope="col" data-st-subtotal="9">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                    </tr>
+                    <tr class="table-light">
+                      <th scope="col" data-st-field="created_at" data-st-type="date">Дата</th>
+                      <th scope="col" data-st-field="project_region__name">ПМ</th>
+                      <th scope="col" data-st-field="account__name">Р/с</th>
+                      <th scope="col" data-st-field="name">Статья</th>
+                      <th scope="col" data-st-field="sum" data-st-type="number">Сумма</th>
+                      <th scope="col" data-st-field="note">Примечание</th>
+                      <th scope="col" data-st-field="status__name">Статус</th>
+                    </tr>
+                  </thead>
+                  <tbody id="administrative-transfers-table-rows">
+                    <tr id="administrative-transfers-table-last-row">
+                      <td colspan="7">
+                        <div style="height: 10px;"></div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-auto">
+            <form id="form" method="post">
+              <div class="form-floating mb-1">
+                <input class="form-control" value="Выберите ПМ" id="project-region-name-input" readonly />
+                <label for="project-region-name-input" class="form-label">ПМ</label>
+              </div>
+              <div class="form-floating mb-1">
+                <input type="text" class="form-control" id="account-name-input" value="Выберите расчётный счёт"
+                  readonly />
+                <label for="account-name-input" class="form-label">Расчётный счёт</label>
+              </div>
+              <div class="form-floating mb-1">
+                <input type="text" name="name" list="name-datalist" id="name-input" class="form-control" min="0"
+                  step="0.01" placeholder="Введите имя статьи" required /><label for="name-input"
+                  class="form-label">Статья</label>
+                <datalist id="name-datalist">
+                </datalist>
+              </div>
+              <div class="form-floating mb-1">
+                <input type="number" name="sum" id="sum-input" class="form-control" min="0" step="0.01"
+                  placeholder="Введите сумму" required />
+                <label for="sum-input" class="form-label">Сумма</label>
+              </div>
+              <div class="form-floating mb-2">
+                <textarea name="note" id="note-textarea" cols="30" rows="1" class="form-control"
+                  placeholder="Введите примечание"></textarea>
+                <label for="note-textarea" class="form-label">Примечание</label>
+              </div>
+              <button type="submit" class="btn btn-primary float-end">Перевести</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
+        <div class="row h-100">
+          <div class="col d-flex flex-column gap-1">
+            <div>
+              <button id="send-raschetnye-mail-button" class="btn btn-primary">Отправить как письмо SWIFT</button>
+            </div>
+            <div class="flex-fill position-relative">
+              <div class="position-absolute top-0 bottom-0 end-0 start-0" style="overflow: scroll;">
+                <table id="raschetnye-table" class="table table-bordered mb-0">
+                  <thead>
+                    <tr class="text-danger">
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th class="text-end" scope="col" data-st-subtotal="9">-</th>
+                      <th class="text-end" scope="col" data-st-subtotal="9">-</th>
+                      <th class="text-end" scope="col" data-st-subtotal="9">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                    </tr>
+                    <tr class="table-light">
+                      <th scope="col" data-st-field="created_at" data-st-type="date">Дата</th>
+                      <th scope="col" data-st-field="project_region__name">ПМ</th>
+                      <th scope="col" data-st-field="account__name">Р/с</th>
+                      <th scope="col" data-st-field="name">ФИО</th>
+                      <th scope="col" data-st-field="layoff_date">Примечание</th>
+                      <th scope="col" data-st-field="raschetnye_by_1c" data-st-type="number">Расчетные по 1С</th>
+                      <th scope="col" data-st-field="subreport" data-st-type="number">Подотчеты</th>
+                      <th scope="col" data-st-field="percent_15" data-st-type="number">15%</th>
+                      <th scope="col" data-st-field="status__name">Статус</th>
+                    </tr>
+                  </thead>
+                  <tbody id="raschetnye-table-rows">
+                    <tr id="raschetnye-table-last-row">
+                      <td colspan="9">
+                        <div style="height: 10px;"></div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-auto">
+            <form action="" id="raschetnye-form">
+              <div class="form-floating mb-1">
+                <input class="form-control" type="text" name="name" placeholder="Введите ФИО" id="raschetnye-name-input" style="min-width: 16em;" required>
+                <label for="raschetnye-name-input" class="form-label">ФИО</label>
+              </div>
+              <div class="form-floating mb-1">
+                <input class="form-control" type="month" name="layoff-date" placeholder="Выберете месяц уволнения" id="raschetnye-layoff-date-input" required>
+                <label for="raschetnye-layoff-date-input" class="form-label">Месяц уволнения</label>
+              </div>
+              <div class="form-floating mb-1">
+                <input class="form-control" type="number" min="0" step="0.01" placeholder="Введите расчётные по 1C" name="raschetnye-by-1c" id="raschetnye-layoff-raschetnye-by-1c-input" required>
+                <label for="raschetnye-layoff-raschetnye-by-1c-input" class="form-label">Расчетные по 1С</label>
+              </div>
+              <div class="form-floating mb-1">
+                <input class="form-control" type="number" min="0" step="0.01" placeholder="Введите подотчеты" name="subreport" id="raschetnye-subreport-input" required>
+                <label for="raschetnye-subreport-input" class="form-label">Подотчеты</label>
+              </div>
+              <div class="form-floating mb-1">
+                <input class="form-control" type="number" min="0" step="0.01" placeholder="Введите 15%" name="percent-15" id="raschetnye-percent-15-input" required>
+                <label for="raschetnye-percent-15-input" class="form-label">15%</label>
+              </div>
+              <div class="form-text mb-2">
+                При отправке расчётных еще создаётся <br>Перевод на АДМ, на статью "20% за кэш", <br> с суммой 15%.
+              </div>
+              <button class="btn btn-primary float-end">Отправить</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane fade" id="contact-tab-pane" role="tabpanel" aria-labelledby="contact-tab" tabindex="0">
+        <div class="accordion accordion-flush" id="accordionExample">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                Форма
+              </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <div style="overflow-x: scroll;">
+                  <form action="" id="add-chsi-form">
+                    <table class="table w-auto table-striped">
+                      <thead class="table-light">
+                        <tr>
+                          <th scope="col">
+                            <label for="chsi-llc-input">ТОО</label>
+                          </th>
+                          <th scope="col">
+                            <label for="chsi-recipient-input">Получатель</label>
+                          </th>
+                          <th scope="col">
+                            <label for="chsi-iin-or-bin-input">ИИН/БИН</label>
+                          </th>
+                          <th scope="col">
+                            <label for="chsi-iik-input">ИИК</label>
+                          </th>
+                          <th scope="col">
+                            <label for="chsi-executive-inscription-input">Исполнительная надпись</label>
+                          </th>
+                          <th scope="col">
+                            <label for="chsi-retention-type-input">Вид удержания</label>
+                          </th>
+                          <th scope="col">
+                            <label for="chsi-collaborator-input">Сотрудник</label>
+                          </th>
+                          <th scope="col">
+                            <label for="chsi-iin-input">ИИН</label>
+                          </th>
+                          <th scope="col">
+                            <label for="chsi-actual-retention-rate-input">Фактическая ставка удержания</label>
+                          </th>
+                          <th scope="col">
+                            <label for="chsi-sum-input">Сумма</label>
+                          </th>
+                          <th scope="col">
+                            <label for="chsi-executive-order-receipt-date-input">Дата получения исполнительного</label>
+                          </th>
+                          <th scope="col">
+        
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody id="chsi-rows">
+                        <tr>
+                          <td>
+                            <input type="text" name="llc" id="chsi-llc-input" class="form-control" placeholder="Введите ТОО" required>
+                          </td>
+                          <td>
+                            <input type="text" name="recipient" id="chsi-recipient-input" class="form-control" placeholder="Введите получателя" required>
+                          </td>
+                          <td>
+                            <input type="text" name="iin-or-bin" id="chsi-iin-or-bin-input" class="form-control" placeholder="Введите ИИН/БИН" required>
+                          </td>
+                          <td>
+                            <input type="text" name="iik" id="chsi-iik-input" class="form-control" placeholder="Введите ИИК" required>
+                          </td>
+                          <td>
+                            <input type="text" name="executive-inscription" id="chsi-executive-inscription-input" class="form-control" placeholder="Введите исполнительную надпись" required>
+                          </td>
+                          <td>
+                            <input type="text" name="retention-type" id="chsi-retention-type-input" class="form-control" placeholder="Введите вид удержания" required>
+                          </td>
+                          <td>
+                            <input type="text" name="collaborator" id="chsi-collaborator-input" class="form-control" placeholder="Введите сотрудника" required>
+                          </td>
+                          <td>
+                            <input type="text" name="iin" id="chsi-iin-input" class="form-control" placeholder="Введите ИИН" required>
+                          </td>
+                          <td>
+                            <input type="text" name="actual-retention-rate" id="chsi-actual-retention-rate-input"
+                              class="form-control" placeholder="Введите фактическая ставку удержания" required>
+                          </td>
+                          <td>
+                            <input type="number" name="sum" min="0" step="0.01" id="chsi-sum-input" class="form-control" placeholder="Введите сумму" required>
+                          </td>
+                          <td>
+                            <input type="date" name="executive-order-receipt-date" id="chsi-executive-order-receipt-date-input"
+                              class="form-control" placeholder="Выбрете дату получения исполнительного" required>
+                          </td>
+                          <td>
+                            <button type="submit" class="btn btn-success">Добавить</button>
+                          </td>
+                        </tr>
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <th scope="col">Итого</th>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td class="text-end" id="chsi-total-sum">0,00</td>
+                          <td></td>
+                          <td></td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </form>
+                  <form action="" id="chsi-form">
+                    <div class="mb-3">
+                      <label class="form-label" for="chsi-date">Дата</label>
+                      <input type="date" name="date" id="chsi-date" class="form-control w-auto">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Отправить</button>
+                    <button id="chsi-delete-all-rows" type="button" class="btn btn-link">Удалить все строки</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                Ранее отправленные
+              </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <table id="chsi-groups-table" class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col" class="smart-table__always-shown"></th>
+                      <th scope="col" data-st-field="project_region__name">
+                        Проект регион
+                      </th>
+                      <th scope="col" data-st-field="account__name">
+                        Расчётный счёт
+                      </th>
+                      <th scope="col" data-st-field="sum" date-st-type="number">
+                        Сумма
+                      </th>
+                      <th scope="col" data-st-field="status__name">
+                        Статус
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="chsi-groups-table-rows">
+                    <tr id="chsi-groups-table-last-row">
+                      <td colspan="5">
+                        <div style="height: 10px;">
+
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane h-100 fade" id="disabled-tab-pane" role="tabpanel" aria-labelledby="disabled-tab" tabindex="0">
+        <div class="row h-100">
+          <div class="col d-flex flex-column gap-1">
+            <div class="flex-fill position-relative">
+              <div class="position-absolute top-0 bottom-0 end-0 start-0" style="overflow: scroll;">
+                <table class="table table-bordered border-black mb-0" id="transfers-table">
+                  <thead>
+                    <tr>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                      <th scope="col" data-st-subtotal="9">-</th>
+                      <th scope="col" data-st-subtotal="2">-</th>
+                    </tr>
+                    <tr class="table-light border-black">
+                      <th data-st-field="datetime" class="align-middle" scope="col">Дата</th>
+                      <th data-st-field="responsible_name" class="align-middle" scope="col">Ответственный</th>
+                      <th data-st-field="from_whom__name" class="align-middle" scope="col">С проект региона</th>
+                      <th data-st-field="from_account__name" class="align-middle" scope="col">С р/с</th>
+                      <th data-st-field="from_account__number" class="align-middle" scope="col">Номер р/с</th>
+                      <th data-st-field="to_whom__name" class="align-middle" scope="col">На проект региона</th>
+                      <th data-st-field="to_account__name" class="align-middle" scope="col">На р/с</th>
+                      <th data-st-field="to_account__number" class="align-middle" scope="col">Номер р/с</th>
+                      <th data-st-field="sum" data-st-type="number" class="align-middle" scope="col">Сумма</th>
+                      <th data-st-field="status__name" class="align-middle" scope="col">Подтверждение</th>
+                    </tr>
+                  </thead>
+                  <tbody id="transfers-table-rows">
+                    <tr id="transfers-table-last-row">
+                      <td class="text-center" colspan="10">
+                        <div style="height: 10px"></div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-auto">
+            <form action="" id="transfers-form">
+              <div class="form-floating mb-1">
+                <select class="form-select" name="to-whom-id" id="transfers-to-whom-select" required disabled> 
+                  <option value="" disabled selected>Выберете проект регион</option>
+                </select>
+                <label for="transfers-to-whom-select" class="form-label">На проект регион</label>
+              </div>
+              <div class="form-floating mb-1">
+                <select class="form-select" name="to-account-id" id="transfers-to-account-select" required disabled>
+                  <option value="" disabled selected>Выберете р/с</option>
+                </select>
+                <label for="transfers-to-whom-select" class="form-label">На р/с</label>
+              </div>
+              <div class="form-floating mb-1">
+                <input class="form-control" type="number" min="0" step="0.01" placeholder="Введите сумму" name="sum" id="transfers-sum-input" required>
+                <label for="transfers-sum-input" class="form-label">Сумма</label>
+              </div>
+              <button class="btn btn-primary float-end">Перевести</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  const csrfToken = "{{ csrf_token }}";
+</script>
+<script src="{% static 'finance_module/accounts-table.js' %}"></script>
+<script src="{% static 'finance_module/division_of_financial_planning/administrative_transfer.js' %}"></script>
+{% endblock %}

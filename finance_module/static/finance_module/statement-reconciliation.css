@@ -1,0 +1,18 @@
+.mapping-container {
+    height: 68vh;
+    overflow-y: scroll;
+}
+
+.mapping-container::-webkit-scrollbar {
+    display: none;
+}
+
+.history-container {
+    max-height: 40vh;
+    overflow-y: scroll;
+}
+
+
+.history-container::-webkit-scrollbar {
+    display: none;
+}

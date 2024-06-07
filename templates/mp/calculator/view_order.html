@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Калькулятор цен с подрядчиками{% endblock %}
+
+
+{% block chapter %} 
+{% endblock %}
+
+{% block content %}
+
+<div class="card-body">
+  {% if "709" in user.email %}    
+    
+  <a href="#" class="btn btn-success btn-icon-split" data-toggle="modal" data-target="#dimaConfirmModal">
+    <span class="icon text-white-50">
+        <i class="fas fa-check"></i>
+    </span>
+    <span class="text">Согласовать</span>
+</a>
+  {% endif %}
+
+  {% if "22089" in user.email and order.status == "in_processing" %}  
+  
+  <a href="#" class="btn btn-success btn-icon-split" data-toggle="modal" data-target="#dimaConfirmModal">
+    <span class="icon text-white-50">
+        <i class="fas fa-check"></i>
+    </span>
+    <span class="text">Сменить статус</span>
+</a>
+  {% endif %}
+  <hr>
+    ПМ: <a href="mailto:{{order.author.email}}?subject={{order.name|iriencode }}&body={{order.comment_1c|iriencode }}">{{order.author.last_name}} {{order.author.first_name}} {{order.author.email}} </a>
+    <div class="text-white-50 small">#4e73df</div>
+    <p><b>Заметки :</b>{{order.changes_comment_style | safe}}</p>
+    <p><b>Номер заявки :</b> Заявка#{{order.id}}</p>
+    <hr>
+    <p><b>Статус утверждения :</b> {{order.supervisor_status_text}}</p>
+    <p><b>Комментарии Димы :</b> {{order.supervisor_comment}}</p>
+    <hr>
+    <p><b>Статус :</b>{{order.status_text}}</p>
+    <p><b>Комментарии от Айдана :</b>{{order.moderator_comment}}</p>
+
+    {% if "22089" in user.email %}
+    <button class="btn btn-primary mb-4" onclick="make_file_export()" id="main-table-container" >Выгрузить HTML файл</button>
+    {% endif %}
+
+
+
+
+</div>
+
+
+
+
+
+
+{% if order.approval_document %}
+<a type="submit" target="_blank" href="{{order.approval_document.url}}" class="btn btn-primary mb-4">Скачать - {{order.name}}</a>
+{% endif %}
+
+
+    {{order.html_file_as_text | safe}}
+
+
+    {% if "22089" in user.email %}
+    <div class="modal fade" id="dimaConfirmModal" tabindex="-1" aria-labelledby="exampleModalLabel" style="display: none;" aria-hidden="true">
+      <div class="modal-dialog">
+          <form method="post" class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Согласование</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+        {% csrf_token %}
+        
+        <label for="id_status" class="mb-2 mt-2">Статус заявки:</label>
+        {{form.status}}
+        
+        <br>
+        <label for="id_moderator_comment" class="mb-2 mt-2">Комментарии:</label>
+        <textarea name="moderator_comment" class="form-control" cols="2" rows="2" id="id_moderator_comment"></textarea>
+        <input type="number" name="total_summ" class="d-none" value="661201.0" step="any" required="" id="id_total_summ">
+        {% comment %} <input type="submit" name="Сохранить" value="Сохранить"  class="mb-2 mt-2 btn btn-sm btn-primary shadow-sm"> {% endcomment %}
+        
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+      <button type="submit" class="btn btn-primary">Сохранить</button>
+    </div>
+</form>
+</div>
+</div>
+    {% endif %}
+
+
+
+
+    {% if "709" in user.email and order.supervisor_status == "in_processing" %}
+    <div class="modal fade" id="dimaConfirmModal" tabindex="-1" aria-labelledby="exampleModalLabel" style="display: none;" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+          <form method="POST" class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Утверждение</h5>
+                  <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">×</span>
+                  </button>
+              </div>
+              <div class="modal-body">
+                  {% csrf_token %}
+                  <label for="supervisor_status" class="mb-2 mt-2">Статус утверждения:</label>
+                  {{form_x.supervisor_status}}
+                  <br>
+                  <label for="id_supervisor_comment" class="mb-2 mt-2">Комментарии:</label>
+                  <textarea name="supervisor_comment" class="form-control" cols="2" rows="2" id="id_supervisor_comment"></textarea>
+                  <input type="number" name="total_summ" class="d-none" value="661201.0" step="any" required="" id="id_total_summ">
+
+              </div>
+              <div class="modal-footer">
+                  <button class="btn btn-secondary" type="button" data-dismiss="modal">Отменить</button>
+                  <button type="submit" class="btn btn-primary">Сохранить</a>
+              </div>
+          </form>
+      </div>
+  </div>
+    {% endif %}
+      
+    
+
+
+
+{% if "22089" in user.email %}
+<script>
+    function make_file_export(){
+            document.getElementById('main-table-container').innerHTML = `
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>` + document.getElementById('main-table-container').innerHTML;
+                    document.getElementById('main-table-container').disabled = true
+            var url = '/mp/calculator/export_html_file/{{order.id}}'
+
+            // Создание XMLHttpRequest объекта
+            var xhr = new XMLHttpRequest();
+
+            // Настройка GET-запроса
+            xhr.open('GET', url, true);
+
+            // Отправка GET-запроса
+            xhr.send();
+
+            // Обработка ответа (это можно дополнить по вашим потребностям)
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Обработка успешного ответа
+
+                    {% comment %} location.href = "/media/uploads/"+xhr.responseText; {% endcomment %}
+
+                     var a = document.createElement('a');
+                     a.href = "/media/uploads/"+xhr.responseText;
+                     a.download = xhr.responseText
+                     a.click();
+            
+                    document.getElementById('main-table-container').disabled = false
+                    document.getElementById('main-table-container').innerHTML = "Выгрузить HTML файл"
+        
+
+
+                    console.log('GET запрос выполнен успешно.');
+
+                    // Дополнительный код обработки ответа
+                }
+            };
+        };
+
+
+
+</script>
+{% endif %}
+  
+
+{% endblock %}
+

@@ -1,0 +1,288 @@
+{% extends 'finance_module/base.html' %}
+{% load static %}
+{% block active_breadcrump %}
+  Сверка реестра оплат с выписками из банка
+{% endblock %}
+{% block title %}
+  Сверка реестра оплат с выписками из банка
+{% endblock %}
+{% block links %}
+<link rel="stylesheet" href="{% static "finance_module/statement-reconciliation.css" %}">
+{% endblock %}
+{% block finance_module_content %}
+  <div class="row mb-3">
+    <div class="col-md-4 col-lg-3">
+      <form id="statement-reconciliation-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="card shadow">
+          <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="form-tab" data-bs-toggle="tab" data-bs-target="#form" type="button" role="tab" aria-controls="form" aria-selected="true">Сверка</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="mapping-tab" data-bs-toggle="tab" data-bs-target="#mapping" type="button" role="tab" aria-controls="mapping" aria-selected="false">Сопоставление</button>
+              </li>
+              <li class="nav-item ms-auto" role="presentation">
+                <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="false">История сверок</button>
+              </li>
+              
+            </ul>
+          </div>
+          <div class="card-body">
+            <div class="tab-content" id="myTabContent">
+              <div class="tab-pane fade show active" id="form" role="tabpanel" aria-labelledby="form-tab">
+                <div class="mb-2">
+                  <label for="paid-invoices-file-input" class="form-label">Файл реестра оплат</label>
+                  <input type="file" name="paid-invoices-file" class="form-control" id="paid-invoices-file-input" />
+                </div>
+                <div class="row mb-2">
+                  <div class="col-xl-4 col-md-12">
+                    <div class="form-floating">
+                      <input type="date" name="date" id="date-input" class="form-control" required />
+                      <label for="date-input" class="form-label">Выберите дату:</label>
+                    </div>
+                  </div>
+                  <div class="col-xl-4 col-md-6">
+                    <div class="form-floating">
+                      <input id="worksheet-name-input" class="form-control" name="worksheet-name" type="text" />
+                      <label for="worksheet-name-input" class="form-label">Имя таблицы</label>
+                    </div>
+                  </div>
+                  <div class="col-xl-4 col-md-6">
+                    <div class="form-floating">
+                      <input id="start-row-input" type="number" name="start-row" class="form-control" required />
+                      <label for="start-row-input" class="form-label">Начало данных</label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="mb-2">
+                  <label for="files-input" class="form-label">Файлы выписок</label>
+                  <input type="file" name="files" class="form-control" id="files-input" multiple required />
+                </div>
+              </div>
+              <div class="tab-pane fade" id="mapping" role="tabpanel" aria-labelledby="mapping-tab">
+                <div class="mapping-container">
+                  <label for="correspondents-map-textarea">Корреспондент=Контрагент</label>
+                  <textarea class="form-control mb-3" name="correspondents-map" id="correspondents-map-textarea" cols="30" rows="10" style="white-space: pre;">{{ variables.correspondents_map }}</textarea>
+                  <label for="exclude-from-exceptions-textarea">Исключить из исключения</label>
+                  <textarea class="form-control mb-3" name="exclude-from-exceptions" id="exclude-from-exceptions-textarea" cols="30" rows="10" style="white-space: pre;">{{ variables.exclude_from_exceptions }}</textarea>
+                  <label for="accounts-map-textarea">Имя файла=Имя расчётного счёта</label>
+                  <textarea class="form-control" name="accounts-map" id="accounts-map-textarea" cols="30" rows="10" style="white-space: pre;">{{ variables.accounts_map }}</textarea>
+                </div>
+              </div>
+              <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
+                <div class="history-container">
+                  <ul class="list-group list-group-flush" id="statement-reconciliation-saved-results">
+                    
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer d-flex align-items-center">
+            <button type="submit" class="btn btn-primary" id="statement-reconciliation-form-submit-button">Сверить</button>
+            <div class="ms-2 d-none statement-reconciliation-form-loading">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            <div class="ms-2 text-danger" id="statement-reconciliation-form-error-message">
+              
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="col-md-8 col-lg-9 ">
+      <form id="statement-reconciliation-complete-form">
+        <div class="card shadow">
+          <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="paid-invoices-tab" data-bs-toggle="tab" data-bs-target="#paid-invoices" type="button" role="tab" aria-controls="paid-invoices" aria-selected="true">Список оплат</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="not-found-tab" data-bs-toggle="tab" data-bs-target="#not-found" type="button" role="tab" aria-controls="not-found" aria-selected="false">Не найдено</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="refund-tab" data-bs-toggle="tab" data-bs-target="#refund" type="button" role="tab" aria-controls="refund" aria-selected="false">Возврат</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="statements-tab" data-bs-toggle="tab" data-bs-target="#statements" type="button" role="tab" aria-controls="statements" aria-selected="false">Все выписки</button>
+              </li>
+            </ul>
+          </div>
+          <div class="card-body">
+            <div class="tab-content" id="myTabContent">
+              <div class="tab-pane fade show active" id="paid-invoices" role="tabpanel" aria-labelledby="paid-invoices-tab">
+                <div style="height: 68vh; overflow-y: scroll;">
+                  <table id="paid-invoices-table" class="table table-bordered border-black">
+                    <thead class="border-black">
+                      <tr>
+                        <th data-st-subtotal="2">-</th>
+                        <th data-st-subtotal="2">-</th>
+                        <th data-st-subtotal="9" class="text-end">-</th>
+                        <th data-st-subtotal="9" class="text-end">-</th>
+                        <th data-st-subtotal="2">-</th>
+                        <th data-st-subtotal="2">-</th>
+                      </tr>
+                      <tr class="border-black">
+                        <th data-st-field="number" class="" scope="col">ДО</th>
+                        <th data-st-field="contractor" class="text-success" scope="col">Контрагент</th>
+                        <th data-st-field="paid" class="text-primary" scope="col" data-st-type="number">Сумма</th>
+                        <th data-st-field="commission" class="text-info" data-st-type="number" scope="col">Коммисия</th>
+                        <th data-st-field="account" class="text-secondary" scope="col">Расчётный счёт</th>
+                        <th data-st-field="checked" class="" scope="col" data-st-type="boolean">Подтверждение</th>
+                      </tr>
+                    </thead>
+                    <tbody id="paid-invoices-table-rows">
+                      {% comment %} {% for paid_invoice in result.paid_invoices %}
+                        <tr class="{% if paid_invoice in result.matched_paid_invoices %}{% endif %}">
+                          <td>{{ paid_invoice.number }}</td>
+                          <td>{{ paid_invoice.contractor }}</td>
+                          <td>{{ paid_invoice.paid }}</td>
+                          <td>{{ paid_invoice.account }}</td>
+                        </tr>
+                      {% endfor %} {% endcomment %}
+                      <tr>
+                        <td class="text-center" colspan="6">Выполните сверку...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="tab-pane fade" id="not-found" role="tabpanel" aria-labelledby="not-found-tab">
+                <div style="height: 68vh; overflow-y: scroll;">
+                  <table class="table table-bordered border-black">
+                    <thead class="table-light border-black">
+                      <tr>
+                        <th class="text-center" scope="col">№ п/п</th>
+                        <th class="text-center" scope="col">Дата</th>
+                        <th class="text-center" scope="col">Корреспондент</th>
+                        <th class="text-center text-primary" scope="col">Дебет</th>
+                        <th class="text-center" scope="col">Файл</th>
+                      </tr>
+                    </thead>
+                    <tbody id="not-found-table-rows">
+                      {% comment %} {% for document in result.documents %}
+                        {% if document not in result.matched_documents and not document.excluded %}
+                          <tr>
+                            <td>{{ document.id }}</td>
+                            <td>{{ document.datetime }}</td>
+                            <td>{{ document.correspondent }}</td>
+                            <td>{{ document.debit }}</td>
+                            <td>{{ document.statement.uploaded_file.name }}</td>
+                          </tr>
+                        {% endif %}
+                      {% endfor %} {% endcomment %}
+                      <tr>
+                        <td class="text-center" colspan="5">Выполните сверку...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="tab-pane fade" id="refund" role="tabpanel" aria-labelledby="refund-tab">
+                <div style="height: 68vh; overflow-y: scroll;">
+                  <table class="table table-bordered border-black">
+                    <thead class="table-light border-black">
+                      <tr>
+                        <th class="text-center" scope="col">№ п/п</th>
+                        <th class="text-center" scope="col">Дата</th>
+                        <th class="text-center" scope="col">Корреспондент</th>
+                        <th class="text-center text-primary" scope="col">Кредит</th>
+                        <th class="text-center" scope="col">Назначение</th>
+                        <th class="text-center" scope="col">Файл</th>
+                      </tr>
+                    </thead>
+                    <tbody id="refund-table-rows">
+                      {% comment %} {% for document in result.documents %}
+                        {% if 'возврат' in (document.purpose_of_payment|lower) and not document.excluded %}
+                          <tr>
+                            <td>{{ document.id }}</td>
+                            <td>{{ document.datetime }}</td>
+                            <td>{{ document.correspondent }}</td>
+                            <td>{{ document.debit }}</td>
+                            <td>{{ document.purpose_of_payment }}</td>
+                            <td>{{ document.statement.uploaded_file.name }}</td>
+                          </tr>
+                        {% endif %}
+                      {% endfor %} {% endcomment %}
+                      <tr>
+                        <td class="text-center" colspan="6">Выполните сверку...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="tab-pane fade" id="statements" role="tabpanel" aria-labelledby="statements-tab">
+                <div style="height: 68vh; overflow-y: scroll;">
+                  <table id="statements-table" class="table table-bordered border-black">
+                    <thead class="border-black">
+                      <tr>
+                        <th scope="col" data-st-subtotal="2">-</th>
+                        <th scope="col" data-st-subtotal="2">-</th>
+                        <th scope="col" data-st-subtotal="2">-</th>
+                        <th scope="col" data-st-subtotal="9" class="text-end">-</th>
+                        <th scope="col" data-st-subtotal="9" class="text-end">-</th>
+                        <th scope="col" data-st-subtotal="2">-</th>
+                        <th scope="col" data-st-subtotal="2">-</th>
+                        <th scope="col" data-st-subtotal="2">-</th>
+                      </tr>
+                      <tr>
+                        <th data-st-field="id" class="" scope="col">№ п/п</th>
+                        <th data-st-field="datetime" class="" scope="col">Дата</th>
+                        <th data-st-field="correspondent" class="text-success" scope="col">Корреспондент</th>
+                        <th data-st-field="debit" data-st-type="number" class="text-primary" scope="col">Дебет</th>
+                        <th data-st-field="credit" data-st-type="number" class="text-primary" scope="col">Кредит</th>
+                        <th data-st-field="ppc" class="" scope="col">КНП</th>
+                        <th data-st-field="purposeOfPayment" class="" scope="col">Назначение</th>
+                        <th data-st-field="uploadedFile" class="text-secondary" scope="col">Файл</th>
+                      </tr>
+                    </thead>
+                    <tbody id="statements-table-rows">
+                      <tr>
+                        <td class="text-center" colspan="8">Выполните сверку...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer d-flex align-items-center">
+            <button type="submit" class="btn btn-success">Подтвердить</button>
+            <div class="ms-2 d-none statement-reconciliation-complete-form-loading">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            <div class="ms-2 text-success" id="statement-reconciliation-complete-form-info">
+
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+{% block scripts %}
+  <script>
+    const csrfToken = "{{csrf_token}}";
+    $(function () {
+      const worksheetNameInput = $('#worksheet-name-input')
+      worksheetNameInput.val(localStorage.getItem('worksheet-name-input-value'))
+      worksheetNameInput.on('input', function () {
+        localStorage.setItem('worksheet-name-input-value', $(this).val())
+      })
+      const startRowInput = $('#start-row-input')
+      startRowInput.val(localStorage.getItem('start-row-input-value'))
+      startRowInput.on('input', function () {
+        localStorage.setItem('start-row-input-value', $(this).val())
+      })
+    })
+  </script>
+  <script src="{% static 'finance_module/statement-reconciliation.js' %}"></script>
+{% endblock %}

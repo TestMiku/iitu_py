@@ -1,0 +1,36 @@
+<div class="col-lg-6 col-xl-3 mb-1">
+    <div class="card shadow h-100 py-2"
+         style="border-left: 0.25rem solid #8500DF!important; text-decoration: none !important;"
+    >
+        <div class="card-body">
+            <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                    <div class="d-flex align-items-center text-xs text-primary mb-1">
+                        <h5 class="mb-0 font-weight-bold text-gray-800 mr-2">
+                            <a href="{{ object.get_absolute_url }}">{{ object|truncatechars:24 }}</a>
+                        </h5>
+                        <span>{{ object.get_size_as_str }}</span>
+                    </div>
+                    <div class="row justify-content-between">
+                        {% if object.description %}
+                            <div class="col-6">
+                                <h6>Описание</h6>
+                                <div class="text-monospace"
+                                     style="font-size: 0.75em">{{ object.description|truncatechars:32 }}</div>
+                            </div>
+                        {% endif %}
+
+                        <div class="col-6">
+                            <h6>Загружен</h6>
+                            <div style="font-size: 0.75em"
+                                 class="text-monospace">{{ object.created_at }} {{ object.uploaded_by }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <i class="fas fa-{{ icon }} fa-2x text-gray-300"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,688 @@
+{% load mathfilters %}
+{% load to_dot %}
+{% load to_float %}
+<span id="import_data" style="display:none;">
+
+</span>
+
+<style>
+    #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        /* Прозрачный серый цвет */
+        display: none;
+        /* Скрываем по умолчанию */
+    }
+
+    .spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        /* Добавьте стили для вашего спиннера, например, используя анимацию */
+    }
+
+    #container {
+        width: 200px;
+        height: 200px;
+    }
+
+    @keyframes animation {
+        0% {
+            stroke-dasharray: 1 98;
+            stroke-dashoffset: -105;
+        }
+
+        50% {
+            stroke-dasharray: 80 10;
+            stroke-dashoffset: -160;
+        }
+
+        100% {
+            stroke-dasharray: 1 98;
+            stroke-dashoffset: -300;
+        }
+    }
+
+    #spinner {
+        transform-origin: center;
+        animation-name: animation;
+        animation-duration: 1.2s;
+        animation-timing-function: cubic-bezier;
+        animation-iteration-count: infinite;
+    }
+</style>
+
+
+<div class="container-fluid mb-4">
+    <h1 style="color:#fff;" id="margin-delete"> .</h1>
+
+    <div class="row mt-0 ml-4 mr-4" id="notes-info" style="display:none;">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-danger">Превышение по пунктам</h6>
+            </div>
+            <div class="card-body" id="notes-info-text">
+
+            </div>
+        </div>
+    </div>
+    {% comment %} <h5 id="bs-comments">{{ data.order.comments }}</h5> {% endcomment %}
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Номер заказа
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="order-number">
+                                {{ order_number }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-info fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Заказчик
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="order_customer_name">
+                                КаР-Тел, ТОО
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-info fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4" hidden>
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Количество пунктов
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ header_data|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4" hidden>
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                сумма заказа с НДС
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format" id="">
+                                {{ summ }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                сумма заказа без НДС
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format" id="">
+                                {{ summ_without_nds }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4" hidden>
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                сумма расхода за работы с НДС
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format" id="">
+                                {{ other_summ }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                сумма расхода за работы без НДС
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format" id="">
+                                {{ other_summ_without_nds }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4" hidden>
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                сумма расхода за материалы с НДС
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format" id="">
+                                {{tmc_summ}}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                сумма расхода за материалы без НДС
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format" id="">
+                                {{ tmc_summ_without_nds }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4" hidden>
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                НДС приход
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format" id="">
+                                {{nds_coming}}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4" hidden>
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                НДС расход
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format" id="">
+                                {{nds_expense}}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4" hidden>
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                НДС к уплате
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format" id="">
+                                {{nds_due}}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Валовая прибыльность
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format" id="">
+                                {{ gross_profitability_new }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                КПН 20%
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format" id="">
+                                {{ CIT_20_new }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                % расхода АВХ 15%
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format" id="">
+                                {{ flow_rate_АВХ_5_new }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                чистая прибыль
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format" id="">
+                                {{ net_profit_new }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                планируемая маржа
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="">
+                                {{ morhz_new }}%
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-percent fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                фактическая маржа
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="">
+                                {{ fact_morzh_new }}%
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-percent fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Фактически полученная сумма по заказу
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 money_format" id="">
+                                {{ total_totallines_7_15|default:"0" }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Регион
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="">
+                                {{ header_data.first.region }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-info fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Название БС
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="">
+                                {{ bs_name }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-info fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card-body custom-table-container">
+        <div class="table-responsive">
+            <table class="table table-bordered dataTable" id="dataTable" width="100%" cellspacing="0" role="grid"
+                aria-describedby="dataTable_info" style="width: 100%;">
+                <thead>
+                    <tr role="row">
+                        <th style="width: 110.393px;">
+                            № ДО
+                        </th>
+                        <th style="width: 250.554px;">
+                            Поставщик
+                        </th>
+                        <th style="width: 303.554px;">
+                            Комментарий
+                        </th>
+                        <th style="width: 250px;">
+                            ПМ
+                        </th>
+                        <th style="width: 122.393px;">
+                            НДС
+                        </th>
+                        <th style="width: 122.393px;">
+                            Категория счета
+                        </th>
+                        <th style="width: 122.393px;">
+                            Фактический № договора
+                        </th>
+                        <th style="width: 122.393px;">
+                            Сумма оплаты по счету на оплату
+                        </th>
+                        <th style="width: 122.393px;">
+                            <!-- <button type="button" class="btn btn-light" data-toggle="modal" data-target=".bd-example-modal"> -->
+                            Сумма счета на оплату
+                            <!-- </button> -->
+                        </th>
+                        <th style="width: 122.393px;" hidden>
+                            Фактически полученная сумма по заказу
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for postiton in header_data %}
+                    <tr class="{% cycle 'even' 'odd' %} tr-position" id="tr-{{ postiton.id }}" style="">
+                        <td>
+                            <span id="note-{{ postiton.id }}" style="display:none;" class=""></span>
+                            <span class="">{{ postiton.idocumentno }}</span>
+                        </td>
+                        <td class="custom-info">{{ postiton.iprovider }}</td>
+                        <td style="padding-top:20px;">{{ postiton.idescription }}</td>
+                        <td style="padding-top:20px;">{{ postiton.project_manager }}</td>
+                        <td class="positionContractor">{{ postiton.taxincluded }}</td>
+                        <td style="padding-top:20px;">{{ postiton.category }}</td>
+                        <td style="padding-top:20px;">{{ postiton.iagreement }}</td>
+                        <td style="padding-top:20px;" class="money_format">{{postiton.total_buyigrandtotal|default:"0"}}</td>
+                        <td style="padding-top:20px;" class="money_format">{{postiton.total_refundamtonorder|default:"0"}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <!-- <div class="modal fade bd-example-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                 <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Категория счета</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <table class="table table-bordered dataTable" id="dataTable" width="100%" cellspacing="0" role="grid" aria-describedby="dataTable_info" style="width: 100%;">
+                        <thead>
+                            <tr role="row">
+                                <th>
+                                    Категория счета
+                                </th>
+                                <th>
+                                    Сумма счета на оплату
+                                </th>
+                                <th>
+                                    Маржа
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for postiton in summed_category %}
+                            <tr class="{% cycle 'even' 'odd' %} tr-position" id="tr-{{ postiton.id }}">
+                                <td style="padding-top:20px;">{{ postiton.category }}</td>
+                                <td style="padding-top:20px;" class="money_format">{{postiton.total_refundamtonorder|default:"0" }}</td>
+                                <td style="padding-top:20px;">{{morhz}}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                      </div>
+                    </div>
+                  </div> -->
+        </div>
+    </div>
+
+    <div class="card-body custom-table-container">
+        <div class="table-responsive">
+            <table class="table table-bordered dataTable" id="dataTable" width="100%" cellspacing="0" role="grid"
+                aria-describedby="dataTable_info" style="width: 100%;">
+                <thead>
+                    <tr role="row">
+                        <th style="width: 110.393px;">
+                            Сфера деятельности
+                        </th>
+                        <th style="width: 250.554px;">
+                            Вид деятельности
+                        </th>
+                        <th style="width: 303.554px;">
+                            Маржа
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in filtered_data_2122 %}
+                    <tr class="{% cycle 'even' 'odd' %} tr-position" id="" style="">
+                        <td class="custom-info">{{ data.activity_field }}</td>
+                        <td style="padding-top:20px;">{{ data.activity_kind }}</td>
+                        <td style="padding-top:20px;">{{ data.margin|default:"0" }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <!-- <div class="modal fade bd-example-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                 <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Категория счета</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <table class="table table-bordered dataTable" id="dataTable" width="100%" cellspacing="0" role="grid" aria-describedby="dataTable_info" style="width: 100%;">
+                        <thead>
+                            <tr role="row">
+                                <th>
+                                    Категория счета
+                                </th>
+                                <th>
+                                    Сумма счета на оплату
+                                </th>
+                                <th>
+                                    Маржа
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for postiton in summed_category %}
+                            <tr class="{% cycle 'even' 'odd' %} tr-position" id="tr-{{ postiton.id }}">
+                                <td style="padding-top:20px;">{{ postiton.category }}</td>
+                                <td style="padding-top:20px;" class="money_format">{{postiton.total_refundamtonorder|default:"0" }}</td>
+                                <td style="padding-top:20px;">{{morhz}}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                      </div>
+                    </div>
+                  </div> -->
+        </div>
+    </div>
+</div>
+
+<span id="span_csrf_token" style="width: 0;height: 0;overflow: hidden; display: none;">{% csrf_token %}</span>
+<div id="loading-screen" style="z-index: 9">
+    <div class="spinner">
+        <div id="container">
+            <svg viewBox="0 0 100 100">
+                <defs>
+                    <filter id="shadow">
+                        <feDropShadow dx="0" dy="0" stdDeviation="1.5" flood-color="#8424dd" />
+                    </filter>
+                </defs>
+                <circle id="spinner"
+                    style="fill:transparent;stroke:#8424dd;stroke-width: 7px;stroke-linecap: round;filter:url(#shadow);"
+                    cx="50" cy="50" r="45" />
+            </svg>
+        </div>
+    </div>
+</div>
+<script>
+    function flashBorderColor(elementId) {
+        location.href = "#" + elementId
+
+        let element = document.getElementById(elementId);
+
+        if (element) {
+            let originalBorderStyle = element.style.border;
+
+            element.style.border = "3px solid red";
+
+            setTimeout(function () {
+                element.style.border = originalBorderStyle;
+            }, 3000);
+        }
+    }
+
+</script>

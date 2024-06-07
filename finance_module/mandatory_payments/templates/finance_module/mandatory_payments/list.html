@@ -1,0 +1,104 @@
+{% extends 'finance_module/mandatory_payments/base.html' %}
+{% load number_format %}
+{% block mandatory_payments_active_breadcrump %}
+Список обезятельных платежей
+{% endblock %}
+
+{% block finance_module_content %}
+<div class="row">
+    <div class="col-3">
+        <div class="card shadow">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="post-type" value="create-mandatory-payment">
+                    <fieldset>
+                        <legend>Создать обязятельный платёж</legend>
+                        <div class="form-floating mb-1">
+                            <input type="text" class="form-control" name="name" id="create-mandatory-payment-name-input"
+                                placeholder="Введите имя статьи" required>
+                            <label for="create-mandatory-payment-name-input">Имя статьи</label>
+                        </div>
+                        <div class="form-floating mb-1">
+                            <select class="form-control" name="category-id"
+                                id="create-mandatory-payment-category-id-select">
+                                <option value="">Выберете категорию</option>
+                                {% for category in categories %}
+                                <option value="{{category.id}}">{{category}}</option>
+                                {% endfor %}
+                            </select>
+                            <label for="create-mandatory-payment-category-id-select">Категория</label>
+                        </div>
+
+                        <div class="form-floating mb-1">
+                            <input type="number" class="form-control" name="monthly-payments" step="0.01" min="0"
+                                id="create-mandatory-payment-monthly-payments-input"
+                                placeholder="Введите ежемесячные платежи" required>
+                            <label for="create-mandatory-payment-monthly-payments-input">Ежемесячные платежи</label>
+                        </div>
+                        <div class="form-floating mb-1">
+                            <input type="text" class="form-control" name="deadline-template"
+                                pattern="(до \d+ (числа каждого месяца|\w+)|\d{4})"
+                                list="create-mandatory-payment-deadline-list"
+                                id="create-mandatory-payment-deadline-input" placeholder="Введите срок оплаты">
+                            <datalist id="create-mandatory-payment-deadline-list">
+                                {% for deadline_template in deadline_templates %}
+                                <option value="{{deadline_template}}"></option>
+                                {% endfor %}
+                            </datalist>
+                            <label for="create-mandatory-payment-deadline-input">Срок оплаты</label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="exception"
+                                id="create-mandatory-payment-exception-checkbox">
+                            <label class="form-check-label" for="create-mandatory-payment-exception-checkbox">
+                                Исключение
+                            </label>
+                        </div>
+                    </fieldset>
+                    <button class="btn btn-primary" type="submit">Создать</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-9">
+        <div class="card shadow">
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="align-middle text-center">#</th>
+                            <th scope="col">Категория</th>
+                            <th scope="col">Статья</th>
+                            <th scope="col">Срок оплаты</th>
+                            <th scope="col">Ежемесячные платежи</th>
+                            <th scope="col">Исключение</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        {% for mandatory_payment in mandatory_payments %}
+                        <tr>
+                            <th class="align-middle text-center" scope="row">{{forloop.counter}}</th>
+                            <td class="align-middle">{{mandatory_payment.category}}</td>
+                            <td class="align-middle">{{mandatory_payment}}</td>
+                            <td class="align-middle">{{mandatory_payment.deadline_template|default:""}}</td>
+                            <td class="align-middle">{{mandatory_payment.monthly_payments|format_number}}</td>
+                            <td class="align-middle">{% if mandatory_payment.exception %}<span class="text-danger">Есть{% else %}<span class="text-success">Нет{% endif %}</span></td>
+                            <td>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="id" value="{{mandatory_payment.id}}">
+                                    <input type="hidden" name="post-type" value="delete-mandatory-payment">
+                                    <button class="btn btn-outline-danger btn-sm"><i class="fa-solid fa-minus"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

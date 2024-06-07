@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% load custom_tags %}
+{% load static %}
+
+{% block chapter %}
+
+{% endblock %}
+
+{% block title %}
+    Проектирование
+{% endblock %}
+
+{% block links %}
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'constructor-do/css/main.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="fixed-container">
+        <div class="container text-center d-flex flex-column">
+            <div class="alert alert-danger alert-dismissible fade show" style="display:none; position: absolute;"
+                id="alertOrderEmpty" role="alert">
+                Выберите номера заказов!
+                <button type="button" class="close" data-dismiss="alert" aria-label="Закрыть">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed-container">
+        <div class="container text-center d-flex flex-column">
+            <div class="alert alert-success alert-dismissible fade show" style="display:none; position: absolute;"
+                id="alertOrderAdded" role="alert">
+                Заказы добавлены!
+                <button type="button" class="close" data-dismiss="alert" aria-label="Закрыть">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed-container">
+        <div class="container text-center d-flex flex-column">
+            <div class="alert alert-success alert-dismissible fade show" style="display:none; position: absolute;"
+                id="alertOrdersDeleted" role="alert">
+                Заказы удалены!
+                <button type="button" class="close" data-dismiss="alert" aria-label="Закрыть">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="align-items-center">
+        <h1>Проектирование</h1>
+    </div>
+    <hr>
+    <div id="orders-container" class="d-flex justify-content-between">
+        <form id="searchFM" class="">
+            <div class="form-row mb-3 col-sm-6 ml-10 mr-0 pl-0 pr-0" style="min-width:750px">
+                <div class="row contents">
+                    <!-- Dropdown for Base Station -->
+                    <div class="dropdown">
+                        <input name="bs_name" type="text" class="form-control" value="{{request.GET.bs_name}}"
+                            aria-haspopup="true" autocomplete="off" id="dropdownBSButton" aria-expanded="false"
+                            data-toggle="dropdown" title="Введите от 4 до 12 символов"
+                            placeholder="Базовая станция">
+                        <div class="dropdown-menu" aria-labelledby="dropdownBSButton">
+                            {% for bs in unique_bs %}
+                                <a class="dropdown-item bs-item" href="#">{{ bs }}</a>
+                            {% endfor %}
+                        </div>
+                        <div id="warningMessage" style="color: red; font-size: 12px; display: none; position: absolute;">
+                            Пожалуйста, заполните поле</div>
+                    </div>
+
+                    <!-- Dropdown for Order Number -->
+                    <div class="dropdown ml-10">
+                        <input name="on_name" type="text" class="form-control" value="{{request.GET.on_name}}"
+                            aria-haspopup="true" autocomplete="off" id="dropdownONButton" aria-describedby="submitButton" aria-expanded="false"
+                            data-toggle="dropdown" title="Введите от 4 до 12 символов"
+                            placeholder="Номер заказа">
+                        <div class="dropdown-menu" aria-labelledby="dropdownONButton">
+                            {% for order_number in filtered_data_bs %}
+                                <a class="dropdown-item on-item" href="#" name="{{ order_number.productname }}">{{ order_number.order_number }} ({{ order_number.odateordered }})</a>
+                            {% endfor %}
+                        </div>
+                        <div id="warningMessage" style="color: red; font-size: 12px; display: none; position: absolute;">
+                            Пожалуйста, заполните поле</div>
+                    </div>
+                </div>
+
+                <div class="col d-flex ml-10 pl-0">
+                    <button class="btn btn-primary" id="submitButton">Добавить</button>
+                </div>
+            </div>
+        </form>
+        <div class="row">
+            <div id="" class="mr-10" style="display: initial;">
+                <a href="{% url 'constructor-do:download_html' %}" target="_blank">
+                    <button onclick="clearAll()" class="btn btn-warning btn-icon-split">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-download"></i>
+                        </span>
+                        <span class="text">Скачать как HTML</span>
+                    </button>
+                </a>
+            </div>
+            <div id="" style="display: initial;">
+                <a href="{% url 'constructor-do:download_excel' %}">
+                    <button onclick="clearAll()" class="btn btn-success btn-icon-split">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-download"></i>
+                        </span>
+                        <span class="text">Скачать как Excel</span>
+                    </button>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12" role="document">
+            <div class="modal-content rounded-4 shadow">
+                <div class="card-body custom-table-container">
+                    <div class="table-responsive">
+                        <!-- Table for Orders -->
+                        <table class="table table-bordered dataTable" id="dataTable" width="100%" cellspacing="0" role="grid" aria-describedby="dataTable_info" style="width: 100%;">
+                            <thead>
+                                <tr role="row">
+                                    <th style="width: 250.875px">№</th>
+                                    <th style="width: 250.875px">Базовая станция</th>
+                                    <th style="width: 320.875px">Номер заказа</th>
+                                    <th style="width: 620.875px">Номенклатура</th>
+                                    <th style="width: 220.875px">Действие &emsp;
+                                                    <span class="toggle-link" onclick="toggleContent()">
+                                                        {% if show_previous == 'table-row-group'%}
+                                                            Скрыть добавленные
+                                                        {% else %}
+                                                            Показать добавленные
+                                                        {% endif %}
+                                                    </span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="previous_orders" style="display: {% if show_previous == 'table-row-group' %}
+                            	table-row-group
+                            {% else %}
+                            	none
+                            {% endif %} " role="row" class="bc-grey tr-position">
+                                {% if previous_orders|length > 0 %}
+                                    {% for value in previous_orders %}
+                                        <tr {% if forloop.last %}
+                                        	style="border-bottom: 10px solid white;"
+                                        {% endif %} >
+                                            <th style="font-weight: 400; width: 250.875px">
+                                                {{ forloop.counter }}
+                                            </th>
+                                            <th style="font-weight: 400; width: 250.875px">{{ value.0 }}</th>
+                                            <th style="font-weight: 400; width: 620.875px">{{ value.1 }}</th>
+                                            <th style="font-weight: 400; width: 620.875px">{{ value.2 }}</th>
+                                            <th style="font-weight: 400"> </th>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            </tbody>
+
+                            <tbody id="order-count">
+                                {% if all_orders|length > 0 %}
+                                    {% for key, value in all_orders.items %}
+                                        <tr role="row" class="even tr-position">
+                                            <th style="width: 250.875px">
+                                                {{ forloop.counter }}
+                                            </th>
+                                            <th style="width: 250.875px">{{ value.0 }}</th>
+                                            <th style="width: 620.875px">{{ value.1 }}</th>
+                                            <th style="width: 620.875px">{{ value.2 }}</th>
+                                            <th style="font-weight: 400"><a href='{% url 'constructor-do:delete_order' key %}'>Удалить</a> </th>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="form-row mb-3 col-sm-6 mt-50" style="min-width:750px;" id="tcp-form">
+                        <div class="col">
+                            <div class="dropdown">
+                                <input name="tcp_value" type="text" class="form-control" aria-haspopup="true"
+                                    autocomplete="off" id="dropdownTCP" aria-expanded="false" data-toggle="dropdown"
+                                    title="Введите от 4 до 12 символов" placeholder="Поиск пункта ТЦП">
+                                <div class="dropdown-menu" aria-labelledby="dropdownTCP">
+                                    {% for item in data_tcp %}
+                                        <a class="dropdown-item tcp-item" href="#" unit="{{item.unit}}" max-sum="{{item.max_sum}}" search-key="{{item.search_key}}">{{item.name}}</a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <input type="submit" class="btn btn-primary" value="Добавить" id="add_tcp">
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <!-- Table for TCP -->
+                        <table class="table table-bordered dataTable" id="dataTable" width="100%" cellspacing="0" role="grid" aria-describedby="dataTable_info" style="width: 100%;">
+                            <thead>
+                                <tr role="row">
+                                    <th style="width: 250.875px">Артикул</th>
+                                    <th style="width: 620.875px">Номенклатура</th>
+                                    <th style="background:#ccccff; width: 220.875px">Кол-во</th>
+                                    <th style="width: 200.875px">Ед. изм.</th>
+                                    <th style="background:#ccccff; width: 350.875px">Цена за ед.</th>
+                                    <th>Цена за ед. (Макc.)</th>
+                                    <th class="sorting sorting_asc" tabindex="0" rowspan="1" colspan="1">Сумма</th>
+                                    <th>Действие</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyTCP">
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row" style="display: flex; justify-content: space-between; align-items: center;">
+                        <!-- Hidden checkbox section -->
+                        <div id="add_nds_container" style="display: none;">
+                            <label for="add_nds" style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="checkbox" id="add_nds" name="additionalOption">
+                                <span style="margin-left: 5px;">С НДС</span>
+                            </label>
+                        </div>
+
+                        <!-- Visible delete button section aligned to the right -->
+                        <div id="" style="margin-left: auto;margin-right: 15px">
+                            <a href="{% url 'constructor-do:delete_all' %}">
+                                <button id="deleteAllButton" onclick="notifications('alertOrdersDeleted')" class="btn btn-primary btn-icon-split" style="display: none">
+                                    <span class="text">Удалить все</span>
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="{% static 'constructor-do/js/script.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.2/jquery.min.js" integrity="sha512-tWHlutFnuG0C6nQRlpvrEhE4QpkG1nn2MOUMWmUeRePl4e3Aki0VB6W1v3oLjFtd0hVOtRQ9PHpSfN6u6/QXkQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+{% endblock %}

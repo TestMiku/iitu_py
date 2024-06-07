@@ -1,0 +1,19 @@
+{% for nomenclature in nomenclatures %}
+    <div class="card">
+        <div class="card-body d-flex align-items-center justify-content-between">
+            <h5 class="card-title">{{ nomenclature.name }}</h5>
+            <button class="btn btn-primary add-product"
+                value="{{ nomenclature.id }}"
+                data-nomenclature-id="{{ nomenclature.id }}"
+                data-nomenclature-key-product="{{ nomenclature.key_product }}"
+                data-nomenclature-name="{{ nomenclature.name }}"
+                data-nomenclature-unit="{{ nomenclature.unit }}"
+                data-expense-item="{{ nomenclature.expense_item }}"
+            >
+            Добавить
+        </button>
+        </div>
+    </div>
+{% empty %}
+    <p>Ничего не найдено.</p>
+{% endfor %}

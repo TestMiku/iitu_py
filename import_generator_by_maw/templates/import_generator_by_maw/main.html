@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block chapter %}
+Импорт по МАШ
+{%endblock %}
+
+{% block title %}
+Импорт по МАШ
+{% endblock %}
+
+{% block links %}
+<link rel="stylesheet" type="text/css" href="{% static 'import_generator_by_maw/css/main.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+{% for message in messages %}
+<script>
+    alert("{{ message|safe }}");
+</script>
+{% endfor %}
+{% endif %}
+
+<i class="bi bi-0-circle"></i>
+<div class="" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modl-title modal-title" style="font: bold;">Генератор импорта</h5>
+                <form action="{% url 'excel_fail_upload' %}" method="post"
+                    onsubmit="document.getElementById('update-button').disabled = true">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-secondary" type="submit" id="update-button">
+                        Обновить данные
+                    </button>
+                </form>
+            </div>
+
+            <div class="modal-body">
+                <form action="" onsubmit="event.preventDefault(); handle()">
+                    <div class="input-group mb-3">
+                        <input id="userInput" type="text" class="form-control" placeholder="Введите номера счета"
+                            aria-label="Recipient's username" aria-describedby="button-addon2">
+                        <button class="btn-sbmt btn btn-outline-secondary" type="submit"
+                            id="button-addon2">Поиск</button>
+                    </div>
+                </form>
+                <div class="checkbox-container">
+                </div>
+            </div>
+
+
+
+            <!-- <form method="post" enctype="multipart/form-data" action="{% url 'excel_fail_upload' %}"
+                class="form-to-data" class="form-to-data">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-secondary btn-data"><i class="fas fa-calendar fa-lg"
+                        alt="Иконка"></i></button>
+                <label class="file-input-container">showTableByCheckedItems
+                    <input type="file" id="fileInput" name="file_upload" required>
+                </label>
+            </form> -->
+            <div class="modal-footer">
+                <div class="spinner-grow spinnerSwitch" role="status">
+                    <span class="visually-hidden"></span>
+                </div>
+                <div class="spinner-grow text-success spinnerSwitch" role="status">
+                    <span class="visually-hidden"></span>
+                </div>
+                <button id="" style="display: None;" type="button" class="btn btn-secondary btnToExportAndShow"
+                    onclick="createExportFile()">Экспорт</button>
+                <button id="" style="display: None;" type="button" class="btn btn-success btnToExportAndShow"
+                    data-toggle="modal" data-target="#exampleModalLong">Просмотр</button>
+                <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+                        <div class="modal-content"
+                            style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLongTitle">Таблица</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+
+                            <div class="modal-body">
+                                <div class="d-flex align-items-center justify-content-center mt-3 mb-3">
+                                    <input type="text" class="form-control mr-2" id="input-text" placeholder="'П-94080-22' или 'П-94080-22,П-94240-20,...'">
+                                    <button class="btn btn-primary flex-grow-1 mr-2" onclick="addToAllRows()">Добавить</button>
+                                </div>
+                                <div id="all-data-to-import">
+                                    <table class="table table-bordered table-striped" id="">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th scope="col">Номенклатура</th>
+                                                <th scope="col">Номер заказа</th>
+                                                <th scope="col">№счета</th>
+                                                <th scope="col">Кол-во</th>
+                                                <th scope="col">Ед.изм</th>
+                                                <th scope="col">Цена, тг</th>
+                                                <th scope="col">Код номенклатуры</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="maw-data-table">
+                                        </tbody>
+                                    </table>
+
+                                    <table class="table table-bordered table-striped" id="" style="background-color: #f8d7da; color: #721c24;">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th scope="col">Номенклатура</th>
+                                                <th scope="col">Номер заказа</th>
+                                                <th scope="col">№счета</th>
+                                                <th scope="col">Кол-во</th>
+                                                <th scope="col">Ед.изм</th>
+                                                <th scope="col">Цена, тг</th>
+                                                <th scope="col">Код номенклатуры</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="secondary-data-table">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                                <button type="button" class="btn btn-primary"
+                                    onclick="createExportFile()">Экспорт</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button> -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'import_generator_by_maw/js/script.js' %}"></script>
+
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "order_entry_as_html/order_entry_template.html" %}
+
+
+{% block content %}
+    <table class="table table-responsive">
+        <thead>
+        <tr>
+            <th scope="col">№</th>
+            <th scope="col">Имя сайта</th>
+            <th scope="col">п/п из ТЦП</th>
+            <th scope="col">НАИМЕНОВАНИЕ И ПОСЛЕДОВАТЕЛЬНОСТЬ ВЫПОЛНЕНИЯ ЭТАПОВ РАБОТ (ВИДОВ РАБОТ)</th>
+            <th scope="col">Единица измерения</th>
+            <th scope="col">Кол-во</th>
+            <th scope="col">Полная стоимость работ в тенге (без учёта НДС)</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for index, site_names, tcp, name, measuring_unit, count, work_cost, _ in data %}
+            <tr>
+                <th scope="row">{{ index }}</th>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ site_names }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ tcp }}</div>
+                </td>
+                <td>
+                    {{ name }}
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ measuring_unit }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ count }}</div>
+                </td>
+                <td class="text-center-td">
+                    <div class="text-center-td__div">{{ work_cost }}</div>
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+    <table class="table">
+        <tbody>
+        <tr>
+            <th scope="row">Итого:</th>
+            <td>{{ data.total_formatted }}</td>
+        </tr>
+        <tr>
+            <th scope="row">НДС {{ vat }}%:</th>
+            <td>{{ data.total_vat_formatted }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Всего с учетом НДС:</th>
+            <td>{{ data.total_with_vat_formatted }}</td>
+        </tr>
+        </tbody>
+    </table>
+    <p>
+        {{ data.total_with_vat_as_words }}
+    </p>
+    <br/>
+    <p>Сроки исполнения работ / услуг: {{ data.completion_date.days }} календарных дней</p>
+    <p>Подрядчик: {{ data.contactor }}</p>
+    <p>Заказчик: {{ data.customer }}</p>
+{% endblock %}

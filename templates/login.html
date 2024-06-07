@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avrora Holding - Sign In</title>
+</head>
+<body>
+    <section>
+        <div class="sign-up_container">
+            <div class="main_block_sign-up_container">
+                <div class="title_main_block">
+                    <h1>Sign In</h1>
+                    <p>Avrora Holding</p>
+                </div>
+                <div class="input_forms_sign-up">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <label>
+                            <input type="email" placeholder="Email" name="email" class="form_input_username">
+                        </label>
+                        <div class="position-relative">
+                            <label>
+                                <input type="password" placeholder="Password" name="password" class="form_input_password">
+                            </label>
+                        </div>
+
+                        <div class="check_validate_account">
+                            {% for message in messages %}
+                                <p>{{ message }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <button type="submit" class="form_sign_up_button" id="submit_button">Sign In</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="image_container">
+            <img src="https://a-brands.kz/storage/settings/July2020/M8FtBkwGRWAX9X2YudFp.png" alt="">
+        </div>
+    </section>
+</body>
+</html>

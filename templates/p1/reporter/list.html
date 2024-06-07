@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+Отчет
+{% endblock %}
+
+{% block chapter %}
+Отчет
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12 col-xl-2">
+        {% if non_selected_sort_fields %}
+        <div>
+            <h6>Поля для сортировки: </h6>
+            <div class="btn-group d-flex flex-wrap" id="non-selected-fields">
+                {% for key, value in non_selected_sort_fields.items %}
+                <button class="sort btn btn-outline-primary mr-1 mb-1"
+                    data-query-name="{{ value.as_query_parameter }}">{{ value.verbose_name }}</button>
+                {% endfor %}
+            </div>
+
+        </div>
+        {% endif %}
+
+        <div>
+            {% if selected_sort_fields %}
+            <h6>Поля в сортировке: </h6>
+
+            {% endif %}
+            <form id="sort-form">
+                <input type="hidden" name="page" value="{{ page_obj.number }}">
+                <div class="d-flex flex-wrap" id="selected-fields">
+                    {% for key, value in selected_sort_fields.items %}
+                    <input type="hidden" name="{{ value.as_query_parameter }}" value="{{ value.order }}"
+                        id="{{ value.as_query_parameter }}">
+                    <div class="sort btn-group mr-1 mb-1">
+                        <button type="button" class="sort__remove btn btn-outline-primary">{{ value.verbose_name }}</button>
+                        <button type="button" class="sort__order-toggle btn btn-primary">
+                            {% if value.order == "desc" %}
+                            <i class="fa fa-sort-amount-down"> </i>
+                            {% else %}
+                            <i class="fa fa-sort-amount-up"> </i>
+                            {% endif %}
+                        </button>
+                    </div>
+
+                    {% endfor %}
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+    <div class="col-lg-12 col-xl-10">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th class="text-center sort" scope="col">
+
+                        №
+
+                    </th>
+                    <th class="text-center sort" scope="col">
+
+                        Имя процесса
+
+                    </th>
+                    <th class="text-center sort" scope="col">
+                        Дата создание
+
+                    </th>
+                    <th class="text-center sort" scope="col">
+
+                        Ответственный
+
+                    </th>
+                    <th class="text-center sort" scope="col">
+
+                        Дополнительно
+
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for object in page_obj %}
+                <tr>
+                    <td class="text-center">{{ object.pk }}</td>
+                    <td>{{ object.process }}</td>
+                    <td class="text-center">{{ object.created_at }}</td>
+                    <td>{{ object.responsible }}</td>
+                    <td>{{ object.text }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <nav class="mt-auto">
+            <ul class="pagination justify-content-center pagination-sm">
+
+                <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                    {% if page_obj.has_previous %}
+                    <a class="page-link"
+                        href="?page={{ page_obj.previous_page_number }}&{{ selected_sort_fields_as_query_parameters }}">Предыдущий</a>
+                    {% else %}
+                    <span class="page-link">Предыдущий</span>
+                    {% endif %}
+                </li>
+
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }}</span>
+                </li>
+
+                <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                    {% if page_obj.has_next %}
+                    <a class="page-link"
+                        href="?page={{ page_obj.next_page_number }}&{{ selected_sort_fields_as_query_parameters }}">Следующий</a>
+                    {% else %}
+                    <span class="page-link">Следующий</span>
+                    {% endif %}
+                </li>
+
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script>
+    $(function () {
+        $("#non-selected-fields .sort").on("click", function () {
+            $("#selected-fields").append(`
+                    <input type="hidden" value="asc" name="${$(this).data("query-name")}"/>
+                `);
+            $("#sort-form").submit();
+        });
+        $("#selected-fields .sort .sort__remove").on("click", function () {
+            $(this).parent().prev().attr("disabled", true);
+            $("#sort-form").submit();
+        });
+        $("#selected-fields .sort .sort__order-toggle").on("click", function () {
+            const input = $(this).parent().prev();
+            const value = input.val();
+            if (value === "asc") {
+                input.val("desc");
+            } else {
+                input.val("asc");
+            }
+            $("#sort-form").submit();
+
+        });
+    });
+</script>
+{% endblock %}

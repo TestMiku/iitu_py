@@ -1,0 +1,261 @@
+.mandatory-payments-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+}
+
+.mandatory-payments-border-thin {
+    --border: 1px solid #dadce0;
+}
+
+#mandatory-payments-table-container {
+    --border-width: 0.09cm;
+    --border: var(--border-width) solid black;
+}
+
+.mandatory-payments-border-top {
+    border-top: var(--border);
+}
+
+.mandatory-payments-border-bottom {
+    border-bottom: var(--border);
+}
+
+.mandatory-payments-border-start {
+    border-left: var(--border);
+}
+
+.mandatory-payments-border-end {
+    border-right: var(--border);
+}
+
+.mandatory-payments-table__column {
+    --has-sum-background-color: #6666ffa3;
+    --paid-background-color: #068dbe8c;
+    --soon-background-color: #ffe666a6;
+    --overdue-background-color: #ff7b2591;
+    --linear-gradient-direction: 45deg;
+
+    text-align: center;
+    cursor: pointer;
+}
+
+.mandatory-payments-table__column.mandatory-payments-table__column_paid-today {
+    background-color: var(--paid-background-color);
+    color: white;
+}
+
+.mandatory-payments-table__column:hover {
+    font-weight: bold;
+}
+
+
+.mandatory-payments-table__column_minus-sum {
+    background-color: #C6EFCE;
+    color: #006100;
+}
+
+.mandatory-payments-table__column:not(.mandatory-payments-table__column_paid-today)[data-sum] {
+    background-color: var(--has-sum-background-color);
+    color: white;
+}
+
+
+.mandatory-payments-table__column.mandatory-payments-table__column_paid-today[data-sum] {
+    background: linear-gradient(var(--linear-gradient-direction), var(--has-sum-background-color) 90%, var(--paid-background-color) 10%);
+}
+
+.mandatory-payments-table__column.mandatory-payments-table__column_paid-today[data-type="overdue"] {
+    background: linear-gradient(var(--linear-gradient-direction), var(--paid-background-color) 90%, var(--overdue-background-color) 10%);
+    font-weight: bold;
+}
+
+.mandatory-payments-table__column.mandatory-payments-table__column_paid-today[data-type="soon"] {
+    background: linear-gradient(var(--linear-gradient-direction), var(--paid-background-color) 90%, var(--soon-background-color) 10%);
+
+}
+
+.mandatory-payments-table__column.mandatory-payments-table__column_paid-today[data-sum][data-type="overdue"] {
+    background: linear-gradient(var(--linear-gradient-direction), var(--has-sum-background-color) 0, var(--has-sum-background-color) 80%, var(--paid-background-color) 80%, var(--paid-background-color) 90%, var(--overdue-background-color) 90%, var(--overdue-background-color) 100%);
+
+}
+
+.mandatory-payments-table__column.mandatory-payments-table__column_paid-today[data-sum][data-type="soon"] {
+    background: linear-gradient(var(--linear-gradient-direction), var(--has-sum-background-color) 0, var(--has-sum-background-color) 80%, var(--paid-background-color) 80%, var(--paid-background-color) 90%, var(--soon-background-color) 90%, var(--soon-background-color) 100%);
+
+}
+
+.mandatory-payments-table__column:not(.mandatory-payments-table__column_paid-today)[data-type="overdue"] {
+    background-color: var(--overdue-background-color);
+}
+
+.mandatory-payments-table__column:not(.mandatory-payments-table__column_paid-today)[data-type="soon"] {
+    background-color: var(--soon-background-color);
+}
+
+.mandatory-payments-table__column:not(.mandatory-payments-table__column_paid-today)[data-sum][data-type="overdue"] {
+    background: linear-gradient(var(--linear-gradient-direction), var(--has-sum-background-color) 90%, var(--overdue-background-color) 10%);
+}
+
+.mandatory-payments-table__column:not(.mandatory-payments-table__column_paid-today)[data-sum][data-type="soon"] {
+    background: linear-gradient(var(--linear-gradient-direction), var(--has-sum-background-color) 90%, var(--soon-background-color) 10%);
+
+}
+
+.mandatory-payments-table__selected-content-container {
+    display: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    z-index: 100;
+}
+
+.mandatory-payments-table__selected-content-container-blackout {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    opacity: 0.5;
+}
+
+.mandatory-payments-table__selected-content {
+    position: absolute;
+    background-color: white;
+    padding: 5px;
+}
+
+
+.mandatory-payments-table__selected-content-column {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-color: white;
+}
+
+.mandatory-payments-table__selected-content-menu {
+    position: relative;
+    left: -2px;
+    background-color: white;
+
+    width: 16em;
+    padding: 1rem;
+    border-bottom: var(--border);
+    border-right: var(--border);
+    border-left: var(--border);
+}
+
+.mandatory-payments-table__selected-content-container.mandatory-payments-table__selected-content-container_active {
+    display: block;
+
+}
+
+
+.mandatory-payments-table-container.mandatory-payments-table-container_selected-content-is-active {
+    overflow: hidden;
+}
+
+#sutochnye-form-table-container {
+}
+
+#sutochnye-form-table-container::-webkit-scrollbar {
+    display: none;
+}
+
+
+#project-region-accounts-table-container {
+    overflow-x: scroll;
+}
+
+#project-region-accounts-table-container::-webkit-scrollbar {
+    display: none;
+}
+
+
+#unpaid-invoices-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+#unpaid-invoices-table .td {
+    vertical-align: middle;
+}
+
+#unpaid-invoices-table .td-content {
+    white-space: nowrap;
+    overflow-x: scroll;
+}
+
+#unpaid-invoices-table .td-content::-webkit-scrollbar {
+    display: none;
+}
+
+#interdivisional-debts-table :where(td, th) {
+    border: 1px solid black;
+    padding: 0.25em 0.25em;
+}
+
+#interdivisional-debts-table th:not(:first-child) {
+    border-left: 0;
+}
+
+#interdivisional-debts-table tbody th {
+    border-top: 0;
+}
+
+#interdivisional-debts-table td {
+
+    border-left: 0;
+}
+
+#interdivisional-debts-table tbody td {
+    border-top: 0;
+}
+
+#interdivisional-debts-table tbody tr:last-child td {
+    border-bottom: 0;
+
+}
+
+#interdivisional-debts-table tbody tr:last-child th {
+    border-bottom: 0;
+}
+
+
+#interdivisional-debts-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+#interdivisional-debts-table th {
+    text-align: center;
+}
+
+#interdivisional-debts-table :where(.participant, .project-region) {
+    max-width: 8em;
+    max-height: 4em;
+    overflow-y: scroll;
+}
+
+#interdivisional-debts-table .project-region-th {
+    max-width: 10em;
+}
+
+#interdivisional-debts-table-container {
+    overflow: scroll;
+}
+
+#interdivisional-debts-table :where(.participant, .project-region)::-webkit-scrollbar {
+    display: none;
+}
+
+#interdivisional-debts-table td {
+    text-align: right;
+}

@@ -1,0 +1,1063 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% block title %}ПРОВЕРЯТЕЛЬ АТП АВ
+{% endblock %}
+{% block chapter %}
+    ПРОВЕРЯТЕЛЬ АТП АВР
+{% endblock %}
+{% block content %}
+
+<!-- <div id="example"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script> -->
+
+
+
+
+    <ul class="nav nav-tabs mb-3" role="tablist">
+      <li class="nav-item">
+        <span class="nav-link active" role="tab" aria-selected="true">ПРОВЕРЯТЕЛЬ АТП АВР</span>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url "tester-atp-avr:load-tcp" %}" role="tab" aria-selected="false">Импорт цен ТЦП</a>
+      </li>
+    <li class="nav-item">
+            <a class="nav-link" href="{% url "tester-atp-avr:tcp-file-list" %}" role="tab" aria-selected="false">Цены
+                ТЦП</a>
+        </li>
+    </ul>
+    <div class="row mb-2">
+        <form class="col-lg-10 col-md-12" id="atp-avr-form" method="post" enctype="multipart/form-data">
+            <div class="text-danger" id="errors"></div>
+<div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="electro_montazh_toggle">
+    <label class="form-check-label" for="electro_montazh_toggle">
+        ЭМР тендер
+    </label>
+</div>
+<input type="hidden" name="electro_montazh" id="electro_montazh_hidden" value="0">
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggle = document.getElementById('electro_montazh_toggle');
+        const hiddenInput = document.getElementById('electro_montazh_hidden');
+
+        // Initialize the hidden input value based on the initial state of the checkbox
+        hiddenInput.value = toggle.checked ? 1 : 0;
+
+        toggle.addEventListener('change', function() {
+            hiddenInput.value = this.checked ? 1 : 0;
+            console.log(hiddenInput.value);
+        });
+
+        // Ensure the hidden input is set correctly on form submit
+        document.getElementById('atp-avr-form').addEventListener('submit', function() {
+            hiddenInput.value = toggle.checked ? 1 : 0;
+        });
+    });
+</script>
+            <div class="mb-2">
+                <h5>
+                    АТП
+                </h5>
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link " id="atp-copy-paste-t
+                  ab" data-toggle="tab" href="#atp-copy-paste"
+                           role="tab"
+                           aria-controls="home"
+                           aria-selected="true">Копировать и Вставить</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" id="atp-file-tab" data-toggle="tab" data-select="file"
+                           data-select-id="{{ form.atp.id_for_label }}" href="#atp-file" role="tab"
+                           aria-controls="profile" aria-selected="false">Файл</a>
+                    </li>
+                </ul>
+                <div class="tab-content mt-2" id="myTabContent">
+                    <div class="tab-pane fade" id="atp-copy-paste" role="tabpanel"
+                         aria-labelledby="atp-copy-paste-tab">
+                         <div class="d-flex justify-content-end mb-2">
+                            <button type="button" class="btn btn-danger" onclick="deleteColumn('atp-html-input')">удалить Столбец</button>
+                        </div>
+                        <div id="atp-html-input"
+                             contenteditable="true"
+                             class="form-control html-input"
+                             style="min-height: 16em; overflow: scroll;" data-set-value-into="#atp">
+
+                        </div>
+                        <input name="atp" id="atp" hidden>
+                        <div class="text-info">Вставьте таблицу скопировав его из приложения Excel, Word или т.п. без шапки</div>
+                        <div class="row new-tcp-inserter" data-add-new-row-button="#atp-add-new-row"
+                             data-insert-tcp="#atp-insert-tcp" data-tcp-category-select="#atp-tcp-category-select" data-tcp-file-select="#atp-tcp-file-select"
+                             data-tcp-id="atp-tcp-select" data-tcp-loading="#atp-tcp-loading" data-tcp-category-id="atp-tcp-category-id"
+                             data-tcp-errors="#atp-tcp-errors" data-tcp-category-loading="#atp-tcp-category-loading" data-tcp-category-insert="#atp-tcp-category-insert"
+                             data-count-input="#atp-tcp-count" data-table-input="#atp" data-table-html-input="#atp-html-input">
+                            <div class="col-sm-12 col-lg-3 mb-2 mb-lg-0 input-group">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="atp-tcp-file-select">Файл TCP</label>
+                                </div>
+                                <select class="custom-select" name="tcp_file" id="atp-tcp-file-select">
+                                    <option value="" selected>Выберете файл TCP</option>
+                                    {% for tcp_file in tcp_files %}
+                                    	<option value="{{ tcp_file.id }}">{{ tcp_file }}</option>
+                                    {% endfor %}
+
+                                </select>
+                            </div>
+                            <div class="col-sm-12 col-lg-3 mb-2 mb-lg-0 ">
+                                <i id="atp-tcp-category-loading" class="fas fa-spinner d-none fa-pulse mx-2"></i>
+
+<div class="input-group" id="atp-tcp-category-insert">
+ <div class="input-group-prepend">
+                                    <label class="input-group-text" for="atp-tcp-category-select">Категория TCP</label>
+                                </div>
+                                <select class="custom-select" name="tcp_category" disabled id="atp-tcp-category-select">
+                                    <option value="" selected>Выберете категорию</option>
+
+                                </select>
+</div>
+
+                            </div>
+                            <div class="col-sm-12 col-lg-3 d-flex align-items-center mb-2 mb-lg-0" id="tcp">
+                                <i id="atp-tcp-loading" class="fas fa-spinner d-none fa-pulse mx-2"></i>
+
+                                <div id="atp-insert-tcp" class="w-100">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" for="atp-tcp-select">Пункт
+                                                TCP</label>
+                                        </div>
+                                        <select class="custom-select" id="atp-tcp-select" disabled>
+                                            <option value="" selected>Выберете пункт</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-lg-2 mb-2 mb-lg-0">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="atp-tcp-count">Количество</label>
+                                    </div>
+                                    <input id="atp-tcp-count" type="number" class="form-control" value="1" min="1">
+                                </div>
+                            </div>
+                            <div class="col-1">
+                                <button class="w-100 btn btn-primary" type="button" disabled id="atp-add-new-row">
+                                    Добавить
+                                </button>
+                            </div>
+
+                        </div>
+                        <div id="atp-tcp-errors" class="text-danger mb-2"></div>
+
+                    </div>
+                    <div class="tab-pane fade show active" id="atp-file" role="tabpanel" aria-labelledby="atp-file-tab">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="custom-file">
+                                <label class="custom-file-label" for="atp-file-input">Выберете файл</label>
+                                <input class="custom-file-input table-inserter" type="file" id="atp-file-input"
+                                       data-insert-tables-into="#atp-tables" data-loading-icon="#atp-loading"
+                                       data-line-scale-input="#atp-line-scale" data-errors="#atp-errors">
+
+                            </div>
+                            <i id="atp-loading" class="d-none fas fa-spinner fa-pulse mx-2"></i>
+                        </div>
+                        <div class="mb-2">
+                            <p>
+                                <a data-toggle="collapse" href="#atp-settings" role="button"
+                                   aria-expanded="false" aria-controls="avr-settings">
+                                    Дополнительные настройки
+                                </a>
+                            </p>
+                            <div class="collapse" id="atp-settings">
+                                <h5>Подберите значение для лучшего результата</h5>
+                                <div class="card card-body">
+                                    <label for="atp-line-scale">Чем больше тем оно обнаруживает мелкий
+                                        линий</label>
+                                    <input id="atp-line-scale" type="number" min="1" max="150" value="54">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="atp-tables" class="select-inserter" data-selected="tr.table-primary"
+                             data-insert-input="#atp" data-insert-html="#atp-html-input">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="text-danger" id="atp-errors">
+
+                </div>
+            </div>
+            <div class="mb-2">
+                <h5>
+                    АВР
+                </h5>
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="avr-copy-paste-tab" data-select="copy_paste"
+                           data-select-id="{{ form.avr.id_for_label }}" data-toggle="tab" href="#avr-copy-paste"
+                           role="tab"
+                           aria-controls="home"
+                           aria-selected="true">Копировать и Вставить</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="avr-file-tab" data-select="file"
+                           data-select-id="{{ form.avr.id_for_label }}" data-toggle="tab" href="#avr-file"
+                           role="tab"
+                           aria-controls="profile" aria-selected="false">Файл</a>
+
+                    </li>
+                </ul>
+                <div class="tab-content mt-2" id="myTabContent">
+                    <div class="tab-pane fade show active" id="avr-copy-paste" role="tabpanel"
+                         aria-labelledby="avr-copy-paste-tab">
+                         <div class="d-flex justify-content-end mb-2">
+                            <button type="button" class="btn btn-danger" onclick="deleteColumn('avr-html-input')">удалить Столбец</button>
+                        </div>
+                        <div id="avr-html-input" contenteditable="true"
+                             class="form-control html-input"
+                             style="min-height: 16em; overflow: scroll;" data-set-value-into="#avr">
+                        </div>
+                        <input name="avr" id="avr" hidden>
+
+                        <div id="avr-materials-container" class="mb-3 d-none">
+                            <div id="avr-materials-input" contenteditable="true" class="form-control html-input" style="min-height: 16em; overflow: scroll;" data-set-value-into="#avr-materials">
+                            </div>
+                            <input type="hidden" name="avr-materials" id="avr-materials">
+                        </div>
+                        <div class="text-info">Вставьте таблицу скопировав его из приложения Excel, Word или т.п. без шапки</div>
+                        <div class="row new-tcp-inserter" data-add-new-row-button="#avr-add-new-row"
+                             data-insert-tcp="#avr-insert-tcp" data-tcp-category-select="#avr-tcp-category-select" data-tcp-file-select="#avr-tcp-file-select" data-tcp-category-insert="#avr-tcp-category-insert"
+                             data-tcp-id="avr-tcp-select" data-tcp-loading="#avr-tcp-loading" data-tcp-category-loading="#avr-tcp-category-loading"
+                             data-tcp-errors="#avr-tcp-errors" data-tcp-category-id="avr-tcp-category-select"
+                             data-count-input="#avr-tcp-count" data-table-input="#avr" data-table-html-input="#avr-html-input">
+<div class="col-sm-12 col-lg-3 mb-2 mb-lg-0 input-group">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="avr-tcp-file-select">Файл TCP</label>
+                                </div>
+                                <select class="custom-select" name="tcp_file" id="avr-tcp-file-select">
+                                    <option value="" selected>Выберете файл TCP</option>
+                                    {% for tcp_file in tcp_files %}
+                                    	<option value="{{ tcp_file.id }}">{{ tcp_file }}</option>
+                                    {% endfor %}
+
+                                </select>
+                            </div>
+                            <div class="col-sm-12 col-lg-3 mb-2 mb-lg-0 d-flex align-items-center">
+                                <i id="avr-tcp-category-loading" class="fas fa-spinner d-none fa-pulse mx-2"></i>
+
+<div class="input-group" id="avr-tcp-category-insert">
+ <div class="input-group-prepend">
+                                    <label class="input-group-text" for="avr-tcp-category-select">Категория TCP</label>
+                                </div>
+                                <select class="custom-select" name="tcp_category" disabled id="avr-tcp-category-select">
+                                    <option value="" selected>Выберете категорию</option>
+
+                                </select>
+</div>
+
+                            </div>
+                            <div class="col-sm-12 col-lg-3 d-flex align-items-center mb-2 mb-lg-0" id="tcp">
+                                <i id="avr-tcp-loading" class="fas fa-spinner d-none fa-pulse mx-2"></i>
+
+                                <div id="avr-insert-tcp" class="w-100">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" for="avr-tcp-select">Пункт
+                                                TCP</label>
+                                        </div>
+                                        <select class="custom-select" id="avr-tcp-select" disabled>
+                                            <option value="" selected>Выберете пункт</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-lg-2 mb-2 mb-lg-0">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="avr-tcp-count">Количество</label>
+                                    </div>
+                                    <input id="avr-tcp-count" type="number" class="form-control" value="1" min="1">
+                                </div>
+                            </div>
+                            <div class="col-1">
+                                <button class="w-100 btn btn-primary" type="button" disabled id="avr-add-new-row">
+                                    Добавить
+                                </button>
+                            </div>
+
+                        </div>
+                        <div id="avr-tcp-errors" class="text-danger mb-2"></div>
+
+                    </div>
+                    <div class="tab-pane fade" id="avr-file" role="tabpanel" aria-labelledby="avr-file-tab">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="custom-file">
+                                <label class="custom-file-label" for="avr-file-input">Выберете файл</label>
+                                <input class="custom-file-input table-inserter" type="file" id="avr-file-input"
+                                       data-insert-tables-into="#avr-tables" data-loading-icon="#avr-loading"
+                                       data-line-scale-input="#avr-line-scale" data-errors="#avr-errors">
+                            </div>
+                            <i id="avr-loading" class="d-none fas fa-spinner fa-pulse mx-2"></i>
+                        </div>
+                        <div class="mb-2">
+                            <p>
+                                <a data-toggle="collapse" href="#avr-settings" role="button"
+                                   aria-expanded="false" aria-controls="avr-settings">
+                                    Дополнительные настройки
+                                </a>
+                            </p>
+                            <div class="collapse" id="avr-settings">
+                                <h5>Подберите значение для лучшего результата</h5>
+                                <div class="card card-body">
+                                    <label for="avr-line-scale">Чем больше тем оно обнаруживает мелкий
+                                        линий</label>
+                                    <input id="avr-line-scale" type="number" min="1" max="150" value="54">
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div id="avr-tables" class="select-inserter" data-selected="tr.table-primary"
+                             data-insert-input="#avr" data-insert-html="#avr-html-input"></div>
+                    </div>
+                </div>
+<div class="input-group ">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="difference-sum">Сумма для разницы</label>
+                            </div>
+                            <input type="number" class="form-control" step="0.01" min="0" name="difference-sum"
+                                   id="difference-sum">
+                        </div>
+                <div class="text-danger" id="avr-errors">
+
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+            <!-- new shanges start -->
+            <style>
+                .tr_red{
+                    background-color: rgba(255, 0, 0, 0.3);
+                }
+                .tr_yellow{
+                    background-color: rgba(255, 255, 0, 0.3);
+                }
+                .tr_green{
+                    background-color: rgba(0, 255, 0, 0.3);
+                }
+
+                .tr_red_green{
+                    background: linear-gradient(-60deg, rgba(255, 0, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 50%);
+                }
+                .tr_red_yellow{
+                    background: linear-gradient(-60deg, rgba(255, 0, 0, 0.3) 50%, rgba(255, 255, 0, 0.3) 50%);
+                }
+                .tr_yellow_green{
+                    background: linear-gradient(-60deg, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 50%);
+                }
+
+                .tr_red_yellow_green {
+                    background: linear-gradient(-60deg,
+                        rgba(255, 0, 0, 0.3) 0%,
+                        rgba(255, 0, 0, 0.3) 33%,
+                        rgba(255, 255, 0, 0.3) 33%,
+                        rgba(255, 255, 0, 0.3) 66%,
+                        rgba(0, 255, 0, 0.3) 66%,
+                        rgba(0, 255, 0, 0.3) 100%
+                    );
+                }
+
+
+            </style>
+            <div class="mb-2 accordion" id="accordionSidebar1">
+                <br>
+                <a class="h5 card-header collapsed" data-toggle="collapse" data-target="#collapse_x" aria-expanded="false" aria-controls="collapse_x">
+                    АТП (для шапки, сметы, и акта монтажа)
+                </a>
+                <span> | </span>
+                <a class="h5 card-header" href="list-wt">
+                    Список работ
+                </a>
+                <span> | </span>
+                <a class="h5 card-header" href="list-cnd">
+                    Список договоров
+                </a>
+                <br>
+                <br>
+
+
+                <div class="row collapse" id="collapse_x">
+
+                    <!-- Area Chart -->
+                    <div class="col-xl-6 col-lg-7">
+                        <div class="card shadow mb-4">
+                            <!-- Card Header - Dropdown -->
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">Записать вручкую</h6>
+                            </div>
+                            <!-- Card Body -->
+                            <div class="card-body"><fieldset>
+
+
+
+
+                                {% comment %} <div class="form-group">
+                                    <label for="id_smeta">Таблица сметы:</label>
+                                    <div contenteditable="true"
+                                        class="form-control html-input"
+                                        style="min-height: 16em; overflow: scroll;">
+                                        <table id="id_smeta" border="1">
+
+                                        </table>
+                                    </div>
+                                </div> {% endcomment %}
+
+                                <div class="form-group">
+                                    <label for="id_akt_montaz">Таблица акта монтажа (1):</label>
+                                    <div contenteditable="true"
+                                        class="form-control html-input"
+                                        style="min-height: 16em; overflow: scroll;">
+                                        <table id="id_akt_montaz" border="1">
+
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="id_akt_montaz2">Таблица акта монтажа (2):</label>
+                                    <div contenteditable="true"
+                                        class="form-control html-input"
+                                        style="min-height: 16em; overflow: scroll;">
+                                        <table id="id_akt_montaz2" border="1">
+
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="id_akt_montaz1">Оборудование от Заказчика :</label>
+                                    <div contenteditable="true"
+                                        class="form-control html-input"
+                                        style="min-height: 16em; overflow: scroll;">
+                                        <table id="id_akt_montaz1" border="1">
+
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <label for="id_smeta_input">Смета (.docx):</label>
+                                    <input type="file"
+                                        id="id_smeta_input"
+                                        name="smeta_input"
+                                        class="mb-3"
+                                        >
+
+                                <div class="form-group">
+                                    <label for="id_bs_order">Заказ номер:</label>
+                                    <input type="text" class="form-control" id="id_bs_order" name="bs_order" value="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_bs_date">Дата заказа:</label>
+                                    <input type="text" class="form-control" id="id_bs_date" name="bs_date" value="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_bs_number">Номер базовой станции:</label>
+                                    <input type="text" class="form-control" id="id_bs_number" name="bs_number" value="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_bs_name">Название базовой станции 1:</label>
+                                    <input type="text" class="form-control" id="id_bs_name" name="bs_name" value="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_bs_name">Название базовой станции 2:</label>
+                                    <input type="text" class="form-control" id="id_bs1_name" name="bs1_name" value="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="bs_address">Полное имя базовой станции</label>
+                                    <input type="text" class="form-control" id="id_bs_address" name="bs_address" value="">
+                                </div>
+
+
+
+                                <div class="form-group">
+                                    <label for="selectInput">Номер и дата договора:</label>
+                                    <input class="form-control" list="dl_contract_number_and_date" type="text" id="id_contract_number_and_date" name="contract_number_and_date" placeholder="Введите своё значение">
+                                    <datalist id="dl_contract_number_and_date">
+                                        {% for obj in contract_number_and_dates %}
+                                        <option value="{{obj.name}}">
+                                        {% endfor %}
+                                    </datalist>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="dl_work_type">Вид работ:</label>
+                                    <input class="form-control" list="dl_work_type" type="text" id="id_work_type" name="work_type" placeholder="Введите своё значение">
+                                    <datalist id="dl_work_type">
+                                        {% for obj in work_types %}
+                                        <option value="{{obj.name}}">
+                                        {% endfor %}
+                                    </datalist>
+                                </div>
+
+
+                                <input id="id_akt_montaz_input" name="akt_montaz_input" type="hidden">
+                                <input id="id_akt_montaz1_input" name="akt_montaz1_input" type="hidden">
+                                <input id="id_akt_montaz2_input" name="akt_montaz2_input" type="hidden">
+
+                            </fieldset>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pie Chart -->
+                    <div class="col-xl-6 col-lg-5">
+                        {% comment %} <div class="card shadow mb-4 accordion" id="accordionSidebar2">
+                            <!-- Card Header - Dropdown -->
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <a href="#" class="h6 m-0 font-weight-bold text-primary collapsed" data-toggle="collapse" data-target="#collapse_smeta" aria-expanded="false" aria-controls="collapse_smeta">Смета</a>
+                            </div>
+                            <!-- Card Body -->
+                            <div class="card-body collapse show" id="collapse_smeta">
+                                <!-- card-body-start -->
+                                <div class="input-group mb-1" style="cursor: pointer;">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="inputGroupFileAddon02">Загрузить</span>
+                                    </div>
+                                    <div class="custom-file">
+                                        <input type="file" onchange="upload_file_for_parsing_smeta()" class="custom-file-input" id="smeta-parse-data" aria-describedby="inputGroupFileAddon02">
+                                        <label class="custom-file-label" for="smeta-parse-data" id="smeta-parse-data-file-name">Выбрать файл</label>
+                                    </div>
+                                </div>
+
+                                <!-- card-body-end -->
+
+
+                                <div class="card-body" id="smeta-parsed-tables">
+
+                                </div>
+
+                            </div>
+
+                        </div> {% endcomment %}
+
+
+                        <div class="card shadow mb-4 accordion" id="accordionSidebar3">
+                            <!-- Card Header - Dropdown -->
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <a href="#" class="h6 m-0 font-weight-bold text-primary collapsed" data-toggle="collapse" data-target="#collapse_akt_montazh" aria-expanded="false" aria-controls="collapse_akt_montazh">Акт монтажа и Оборудование</a>
+                            </div>
+                            <!-- Card Body -->
+                            <div class="card-body collapse show" id="collapse_akt_montazh">
+                                <!-- card-body-start -->
+                                <div class="input-group mb-1" style="cursor: pointer;">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="inputGroupFileAddon01">Загрузить</span>
+                                    </div>
+                                    <div class="custom-file">
+                                        <input type="file" onchange="upload_file_for_parsing()" class="custom-file-input" id="atp-parse-data" aria-describedby="inputGroupFileAddon01">
+                                        <label class="custom-file-label" for="atp-parse-data" id="atp-parse-data-file-name">Выбрать файл</label>
+                                    </div>
+                                </div>
+
+                                <!-- card-body-end -->
+
+
+                                <div class="card-body" id="atp-parsed-tables">
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <script src="{% static "js/tester_atp_avr/mp_part.js" %}"></script>
+                <script src="{% static "js/tester_atp_avr/mp_smeta_part.js" %}"></script>
+            </div>
+
+            <!-- new shanges end -->
+
+
+
+
+
+
+
+
+            <div class="d-flex align-items-center mb-2">
+                <button class="btn btn-primary">Проверить</button>
+                <i id="atp-avr-form-loading" class="d-none fas fa-spinner fa-pulse ml-2"></i>
+                <div class="dropdown ml-2 d-none download">
+                    <button type="button" class="btn btn-primary dropdown-toggle" id="download"
+                            data-toggle="dropdown"
+                            aria-haspopup="true"
+                            aria-expanded="false"><i class="fas fa-download"></i></button>
+                    <div class="dropdown-menu" aria-labelledby="download">
+                        <a class="dropdown-item html-download" href="" download>
+                            <i class="fas fa-file-code"></i> HTML
+                        </a>
+                        <a class="dropdown-item docx-download" href="" download>
+                            <i class="fas fa-file-word"></i> Word
+                        </a>
+                        <a class="dropdown-item xlsx-download" href="" download>
+                            <i class="fas fa-file-excel"></i> Excel
+                        </a>
+                        <a class="dropdown-item docx_format1-download" href="" download="NEW_NAME.docx">
+                            <i class="fas fa-file-word"></i> Монтаж
+                        </a>
+                        <a class="dropdown-item docx_format2-download" href="" download="NEW_NAME.docx">
+                            <i class="fas fa-file-word"></i> ЭМР
+                        </a>
+                        <a class="dropdown-item docx_format_electro_montazh-download" href="" download="NEW_NAME.docx">
+                            <i class="fas fa-file-word"></i> ЭМР тендер
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <button id="preview-button" type="button" class="d-none btn btn-link" data-toggle="modal"
+                    data-target="#preview">Посмотреть результат в полном экране
+            </button>
+            <div id="preview" class="modal fade px-3 " tabindex="-1" role="dialog">
+                <div class="modal-dialog m-0 mw-100 mh-100 h-100 rounded-0" role="document">
+                    <div class="modal-content h-100 rounded-0">
+                        <div class="modal-header rounded-0">
+                            <h5 class="modal-title">Предварительный просмотр</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <iframe src="" class="w-100 h-100 border-0 preview-iframe"></iframe>
+                        </div>
+                        <div class="modal-footer rounded-0">
+                            <div class="dropup">
+                                <button type="button" class="btn btn-primary dropdown-toggle" id="download"
+                                        data-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false"><i class="fas fa-download"></i></button>
+                                <div class="dropdown-menu" aria-labelledby="download">
+                                    <a class="dropdown-item html-download" href="" download><i
+                                            class="fas fa-file-code"></i> HTML</a>
+                                    <a class="dropdown-item docx-download" href="" download><i
+                                            class="fas fa-file-word"></i> Word</a>
+                                    <a class="dropdown-item xlsx-download" href="" download><i
+                                            class="fas fa-file-excel"></i> Excel</a>
+                                    <a class="dropdown-item docx_format1-download" href="" download id="downloadLink"><i
+                                            class="fas fa-file-word"></i> Format 1</a>
+                                    <a class="dropdown-item docx_format2-download" href="" download id="downloadLink"><i
+                                            class="fas fa-file-word"></i> Format 2</a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+    <div class="row mb-2">
+        <iframe src="" class="col-lg-10 col-md-12 border-0 preview-iframe" id="preview-iframe"></iframe>
+
+    </div>
+{% endblock %}
+{% block scripts %}
+<script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggle = document.getElementById('electro_montazh_toggle');
+        const avrMaterialsContainer = document.getElementById('avr-materials-container');
+        const avrMaterialsInput = document.getElementById('avr-materials-input');
+        const avrMaterialsHiddenInput = document.getElementById('avr-materials');
+
+        // Function to update hidden input with the content of the contenteditable div
+        function updateHiddenInput() {
+            avrMaterialsHiddenInput.value = avrMaterialsInput.innerHTML;
+        }
+
+        // Toggle visibility of the contenteditable div
+        toggle.addEventListener('change', function() {
+            if (this.checked) {
+                avrMaterialsContainer.classList.remove('d-none');
+            } else {
+                avrMaterialsContainer.classList.add('d-none');
+            }
+        });
+
+        // Update hidden input on content change
+        avrMaterialsInput.addEventListener('input', updateHiddenInput);
+
+        // Ensure hidden input is updated on form submission
+        document.getElementById('atp-avr-form').addEventListener('submit', updateHiddenInput);
+    });
+
+
+    function insertSelected() {
+        $(".select-inserter").each(function () {
+            const selected = $($(this).data("selected"), this).clone().toggleClass("table-primary");
+            if (selected.length === 0) {
+                return;
+            }
+            const table = $("<table>").addClass("table table-bordered").append($("<tbody>").append(selected)).prop("outerHTML");
+            const insertInput = $($(this).data("insertInput"));
+            insertInput.val(table);
+            insertInput.trigger("inserted");
+            $($(this).data("insertHtml")).html(table);
+        });
+    }
+
+    function selectDefaults() {
+        $("tr", $("table").eq(2)).slice(2).toggleClass("table-primary");
+        insertSelected();
+    }
+
+    function deleteColumn(tableId) {
+        const tableContainer = document.getElementById(tableId);
+        const selectedColumnIndex = getSelectedColumnIndex(tableContainer);
+        if (selectedColumnIndex === -1) {
+            alert("Please select a column to delete.");
+            return;
+        }
+        deleteTableColumn(tableContainer, selectedColumnIndex);
+        updateHiddenInput(tableContainer);
+    }
+
+    function getSelectedColumnIndex(tableContainer) {
+        const table = tableContainer.querySelector('table');
+        if (!table) return -1;
+
+        const headers = table.querySelectorAll('th');
+        for (let i = 0; i < headers.length; i++) {
+            if (headers[i].classList.contains('selected-column')) {
+                return headers[i].cellIndex;
+            }
+        }
+
+        const cells = table.querySelectorAll('td');
+        for (let i = 0; i < cells.length; i++) {
+            if (cells[i].classList.contains('selected-column')) {
+                return cells[i].cellIndex;
+            }
+        }
+        return -1;
+    }
+
+    function deleteTableColumn(tableContainer, columnIndex) {
+        const table = tableContainer.querySelector('table');
+        if (!table) return;
+
+        const rows = table.rows;
+        for (let i = 0; i < rows.length; i++) {
+            if (rows[i].cells.length > columnIndex) {
+                rows[i].deleteCell(columnIndex);
+            }
+        }
+    }
+
+    function updateHiddenInput(tableContainer) {
+        const tableHtml = tableContainer.innerHTML;
+        const hiddenInputSelector = tableContainer.getAttribute('data-set-value-into');
+        const hiddenInput = document.querySelector(hiddenInputSelector);
+        hiddenInput.value = tableHtml;
+    }
+    document.addEventListener('click', function (e) {
+        const target = e.target;
+        if (target.tagName === 'TH' || target.tagName === 'TD') {
+            const cells = target.parentElement.parentElement.querySelectorAll('th, td');
+            cells.forEach(cell => cell.classList.remove('selected-column'));
+            target.classList.add('selected-column');
+        }
+    });
+    $(function () {
+            $(".table-inserter").on("change", function () {
+                const loadingIcon = $(this).data("loadingIcon");
+                $(loadingIcon).removeClass("d-none");
+                $(".table-inserter").prop("disabled", true);
+                const formData = new FormData();
+                const file = this.files[0];
+                formData.append("file", file);
+                const errors = $($(this).data("errors"));
+                const lineScale = $($(this).data("lineScaleInput")).val();
+                formData.append("line-scale", lineScale);
+                const insertTablesInto = $(this).data("insertTablesInto");
+                const xmlHttpRequest = new XMLHttpRequest();
+                xmlHttpRequest.open("POST", "{% url "tester-atp-avr:get-tables-as-html" %}");
+                xmlHttpRequest.addEventListener("readystatechange", function () {
+                    if (this.readyState === XMLHttpRequest.DONE) {
+                        const json = JSON.parse(this.response);
+
+                        if (this.status === 200) {
+                            try{create_table_response(json)}catch(e){console.log(e.stack)}
+                            $(insertTablesInto).empty();
+                            const accordion = $(`<div class="accordion"></div>`);
+                            let index = 1;
+                            for (const table of json.tables) {
+                                const id = `${json.id}-${index}`
+                                const headerId = `${id}-header`;
+                                accordion.append(`
+                                <div class="card">
+                                    <div class="card-header" id="${headerId}">
+                                        <h5 class="mb-0">
+                                            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#${id}" aria-expanded="false" aria-controls="${id}">
+                                                Table #${index}
+                                            </button>
+                                        </h5>
+                                    </div>
+
+                                    <div id="${id}" class="collapse" aria-labelledby="${headerId}" data-parent="${insertTablesInto}">
+                                        <div class="card-body" style="overflow: scroll">
+                                            ${table}
+                                        </div>
+                                    </div>
+                                </div>
+                            `);
+                                index += 1;
+                            }
+                            accordion.appendTo(insertTablesInto);
+                            $("tr", accordion).on("click", function () {
+                                $(this).toggleClass("table-primary");
+                                insertSelected();
+                            });
+                        } else if (this.status === 400) {
+                            errors.empty();
+                            errors.append(`<p>${json.detail}</p>`)
+                        }
+                    }
+                    $(loadingIcon).addClass("d-none");
+                    $(".table-inserter").prop("disabled", false);
+                    selectDefaults();
+                });
+                xmlHttpRequest.send(formData);
+            });
+            $("#atp-avr-form").on("submit", function (event) {
+                event.preventDefault();
+                $("#atp-avr-form-loading").removeClass("d-none");
+                $("#preview-button").addClass("d-none")
+                $(".download").addClass("d-none");
+                const xmlHttpRequest = new XMLHttpRequest();
+                xmlHttpRequest.open("POST", "");
+                xmlHttpRequest.addEventListener("readystatechange", function () {
+                    if (this.readyState === XMLHttpRequest.DONE) {
+                        const json = JSON.parse(this.response);
+                        switch (this.status) {
+                            case 200:
+                                const previewButton = $("#preview-button");
+                                $(".download").removeClass("d-none");
+                                $(".preview-iframe").attr("src", json.html);
+                                $(".html-download").attr("href", json.html);
+                                $(".docx-download").attr("href", json.docx);
+                                $(".xlsx-download").attr("href", json.xlsx);
+                                $(".docx_format1-download").attr("href", json.docx_format1);
+                                $(".docx_format2-download").attr("href", json.docx_format2);
+                                $(".docx_format_electro_montazh-download").attr("href", json.electrical_installation);
+                                previewButton.removeClass("d-none");
+
+                                try{document.getElementById("preview-iframe").classList.add("vh-100")}catch(r){}
+                                break;
+                            case 400:
+                                const errors = $("#errors");
+                                errors.empty();
+                                for (const error of json.errors) {
+                                    errors.append(`<p>${error}</p>`);
+                                }
+                                const atpErrors = $("#atp-errors");
+                                atpErrors.empty();
+                                for (const error of json.atp) {
+                                    atpErrors.append(`<p>${error}</p>`);
+                                }
+                                const avrErrors = $("#avr-errors");
+                                avrErrors.empty();
+                                for (const error of json.avr) {
+                                    avrErrors.append(`<p>${error}</p>`);
+                                }
+                        }
+
+
+                    }
+                    $("#atp-avr-form-loading").addClass("d-none");
+                });
+                const formData = new FormData(this);
+                xmlHttpRequest.send(formData);
+            });
+            $(".html-input").on("input", function () {
+
+                $($(this).data("setValueInto")).val($(this).html());
+
+            });
+
+
+
+            $(".new-tcp-inserter").each(function () {
+                let selectedTcp = null;
+
+                function changeDisabledTcpButton() {
+                    addNewRowButton.prop("disabled", !$(`#${tcpId}`).val() || !tableInput.val());
+                }
+
+                function tcpDefaults() {
+                    selectedTcp = null;
+                    insertTcp.html(`<div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" for="${tcpId}">Пункт
+                                                TCP</label>
+                                        </div>
+                                        <select class="custom-select" id="${tcpId}" disabled>
+                                            <option value="" selected>Выберете пункт</option>
+                                        </select>
+                                    </div>`);
+                    addNewRowButton.prop("disabled", true);
+                }
+
+                function tcpCategoryDefaults() {
+
+                    tcpCategoryInsert.html(`<div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" for="${tcpCategoryInsert}">Пункт
+                                                TCP</label>
+                                        </div>
+                                        <select class="custom-select" id="${tcpCategoryInsert}" disabled>
+                                            <option value="" selected>Выберете пункт</option>
+                                        </select>
+                                    </div>`);
+
+
+                    addNewRowButton.prop("disabled", true);
+
+                }
+
+                const tcpFileSelect = $($(this).data("tcpFileSelect"));
+                const tcpCategorySelect = $($(this).data("tcpCategorySelect"));
+                const tcpLoading = $($(this).data("tcpLoading"));
+                const countInput = $($(this).data("countInput"));
+                const tcpErrors = $($(this).data("tcpErrors"));
+                const tableInput = $($(this).data("tableInput"));
+                const insertTcp = $($(this).data("insertTcp"));
+                const tableHtmlInput = $($(this).data("tableHtmlInput"));
+                const tcpId = $(this).data("tcpId");
+                const addNewRowButton = $($(this).data("addNewRowButton"));
+                const tcpCategoryInsert = $($(this).data("tcpCategoryInsert"));
+                const tcpCategoryLoading = $($(this).data("tcpCategoryLoading"));
+                const tcpCategoryId = $(this).data("tcpCategoryId");
+                tableInput.on("inserted", changeDisabledTcpButton);
+                tableHtmlInput.on("input", changeDisabledTcpButton);
+                tcpFileSelect.on("change", function() {
+                    tcpDefaults();
+                    const value = $(this).val();
+                    if (!value) {
+                        tcpCategoryDefaults();
+                        return;
+                    }
+                    tcpCategoryLoading.removeClass("d-none");
+                    tcpCategoryInsert.addClass("d-none");
+                    $.ajax({
+                        url: `{% url "tester-atp-avr:get-tcp-categories" %}?pk=${value}`,
+                        success(result, status, xhr) {
+                            const inputGroup = $(`<div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="${tcpCategoryId}">Категория TCP</label>
+                                </div></div>`)
+                            const select = $(`<select class="custom-select" id="${tcpCategoryId}" ><option value="" selected>Выберете пункт</option></select>`);
+                            for (const tcpCategory of result) {
+                                select.append(`<option  value="${tcpCategory.id}">${tcpCategory.tcpCategoryId} - ${tcpCategory.name}</option>`);
+
+                            }
+                            inputGroup.append(select);
+                            tcpCategoryInsert.html(inputGroup);
+                            tcpCategoryLoading.addClass("d-none");
+                            tcpCategoryInsert.removeClass("d-none");
+
+                            select.on("change", function () {
+                                const value = $(this).val();
+                                if (!value) {
+                                    tcpDefaults();
+                                    return;
+                                }
+
+                                insertTcp.addClass("d-none");
+                                tcpLoading.removeClass("d-none");
+                                $.ajax({
+                                    url: `{% url "tester-atp-avr:get-tcps" %}?pk=${value}`,
+                                    success(result, status, xhr) {
+                                        console.log(result);
+                                        const inputGroup = $(`<div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <label class="input-group-text" for="${tcpId}">Пункт TCP</label>
+                                            </div></div>`)
+                                        const select = $(`<select class="custom-select" id="${tcpId}" ><option value="" selected>Выберете пункт</option></select>`);
+                                        for (const tcp of result) {
+                                            select.append(`<option  value="${tcp.tcpId}">${tcp.tcpId} - ${tcp.name}</option>`);
+                                        }
+                                        select.on("change", function () {
+                                            const value = $(this).val();
+                                            changeDisabledTcpButton();
+                                            if (value) {
+                                                selectedTcp = result.find(tcp => tcp.tcpId == value);
+                                            }
+                                        });
+                                        inputGroup.append(select);
+                                        insertTcp.html(inputGroup);
+                                        addNewRowButton.prop("disabled", true);
+                                        tcpLoading.addClass("d-none");
+                                        insertTcp.removeClass("d-none");
+
+                                        addNewRowButton.on("click", function () {
+                                            const count = countInput.val();
+
+
+                                            const tables = $("table", tableHtmlInput);
+
+                                            if (tables.length === 0) {
+                                                tcpErrors.empty();
+                                                tcpErrors.append("<p>Таблица должно быть вставлено, чтобы добавить новый пункт.</p>");
+                                                return;
+                                            }
+                                            const table = tables.first();
+                                            const rows = $("tr", table);
+                                            const date = $("td", rows).last();
+                                            const dateHtml = date.html()
+                                            const tcp = `${selectedTcp.tcpCategoryId}.${selectedTcp.tcpId}`;
+                                            if (Array.from(rows).some(row => $("td", $(row)).eq(1).text().trim() === tcp)) {
+                                                tcpErrors.empty();
+                                                tcpErrors.append("<p>Такой пункт уже существует.</p>");
+                                                return;
+                                            }
+                                            let lastRow = rows.last();
+                                            const number = parseInt($("td", lastRow).eq(0).text().trim());
+                                            const price = tcpId === "avr-tcp-select" ?  `<td>${selectedTcp.price * count}</td>` : "";
+                                            $(lastRow).after($(`<tr class="table-success" style="cursor: pointer" data-new-row><td>${number + 1}</td><td>${tcp}</td><td>${selectedTcp.name}</td><td>${selectedTcp.measuringUnit}</td><td>${count}</td>${price}<td>${dateHtml}</td></tr>`).on("click", function () {
+                                                $(this).remove();
+                                            }));
+                                            tableInput.val($(tableHtmlInput).html());
+                                            tcpErrors.empty();
+                                        });
+                                    },
+                                    error(result, status, xhr) {
+                                        tcpDefaults();
+                                        console.error(result);
+
+                                        tcpLoading.addClass("d-none");
+                                    }
+                                });
+                            });
+                        }
+                    });
+                });
+
+
+            });
+        });
+</script>
+{% endblock %}

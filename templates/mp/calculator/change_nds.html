@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Калькулятор цен с подрядчиками{% endblock %}
+
+
+{% block chapter %} 
+Изменение НДС
+{% endblock %}
+
+{% block content %}
+
+<style>
+  #dropArea {
+    
+    border: 5px dashed #ccc;
+    padding: 20px;
+    height: 250px;
+    cursor: pointer;
+    border-radius: 16px;
+  }
+</style>
+<br>
+  <select class="form-control col-2" name="Налог" id="nds-select">
+    <option value="НДС 12%" selected>НДС 12%</option>
+    <option value="НДС 18%">НДС 18%</option>
+    <option value="НДС 20%">НДС 20%</option>
+    <option value="Без налога">Без налога</option>
+  </select>
+  <div id="dropArea" class="form-control col-4 mt-4 d-flex justify-content-center align-items-center" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+    <p class="m-0">Перетащите сюда файл</p>
+  </div>
+
+  <script>
+
+    function handleDragEnter(event) {
+      event.preventDefault();
+      document.getElementById('dropArea').style.border = '2px dashed #333';
+    }
+
+    function handleDragOver(event) {
+      event.preventDefault();
+    }
+
+    function handleDragLeave(event) {
+      event.preventDefault();
+      document.getElementById('dropArea').style.border = '2px dashed #ccc';
+    }
+
+    function handleDrop(event) {
+      event.preventDefault();
+      document.getElementById('dropArea').style.border = '2px dashed #ccc';
+
+      const files = event.dataTransfer.files;
+      if (files.length > 0) {
+        const file = files[0];
+        readFile(file);
+      }
+    }
+
+    function modifyAndDownload(content) {
+    let nds = document.getElementById('nds-select').value;
+      let modifiedContent = content.replace(/Без налога/g, nds);
+      modifiedContent = modifiedContent.replace(/НДС 12%/g, nds);
+      modifiedContent = modifiedContent.replace(/НДС 18%/g, nds);
+      modifiedContent = modifiedContent.replace(/НДС 20%/g, nds);
+
+      const modifiedBlob = new Blob([modifiedContent], { type: 'text/html' });
+      const downloadLink = document.createElement('a');
+      downloadLink.href = URL.createObjectURL(modifiedBlob);
+      downloadLink.download = 'modified_file.html';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
+
+    function readFile(file) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const content = event.target.result;
+        modifyAndDownload(content);
+      };
+      reader.readAsText(file);
+    }
+  </script>
+
+
+
+{% endblock %}
+    

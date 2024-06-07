@@ -1,0 +1,894 @@
+{% extends "base.html" %}
+
+{% block title %}Отдел по работе с заказчиком{% endblock %}
+{% block chapter %}Отдел по работе с заказчиком{% endblock %}
+
+{% block back_button %}
+<div class="">
+    <a class="btn btn-primary" href="{% url 'distributor' %}">На главную страницу</a>
+    <br>
+    <label for="searchInput" class="mt-4">Поиск:</label>
+    <input type="text" id="searchInput" oninput="searchTable()" class="form-control mb-4">
+</div>
+{% endblock %}
+
+{% block content %}
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    {% block links %}
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+    {% endblock %}
+    {% block scripts %}
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+    {% endblock %}
+
+    <div class="mt-2 d-flex">
+        <button id="toggleFilter" class="btn btn-outline-dark">
+            <i class="fas fa-filter"></i> Фильтр
+        </button>
+    </div>
+    <script>
+        document.getElementById("toggleFilter").onclick = function() {
+            var secondDiv = document.getElementById("FilterIDdiv");
+            if (secondDiv.style.display === "none") {
+                secondDiv.style.display = "block";
+            } else {
+                secondDiv.style.display = "none";
+            }
+        };
+    </script>
+    <div id="FilterIDdiv"  style="display:none;">
+        <div class="row mt-3">
+            <div class="col-md-1.9" style="border: 1px solid #ccc; padding: 1px; border-radius: 5px;">
+                <select id="projectFilter" class="selectpicker" data-live-search="true">
+                    <option value="">Все проекты</option>
+                    {% for document in documents|dictsort:"project.name" %}
+                        {% ifchanged document.project.name %}
+                        <option value="{{ document.project.name }}">{{ document.project.name }}</option>
+                        {% endifchanged %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1.9" style="border: 1px solid #ccc; padding: 1px; border-radius: 5px;">
+                <select id="docTypeFilter" class="selectpicker" data-live-search="true">
+                    <option value="">Все виды работ</option>
+                    {% for document in documents|dictsort:"doc_type.name" %}
+                        {% ifchanged document.doc_type.name %}
+                        <option value="{{ document.doc_type.name }}">{{ document.doc_type.name }}</option>
+                        {% endifchanged %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1.9" style="border: 1px solid #ccc; padding: 1px; border-radius: 5px;">
+                <select id="regionFilter" class="selectpicker" data-live-search="true">
+                    <option value="">Все регионы</option>
+                    {% for document in documents|dictsort:"request.region" %}
+                        {% ifchanged document.request.region  %}
+                        <option value="{{ document.request.region }}">{{ document.request.region }}</option>
+                        {% endifchanged %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1.9" style="border: 1px solid #ccc; padding: 1px; border-radius: 5px;">
+                <select id="statusFilter" class="selectpicker" data-live-search="true">
+                    <option value="">Все статусы</option>
+                    {% for document in documents|dictsort:"request.status" %}
+                        {% ifchanged document.request.status  %}
+                        <option style="background:{{document.request.color}};" value="{{ document.request.get_status_display }}">{{ document.request.get_status_display }}</option>
+                        {% endifchanged %}
+                    {% endfor %}
+                </select>
+            </div>
+    {#        <div class="col-md-4">#}
+    {#            <button class="btn btn-secondary mt-4" onclick="applyFilters()">  <i class="fas fa-filter"></i> Фильтр</button>#}
+    {#        </div>#}
+            <div class="col-md-2">
+                <a class="btn btn-secondary" onClick="window.location.reload();">Сбросить</a>
+            </div>
+        </div>
+    </div>
+    <br>
+    <script>
+
+        function applyFilters() {
+            const projectFilterValue = $('#projectFilter').val();
+            const docTypeFilterValue = $('#docTypeFilter').val();
+            const statusFilterValue = $('#statusFilter').val()
+            const regionFilterValue = $('#regionFilter').val()
+
+            $('tbody tr').each(function () {
+                const projectValue = $(this).find('td:eq(1)').text();
+                const docTypeValue = $(this).find('td:eq(2)').text();
+                const statusValue = $(this).find('td:eq(5)').text();
+                const regionValue = $(this).find('td:eq(3)').text();
+
+                const projectMatches = projectFilterValue === '' || projectValue.includes(projectFilterValue);
+                const docTypeMatches = docTypeFilterValue === '' || docTypeValue.includes(docTypeFilterValue);
+                const statusMatches = statusFilterValue === '' || statusValue.includes(statusFilterValue);
+                const regionMatches = regionFilterValue === '' || regionValue.includes(regionFilterValue);
+
+                if (projectMatches && docTypeMatches && statusMatches && regionMatches) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        }
+
+        function searchTable() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const table = document.querySelector('.table');
+            const rows = Array.from(table.querySelectorAll('tbody tr'));
+
+            rows.forEach(row => {
+                const textContent = row.textContent.toLowerCase();
+                row.style.display = textContent.includes(input) ? '' : 'none';
+            });
+        }
+
+        $(document).ready(function () {
+
+            $('#projectFilter, #docTypeFilter, #regionFilter, #statusFilter').change(function () {
+                applyFilters();
+            });
+
+            $('.sortable').click(function () {
+                const table = $(this).parents('table').eq(0);
+                const index = $(this).data('index');
+                const rows = table.find('tr:gt(0)').toArray().sort(comparer(index));
+                this.asc = !this.asc;
+                if (!this.asc) {
+                    rows.reverse();
+                }
+                for (let i = 0; i < rows.length; i++) {
+                    table.append(rows[i]);
+                }
+            });
+
+            function comparer(index) {
+                return function (a, b) {
+                    const valA = getCellValue(a, index);
+                    const valB = getCellValue(b, index);
+                    return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+                };
+            }
+
+            function getCellValue(row, index) {
+                return $(row).children('td').eq(index).text();
+            }
+        });
+    </script>
+
+
+
+ 
+    <span id="hidden-columns">
+
+    </span>
+    <br>
+<div class="row">
+    <div class="col-12">
+        {% if not selected_request %}
+        
+            <table class="table table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" class="sortable" data-index="0">
+                            <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                            <br>Номер заявки &#8593; &#8595;
+                        </th>
+                        <th scope="col" class="sortable" data-index="1">
+                            <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                            <br>Проект
+                        </th>
+                        <th scope="col" class="sortable" data-index="11">
+                            <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                            <br>Вид
+                        </th>
+                        <th scope="col" class="sortable" data-index="12">
+                            <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                            <br>Регион
+                        </th>
+                        <th scope="col" class="sortable" data-index="13">
+                            <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                            <br>БС
+                        </th>
+                        <th scope="col" class="sortable" data-index="2">
+                            <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                            <br>Дата и время создания
+                        </th>
+                        <th scope="col" class="sortable" data-index="3">
+                            <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                            <br>Статус
+                        </th>
+                        <th scope="col" class="sortable" data-index="4">
+                            <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                            <br>Завершена частично/полностью
+                        </th>
+                        <th scope="col" class="sortable" data-index="10">
+                            <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                            <br>Закрыт финансовым отделом
+                        </th>
+                        <th scope="col" class="sortable" data-index="5">
+                            <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                            <br>Кол-во возвращений
+                        </th>
+                        <th scope="col" class="sortable" data-index="6">
+                            <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                            <br>Последние изменения
+                        </th>
+                        <th scope="col" class="sortable" data-index="7">
+                            <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                            <br>Дата и время изменения
+                        </th>
+                        <th scope="col" class="sortable" data-index="8">
+                            <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                            <br>Комментарий при создании заявки
+                        </th>
+                        <th scope="col" class="sortable" data-index="9">
+                            <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                            <br>Причина отклонения заявки
+                        </th>
+                        <th scope="col">
+                            <a class="btn btn-secondary hide-column-btn" ><i class="fas fa-eye-slash"></i><a>
+                            <br>Подробнее
+                        </th>
+                        <th scope="col">Обработать</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+              {% for document in documents %}
+                        {% ifchanged document.request.request_number %}
+                            {% if not document.request.status == 'pending'  %}
+                     <tr id="row{{ document.request.request_number }}">
+
+                        <td>{{ document.request.request_number }}</td>
+                        <td>{{ document.project.name }}</td>
+                        <td>{{ document.doc_type.name }}</td>
+                        <td>{{ document.request.region }}</td>
+                        <td>{{ document.request.get_bs_num_date }}</td>
+                        <td>{{ document.request.created_at }}</td>
+                        <td style="background:{{document.request.color}};">{{ document.request.get_status_display }}</td>
+                        <td>
+                            {% if document.request.status == 'approved' %}
+                                <input type="checkbox" checked disabled>
+                            {% endif %}
+                            {% if document.request.status == 'approved_full' %}
+                                <input type="checkbox" checked disabled>
+                                <input type="checkbox" checked disabled>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if document.request.status == 'close' %}
+                                <input type="checkbox" checked disabled>
+                            {% endif %}
+                        </td>
+                        <td>{{ document.request.history_count }}</td>
+                        <td>{{ document.request.modified_by.first_name }} {{ document.request.modified_by.last_name }}</td>
+                        <td>{{ document.request.modified_at }}</td>
+                        <td>{{ document.request.comment}}</td>
+                        <td>{{ document.request.comment_reject}}</td>
+                        <td>
+                            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#documentModal{{ document.id }}">
+                                Посмотреть
+                            </button>
+                        </td>
+                        <td><a class="btn btn-info" href="?request_number={{ document.request.request_number }}">Обработать</a></td>
+                    </tr>
+                            {% endif %}
+                         {% endifchanged %}
+
+                         <div class="modal fade" id="documentModal{{ document.id }}" tabindex="-1" role="dialog" aria-labelledby="documentModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-xl" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="documentModalLabel">Информация о заявке №{{ document.request.request_number }}</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p><strong>Дата загрузки:</strong> {{ document.request.created_at }}</p>
+                                        <p><strong>Кто загрузил:</strong> {{ document.request.created_by }}</p>
+                        
+                                        <p><strong>Регион:</strong> {{ document.request.region }}</p>
+                                        <p><strong>Наименование БС:</strong> {{ document.request.bis_name }}</p>
+                                        <p><strong>Номер заказа:</strong> {{ document.request.order_number }}</p>
+                                        <p><strong>Вид работ:</strong> {{ document.doc_type }}</p>
+                                        <p><strong>Статус:</strong> {{ document.request.get_status_display  }}</p>
+                                        <p><strong>Комментарий:</strong> {{ document.comment }}</p>
+                                        <p><strong>Документация:</strong></p>
+                        
+                                        <div>
+                                            <ol>
+                                            {% for doc in documents %}
+                                            {% if doc.request.request_number == document.request.request_number %}
+                                                <li>
+                                                    {{ doc.work_type.name }}: {{ doc.document.name }}
+                                                    <a class="btn-outline-primary btn-sm float-right all-download{{document.id}}" href="{{ doc.document.url }}" download>Скачать документ</a>
+                                                    <div class="clearfix"></div>
+                                                </li>
+                                            {% endif %}
+                                            {% endfor %}
+                                            </ol>
+                                        </div>
+                                        <div>
+                        
+                                            <ol>
+                                            {% for documentRent in document_rents %}
+                                            {% if documentRent.request.request_number == document.request.request_number %}
+                                                <li>
+                                                    {{ documentRent.workRent_type.name }}: {{ documentRent.documentRent.name }}
+                                                    <a class="btn-outline-light btn-sm float-right all-download{{document.id}}" >Скачать документ</a>
+                                                    <div class="clearfix"></div>
+                                                </li>
+                                            {% endif %}
+                                            {% endfor %}
+                                            </ol>
+                                        </div>
+                                        <div>
+                                            <h6>Комментарии:{{document.request}}</h6>
+                                            <span id="comments-history{{document.request.request_number}}">
+                                                {% for comment in document.request.get_comments %}
+                                                <p class="ml-4"><i class="fas fa-comment"></i> {{comment|safe}}</p>
+                                                {% endfor %}
+                                            </span>
+                                            <form action="" id="form_comment{{document.request.request_number}}" method="post" class="container">
+                                                <div class="row">
+                                                    <input type="text" id="form_comment_comment_value{{document.request.request_number}}" name="comment" required placeholder="Ваш комментарий" class="form-control col-5 ml-4">
+                                                    <input type="submit" class="btn btn-primary col-2 ml-2" onclick="mycustomsubmite({{document.request.request_number}})">                                            
+                                                    {% csrf_token %}
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                        
+                                    <div class="modal-footer">
+                                        <a href="{% url 'request_history' request_number=document.request.request_number %}" class="btn btn-warning">История заявки</a>
+                                        {% comment %} <a class="btn btn-success" href="{% url 'download_all_documents' request_number=document.request.request_number %}">Скачать все документы</a> {% endcomment %}
+                                        <a class="btn btn-success" onclick="find_hrefs_and_start_download('all-download{{document.id}}')">Скачать все документы</a>
+                                        <script>
+                                            function find_hrefs_and_start_download(qwer) {
+                                                let hrefs = document.querySelectorAll("." + qwer);
+                                        
+                                                let array_links = []
+                                                hrefs.forEach(function(link) {
+                                                    array_links.push(link.href);
+                                                });
+                                        
+                                                var counter = 0;
+                                        
+                                                array_links.forEach(function(link) {
+                                                    setTimeout(function() {
+                                                            var a = document.createElement('a');
+                                                            a.href = link;
+                                                            a.download = ''; // Можно указать имя файла для загрузки, если оно известно
+                                                            a.click(); // Имитация клика для начала загрузки
+                                        
+                                                    }, 500 * counter++); // Установка задержки перед каждым скачиванием
+                                                });
+                                            }
+                                        </script>
+                                        
+                        
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        <div class="container p-4">
+            <div class="pagination justify-content-center">
+                <span class="step-links">
+                    {% if requests.has_previous %}
+                        <a href="?page=1">&laquo; Первая</a>
+                        <a href="?page={{ requests.previous_page_number }}"><-Предыдущая</a>
+                    {% endif %}
+
+                    <span class="current">
+                        Страница {{ requests.number }} из {{ requests.paginator.num_pages }}
+                    </span>
+
+                    {% if requests.has_next %}
+                        <a href="?page={{ requests.next_page_number }}">Следующая-></a>
+                        <a href="?page={{ requests.paginator.num_pages }}">Последняя &raquo;</a>
+
+                </span>
+            </div>
+        </div>
+    {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+{% if selected_request %}
+    <h3>Выбранная заявка №{{ selected_request.request_number }}</h3>
+    <p>Регион: {{ selected_request.region }}</p>
+    <p>Номер заказа: {{ selected_request.order_number }}</p>
+    <p>Наименование БС: {{ selected_request.bis_name }}</p>
+    <p>Дата и время создания заявки: {{ selected_request.created_at }}</p>
+    {% for doc_type in doc_types %}
+        <p>Вид работ: {{ doc_type.name }}</p>
+    {% endfor %}
+{% endif %}
+
+{% for doc_type in doc_types %}
+    {% if selected_request %}
+    <table class="table document-list">
+        <thead>
+            <tr>
+                <th>Тип документа</th>
+                <th>Документ</th>
+                <th>Комментарий</th>
+                <th>Действия</th>
+                <th>
+                    <a class="btn btn-success" onclick="find_hrefs_and_start_download('all-download')">Скачать все документы</a>
+                    <script>
+                        function find_hrefs_and_start_download(qwer) {
+                            let hrefs = document.querySelectorAll("." + qwer);
+                    
+                            let array_links = []
+                            hrefs.forEach(function(link) {
+                                array_links.push(link.href);
+                            });
+                    
+                            var counter = 0;
+                    
+                            array_links.forEach(function(link) {
+                                setTimeout(function() {
+                                        var a = document.createElement('a');
+                                        a.href = link;
+                                        a.download = ''; // Можно указать имя файла для загрузки, если оно известно
+                                        a.click(); // Имитация клика для начала загрузки
+                    
+                                }, 500 * counter++); // Установка задержки перед каждым скачиванием
+                            });
+                        }
+                    </script>
+
+                </th>
+            </tr>
+        </thead>
+                    {% endif %}
+        <tbody>
+
+            {% for document in doc_type.document_set.all %}
+                {% if document.request == selected_request %}
+                <tr {% if document.status != 'approved' and document.status != 'rejected' %}class="document-doc-type-{{ doc_type.id }}"
+                    data-id="{{ document.id }}"{% endif %}
+                    data-doc-type="{{ doc_type.id }}">
+                    <td>{{ document.work_type.name }}</td>
+                    <td>{{ document.document.name }}</td>
+                    <td class="comment-td">{{ document.comment }}</td>
+                    <td class="actionn-td">
+                        {% if selected_request.status != 'approved' and selected_request.status != 'rejected_docs' and selected_request.status != 'rejected' and document.status != 'approved' and document.status != 'rejected_docs'   %}
+                            <select class="status" name="status-{{ document.id }}" id="status-{{ document.id }}" required>
+                                <option value="success" selected>Принять</option>
+                                <option value="rejected">Отклонить</option>
+                            </select>
+                            <script>
+                                document.getElementById("status-{{ document.id }}").addEventListener("change", function (event) {
+                                    const comment = document.getElementById("status-{{ document.id }}-comment");
+                                    comment.hidden = event.target.value !== "rejected";
+                                });
+                            </script>
+                            <input name="comment" placeholder="Добавить комментарий" class="form-control comment get_comment_class" id="status-{{ document.id }}-comment" hidden required>
+                        {% else %}
+                            Действия совершено
+                        {% endif %}
+                    </td>
+
+                    <td ><a class="btn btn-primary all-download" href="{% url 'download_document' document.id %}" download>Скачать</a></td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+
+    <br>
+    <br>
+{% if selected_request %}
+    <table class="table document-rent-list">
+        <thead>
+            <tr>
+                <th>Тип документа</th>
+                <th>Документ</th>
+                <th>Комментарий</th>
+                <th>Действия</th>
+                <th>Скачать</th>
+            </tr>
+        </thead>
+    {% endif %}
+        <tbody>
+
+            {% for documentRent in document_rents %}
+                {% if documentRent.request == selected_request %}
+                <tr {% if documentRent.status != 'approved' and documentRent.status != 'rejected' %}class="documentRent-doc-type-{{ doc_type.id }}"
+                    data-id="{{ documentRent.pk }}"{% endif %}>
+                    <td>{{ documentRent.workRent_type.name }}</td>
+                    <td>{{ documentRent.documentRent.name }}</td>
+                    <td class="commentrent-td">{{ documentRent.comment }}</td>
+                    <td class="actionrent-td">
+                        {% if selected_request.status != 'approved' and selected_request.status != 'rejected_rent' and selected_request.status != 'rejected' and documentRent.status != 'approved' and documentRent.status != 'rejected_rent'   %}
+                            <select class="status" name="status-rent-{{ documentRent.id }}" id="status-rent-{{ documentRent.id }}" required>
+                                <option value="success" selected>Принять</option>
+                                <option value="rejected">Отклонить</option>
+                            </select>
+                            <script>
+                                document.getElementById("status-rent-{{ documentRent.id }}").addEventListener("change", function (event) {
+                                    const comment = document.getElementById("status-rent-{{ documentRent.id }}-comment");
+                                    comment.hidden = event.target.value !== "rejected";
+                                });
+                            </script>
+                            <!-- Добавим атрибут data-comment-rent для хранения комментария -->
+                            <input name="comment-rent" placeholder="Добавить комментарий" class="form-control comment get_comment_class" id="status-rent-{{ documentRent.id }}-comment" hidden required>
+
+                        {% else %}
+                            Действия совершено
+                        {% endif %}
+                    </td>
+                <td>
+                        <a class="btn btn-primary all-download" href="{{ documentRent.documentRent.url }}" download>Скачать</a>
+                    </td>
+
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <br>
+
+    {% if selected_request %}
+    <h5>В случае недостаточно загруженных документов изменить статус заявки</h5>
+        <select id="requestStatus">
+            <option value="" selected >--------</option>
+            <option value="approve">Принять заявку</option>
+            <option value="reject">Отклонить заявку</option>
+        </select>
+        <label for="comment_reject">Комментарий к отклонению заявки:</label>
+        <input type="text" name="comment_reject" id="comment_reject" class="form-control" required >
+
+    {% endif %}
+
+
+
+    <br>
+{% if selected_request %}
+    {% comment %} <a class="btn btn-success" href="{% url 'download_all_documents' selected_request.request_number %}">Скачать все документы</a> {% endcomment %}
+    <a class="btn btn-success"  onclick="find_hrefs_and_start_download()">Скачать все документы</a>
+    <script>
+        function find_hrefs_and_start_download(){
+            let hrefs = document.querySelectorAll('.all-download');
+            for (let i = 0; i < hrefs.length; i++){
+                hrefs[i].click();
+            }
+        }
+    </script>
+    <br>
+    <br>
+{#    <button type="button" class="btn btn-danger" onclick="send_{{ doc_type.id }}().then(() => updateRequestStatus().then(() => send_{{ doc_type.id }}()).then(sendBack));">Отправить назад</button>#}
+{#        <button type="button" class="btn btn-danger" onclick="send_{{ doc_type.id }}().then(sendBack.then(() => updateRequestStatus()));">Отправить назад</button>#}
+{#            <button type="button" class="btn btn-danger" onclick="sendBack().then(() => send_{{ doc_type.id }}()).then(() => updateRequestStatus());">Отправить назад</button>#}
+    <button type="button" class="btn btn-danger " onclick="sendBack().then(() => updateRequestStatus().then(() => send_{{ doc_type.id }}().then(() => updateRequestStatus())));">Отправить назад</button>
+{#         <button type="button" class="btn btn-danger" onclick="updateRequestStatus().then(() => send_{{ doc_type.id }}().then(() => sendBack().then(() => updateRequestStatus())));">Отправить назад</button>#}
+        {% if selected_request %}
+
+            <div class="row">
+                <div class="col-12">
+                     <div class="float-right">
+                         <button type="button" class="btn btn-primary mb-2" onclick="close_req()" >Закрыть заявку</button>
+                     </div>
+                </div>
+
+                <div class="col-12">
+
+                    {% if selected_request.isapproved %}
+                        <div class="float-right">
+                            <button type="button" class="btn btn-success" onclick="send_{{ doc_type.id }}().then(() => approve_req_full());">Завершить полностью</button>
+                        </div>
+                    {% else %}
+                        <div class="float-right">
+                            <button type="button" class="btn btn-warning" onclick="send_{{ doc_type.id }}().then(() => approve_req());">Завершить частично</button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+
+{% endif %}
+
+
+<script>
+    function closeFull() {
+        const requestNumber = "{{ selected_request.request_number }}";
+
+        fetch(`/p2/close_request_full/${requestNumber}/`, {
+            method: "POST"
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                console.log("Request closed fully successfully");
+                location.reload();
+            } else {
+                console.error("Failed to close request fully");
+            }
+        });
+    }
+</script>
+<script>
+    function close_req() {
+        const requestNumber = "{{ selected_request.request_number }}";
+
+        fetch(`/p2/close_request/${requestNumber}/`, {
+            method: "POST"
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                console.log("Request closed fully successfully");
+                alert("Заявка закрыто")
+                location.reload();
+            } else {
+                console.error("Failed to close request fully");
+            }
+        });
+    }
+    function approve_req() {
+        const requestNumber = "{{ selected_request.request_number }}";
+
+        fetch(`/p2/approve_request/${requestNumber}/`, {
+            method: "POST"
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                console.log("Request closed fully successfully");
+                location.reload();
+            } else {
+                console.error("Failed to close request fully");
+            }
+        });
+    }
+    function approve_req_full() {
+        const requestNumber = "{{ selected_request.request_number }}";
+
+        fetch(`/p2/approve_request_full/${requestNumber}/`, {
+            method: "POST"
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                console.log("Request closed fully successfully");
+                location.reload();
+            } else {
+                console.error("Failed to close request fully");
+            }
+        });
+    }
+</script>
+<script>
+    document.getElementById('requestStatus').addEventListener('change', function () {
+        const commentInput = document.getElementById('comment_reject');
+        commentInput.style.display = this.value === 'reject' ? 'block' : 'none';
+    });
+    async function updateRequestStatus() {
+        const selectedOption = document.getElementById('requestStatus').value;
+        const requestNumber = "{{ selected_request.request_number }}";
+        const commentReject = document.getElementById('comment_reject').value;
+        console.log("Comment to be sent:", commentReject)
+        const data = new FormData();
+        data.append('comment_reject', commentReject);
+
+        if (selectedOption === 'approve') {
+            fetch(`/p2/approve_request/${requestNumber}/`, {
+                method: "POST"
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    console.log("Request approved successfully");
+                    location.reload();
+                } else {
+                    console.error("Failed to approve request");
+                }
+            });
+        } else if (selectedOption === 'reject') {
+            data.append('comment_reject', commentReject);
+            fetch(`/p2/reject_request/${requestNumber}/`, {
+                method: "POST",
+                body: data,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    console.log("Request rejected successfully");
+                    location.reload();
+                } else {
+                    console.error("Failed to reject request");
+                }
+            });
+        }
+    }
+</script>
+
+
+
+
+{#    <script>#}
+{#        function downloadAllDocuments() {#}
+{#            const documentLinks = document.querySelectorAll('.document-list a.btn-primary');#}
+{#            const documentRentLinks = document.querySelectorAll('.document-rent-list a.btn-primary');#}
+{#            const downloadLinks = [];#}
+{#            documentLinks.forEach(link => downloadLinks.push(link.href));#}
+{#            documentRentLinks.forEach(link => downloadLinks.push(link.href));#}
+{#            const tempLink = document.createElement('a');#}
+{#            tempLink.style.display = 'none';#}
+{#            downloadLinks.forEach(link => {#}
+{#                tempLink.href = link;#}
+{#                tempLink.download = '';#}
+{#                document.body.appendChild(tempLink);#}
+{#                tempLink.click();#}
+{#                document.body.removeChild(tempLink);#}
+{#            });#}
+{#        }#}
+{#    </script>#}
+
+
+
+        
+    {% if selected_request %}
+        <script>
+            async function sendBack() {
+                let class_name = "get_comment_class";
+                let comments = document.querySelectorAll(".get_comment_class");
+                let commentList = [];
+                for (let i = 0; i < comments.length; i++) {
+                    let comment = comments[i];
+                    let value = comment.value;
+                    let id = comment.id.replace('status-', "").replace('-comment', "");
+                    commentList.push({ id: id, value: value });
+                }
+
+                fetch(`{% url "increase_history_count" selected_request.request_number %}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(commentList)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        console.log("history_count increased successfully");
+                    } else {
+                        console.error("Failed to increase history_count");
+                    }
+                });
+            }
+
+    
+        </script>
+    {% endif %}
+    
+    <script>
+        async function send_{{ doc_type.id }}() {
+            const documents = document.getElementsByClassName("document-doc-type-{{ doc_type.id }}");
+            const documentRents = document.getElementsByClassName("documentRent-doc-type-{{ doc_type.id }}");
+
+            for (const document of documents) {
+                const id = +document.dataset.id;
+                const status = document.getElementsByClassName("status")[0];
+                const comment = document.getElementsByClassName("comment")[0];
+
+                switch (status.value) {
+                    case "success":
+                        fetch(`/p2/confirm_document/${id}/`, {
+                            method: "POST"
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementsByClassName("status-td")[0].textContent = data.status;
+                                document.getElementsByClassName("actionn-td")[0].textContent = "Действия совершено";
+                            });
+                        break;
+                    case "rejected":
+                        if (!comment.checkValidity()) {
+                            continue;
+                        }
+                        const formData = new FormData();
+                        formData.append("comment", comment.value);
+                        fetch(`/p2/reject_document/${id}/`, {
+                            method: "POST",
+                            body: formData
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementsByClassName("status-td")[0].textContent = data.status;
+                                document.getElementsByClassName("comment-td")[0].textContent = data.comment;
+                                document.getElementsByClassName("actionn-td")[0].textContent = "Действия совершено";
+
+                            });
+                        break;
+                }
+            }
+
+            for (const documentRent of documentRents) {
+                const id = +documentRent.dataset.id;
+                const status = documentRent.getElementsByClassName("status")[0];
+                const comment = documentRent.getElementsByClassName("comment")[0];
+
+                switch (status.value) {
+                    case "success":
+                        fetch(`/p2/confirm_document_rent/${id}/`, {
+                            method: "POST"
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                documentRent.getElementsByClassName("statusrent-td")[0].textContent = data.status;
+                                documentRent.getElementsByClassName("actionrent-td")[0].textContent = "Действия совершено";
+                            });
+                        break;
+                    case "rejected":
+                        if (!comment.checkValidity()) {
+                            continue;
+                        }
+                        const formData = new FormData();
+                        formData.append("comment", comment.value);
+                        fetch(`/p2/reject_document_rent/${id}/`, {
+                            method: "POST",
+                            body: formData
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                documentRent.getElementsByClassName("statusrent-td")[0].textContent = data.status;
+                                documentRent.getElementsByClassName("commentrent-td")[0].textContent = data.comment;
+                                documentRent.getElementsByClassName("actionrent-td")[0].textContent = "Действия совершено";
+
+
+                            });
+                        break;
+                }
+            }
+            location.reload();
+}
+    </script>
+{% endfor %}
+
+    
+{% load static %}
+<script src="{% static "js/crm/mp_part.js" %}"></script>
+
+<script>
+    function mycustomsubmite(request_number){
+        event.preventDefault();
+        let form = document.getElementById("form_comment"+request_number);
+        var xhr = new XMLHttpRequest();
+        var formData = new FormData(form);
+        xhr.open("POST", `/p2/comments/Request/${request_number}`, true); // исправленный адрес запроса
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                document.getElementById("comments-history"+request_number).innerHTML = xhr.responseText;
+                console.log("comments-history"+request_number);
+                console.log(xhr.responseText);
+                console.log(document.getElementById("comments-history"+request_number).innerHTML);
+                document.getElementById("form_comment_comment_value"+request_number).value = ""
+
+            } else{
+                console.log(xhr.responseText);
+            }
+        };
+        xhr.send(formData);
+    }
+</script>
+
+{% endblock %}

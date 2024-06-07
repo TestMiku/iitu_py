@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% load widget_tweaks %}
+
+{% block title %}
+    {% if folder is None %}
+        Корневая папка
+    {% else %}
+        Папка - {{ folder }}
+    {% endif %}
+{% endblock %}
+
+{% block chapter %}
+    {% if folder is None %}
+        Корневая папка
+    {% else %}
+        {{ folder }}
+    {% endif %}
+{% endblock %}
+
+{% block back_button %}
+    <a class="btn btn-light btn-icon-split mb-4"
+       href="{% if folder is None %}/{% else %}{{ folder.back_url }}{% endif %}">
+                        <span class="icon text-gray-600">
+                            <i class="fas fa-arrow-left"></i>
+                        </span>
+        <span class="text">Назад{% if folder is not None %} к {% if folder.parent is None %}корневой
+            папке{% else %}папке {{ folder.parent }}{% endif %}{% endif %}</span>
+    </a>
+    {% if folder is not None and folder.parent is not None %}
+        <a class="btn btn-primary btn-icon-split mb-4 ml-2"
+           href="{% url "documents:list" %}">
+                        <span class="icon">
+                            <i class="fas fa-arrow-up"></i>
+                        </span>
+            <span class="text">Назад к корневой папке</span>
+        </a>
+    {% endif %}
+
+{% endblock %}
+
+{% block content %}
+    <div class="modal fade" id="properties-modal" tabindex="-1" aria-labelledby="properties-modal-label"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="properties-modal-label">Свойства</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {% if folder is not None %}
+                        {% if folder.description %}
+                            <h6>Описание</h6>
+                            <p class="text-monospace">{{ folder.description }}</p>
+                        {% endif %}
+                        <h6>Для ролей</h6>
+                        <p class="text-monospace">{{ folder.for_roles.all|join:", " }}
+                        </p>
+                        <h6>Создан</h6>
+                        <p class="text-monospace">{{ folder.created_at }} - {{ folder.uploaded_by }}</p>
+                    {% endif %}
+                    <div class="form-group">
+                        <label for="display">Отображение</label>
+                        <select class="custom-select" name="display" id="display">
+                            <option value="cards"
+                                    {% if not request.GET.display or request.GET.display == "cards" %}selected{% endif %}>
+                                Карточки
+                            </option>
+                            <option value="rows"
+                                    {% if request.GET.display == "rows" %}selected{% endif %}>
+                                Строки
+                            </option>
+
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="first">Первыми идут</label>
+                        <select class="custom-select" name="first" id="first">
+                            <option value="folders"
+                                    {% if not request.GET.first or request.GET.first == "folders" %}selected{% endif %}>
+                                Папки
+                            </option>
+                            <option value="documents"
+                                    {% if request.GET.first == "documents" %}selected{% endif %}>
+                                Документы
+                            </option>
+
+                        </select>
+                    </div>
+                    {#                    <div id="sorts">#}
+                    {##}
+                    {#                    </div>#}
+                    {#                    <button type="button" class="btn btn-primary" id="add-sort">Добавить поле для сортировки</button>#}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary">Применить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="d-flex flex-wrap align-items-center my-2">
+
+
+        <a class="btn btn-primary mr-2 mb-2 "
+           href="{% if folder is None %}
+{% url "documents:create" %}
+{% else %}
+{% url "documents:create_with_path" path=folder.path %}
+{% endif %}?type=document" aria-disabled="true"
+        >
+                        <span class="icon">
+                            <i class="fas fa-upload"></i>
+                        </span>
+            Загрузить документ
+        </a>
+
+
+        <a class="btn btn-primary mr-2 mb-2" href="{% if folder is None %}
+{% url "documents:create" %}
+{% else %}
+{% url "documents:create_with_path" path=folder.path %}
+{% endif %}?type=folder">
+                        <span class="icon">
+                            <i class="fas fa-folder-plus"></i>
+                        </span>
+            Добавить папку
+        </a>
+        <button class="btn btn-primary mb-2 mr-2" data-toggle="modal" data-target="#properties-modal">
+            <i class="fas fa-code"></i>
+            Свойства
+        </button>
+
+        {% if folder is not None and folder.uploaded_by == user %}
+
+            <a class="btn btn-primary mr-2 mb-2"
+               href="{% url "documents:update_with_path" path=folder.path %}">
+                        <span class="icon">
+                            <i class="fas fa-pen"></i>
+                        </span>
+                Редактировать
+            </a>
+
+
+            <a class="btn btn-danger mb-2"
+               href="{% url "documents:delete_with_path" path=folder.path %}">
+                            <span class="icon">
+                                <i class="fas fa-trash"></i>
+                            </span>
+                Удалить
+            </a>
+
+
+
+        {% endif %}
+
+
+    </div>
+    <hr>
+    <div>
+        {% if not request.GET.display or request.GET.display == "cards" %}
+            <div class="row">
+                {% for objects, icon in chain %}
+                    {% for object in objects %}
+                        {% include "p1/documents/object.html" %}
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Тип</th>
+
+                    <th scope="col">Имя</th>
+                    <th scope="col">Описание</th>
+                    <th scope="col">Размер</th>
+                    <th scope="col">Дата создание/загрузки</th>
+                    <th scope="col">Создал/Загрузил</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for objects, icon in chain %}
+                    {% for object in objects %}
+                        <tr>
+                            <td><i class="fas fa-{{ icon }} fa-2x"></i></td>
+                            <td>
+                                <a href="{{ object.get_absolute_url }}">{{ object }}</a>
+                            </td>
+                            <td>
+                                {{ object.description }}
+                            </td>
+                            <td>
+                                {{ object.get_size_as_str }}
+                            </td>
+                            <td>
+                                {{ object.created_at }}
+                            </td>
+                            <td>{{ object.uploaded_by }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+    </div>
+{% endblock %}
+
+
+{#{% block scripts %}#}
+{#    <script src="https://code.jquery.com/jquery-3.7.1.min.js"#}
+{#            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>#}
+{#    <script>#}
+{#        function getSelectedFields() {#}
+{#            const selectedFields = [];#}
+{#            $(".sort-field").each(function () {#}
+{#                $(this).prop("disabled", true);#}
+{#                selectedFields.push($(this).val());#}
+{#            });#}
+{#            return selectedFields;#}
+{#        }#}
+{##}
+{#        function hasUnselectedFields() {#}
+{#            return $(".sort-field").toArray().some(sortField => !$(sortField).val())#}
+{#        }#}
+{##}
+{##}
+{#        function canAddSelect(selectedFields) {#}
+{#            return selectedFields.all(selectedField => selectedField in sortFields);#}
+{#        }#}
+{##}
+{#        const sortFields = {};#}
+{#        {% for key, value in sort_fields.items %}#}
+{#            sortFields["{{ key }}"] = "{{ value }}";#}
+{#        {% endfor %}#}
+{#        $(document).ready(function () {#}
+{#            $("#add-sort").on("click", function () {#}
+{#                if (hasUnselectedFields()) {#}
+{#                    return;#}
+{#                }#}
+{##}
+{#                let selectedFields = getSelectedFields();#}
+{##}
+{#                const notSelectedSortFields = Object.keys(sortFields).filter(sortField => !selectedFields.includes(sortField));#}
+{#                if (notSelectedSortFields.length === 0) {#}
+{#                    return;#}
+{#                }#}
+{#                let options = `<option selected value="">Выбрать поле</option>` + notSelectedSortFields.map(sortField => `<option value="${sortField}">${sortFields[sortField]}</option>`).join("");#}
+{#                $("#sorts").append(`<div class="sort form-group">#}
+{#                                        <div class="row">#}
+{#                                            <div class="col-6">#}
+{#                                                <select class="custom-select sort-field" name="asc" required>#}
+{#                                                    ${options}#}
+{#                                                </select>#}
+{#                                            </div>#}
+{#                                            <div class="col-4">#}
+{#                                                <select class="custom-select sort-order">#}
+{#                                                    <option value="asc">ASC</option>#}
+{#                                                    <option value="desc">DESC</option>#}
+{#                                                </select>#}
+{#                                            </div>#}
+{#                                            <div class="col-2">#}
+{#                                                <button type="button" class="btn btn-danger sort-delete"><i class="fas fa-minus"></i></button>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>`).find(".sort-delete").on("click", function () {#}
+{#                    const sort = $(this).parents(".sort");#}
+{#                    const value = sort.find(".sort-field").val();#}
+{#                    sort.prev().find(".sort-field").prop("disabled", false);#}
+{#                    sort.remove()#}
+{##}
+{#                    $("#sorts .sort-field").append(`<option value="${value}">${sortFields[value]}</option>`);#}
+{#                });#}
+{#            });#}
+{#        });#}
+{#    </script>#}
+{#{% endblock %}#}

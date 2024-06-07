@@ -1,0 +1,7 @@
+Просьба оплатить:
+<ul>
+    {% for paid_invoice in paid_invoices %}
+    <li>{{paid_invoice.number}} {{paid_invoice.sum}} с расчётного счёта {{paid_invoice.account}};</li>
+    {% endfor %}
+</ul>
+<a href="{{unpaid_invoices_url}}">Перейти к таблице</a>

@@ -1,0 +1,43 @@
+{% extends 'finance_module/interdivisional_debts/base.html' %}
+{% load static %}
+
+{% block interdivisional_debts_active_breadcrump %}
+  Долги между ПМ
+{% endblock %}
+{% block title %}
+  Долги между ПМ
+{% endblock %}
+{% block links %}
+  <link rel="stylesheet" href="{% static 'finance_module/interdivisional-debts.css' %}" />
+{% endblock %}
+
+{% block interdivisional_debts_content %}
+  <div id="table-container">
+    <table id="table">
+      <thead>
+        <tr>
+          <th></th>
+          {% for participant in participants %}
+          <th scope="col" style="position: sticky; top: 0;"><div class="thead-th-content">{{participant}}</div></th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for participant, sums in rows %}
+        <tr>
+          <th scope="row" style="position: sticky; left: 0;">{{participant}}</th>
+          {% for sum in sums %}
+          <td>{{sum}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  
+  
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'finance_module/interdivisional-debts-table.js' %}"></script>
+{% endblock %}

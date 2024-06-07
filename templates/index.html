@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная страница{% endblock %}
+
+
+{% block chapter %} Все разделы {% if chapter_group %}- {{ chapter_group.title }}{% endif %}{% endblock %}
+{% block back_button %}
+    {% if chapter_group %}
+        <a class="btn btn-light btn-icon-split mb-4" href="{{ chapter_group.get_parent_url }}">
+                        <span class="icon text-gray-600">
+                            <i class="fas fa-arrow-left"></i>
+                        </span>
+            <span class="text">Назад</span>
+        </a>
+    {% else %}
+        {{ block.super }}
+    {% endif %}
+
+{% endblock %}
+{% block content %}
+
+{% if user.is_superuser %}
+<a href="/mp/add_statapp" class="btn btn-success mb-4 ml-4">Создать Static App</a>
+<a href="{% url "create_chapter_group" %}{% if chapter_group %}?parent={{ chapter_group.pk }}{% endif %}"
+class="btn btn-success mb-4 ml-4">Создать Группу для разделов</a>
+{% endif %}
+
+
+    <div class="row">
+
+        {% if chapters or chapter_groups %}
+            {% for chapter_group in chapter_groups %}
+
+                <a href="{{ chapter_group.get_absolute_url }}" class="col-xl-3 col-md-6 mb-4">
+                    <div class="card shadow h-100 py-2"
+                         style="border-left: 0.25rem solid {{ chapter_group.color }}!important;">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ chapter_group.title }}</div>
+                                        {{ chapter_group.short_description }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    {{ chapter_group.icon | safe }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+
+            <!-- Earnings (Monthly) Card Example -->
+            {% for chapter in chapters %}
+
+                <a href="{{ chapter.link }}" class="col-xl-3 col-md-6 mb-4">
+                    <div class="card shadow h-100 py-2"
+                         style="border-left: 0.25rem solid {{ chapter.color }}!important;">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ chapter.title }}</div>
+                                        {{ chapter.short_description }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    {{ chapter.icon | safe }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+            {% endfor %}
+
+        {% else %}
+            <div class="col h5 mb-0 font-weight-bold text-gray-800">Нет доступных разделов</div>
+        {% endif %}
+
+
+    </div>
+
+
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'finance_module/mandatory_payments/base.html' %}
+
+{% block mandatory_payments_active_breadcrump %}
+    Выгрузка
+{% endblock %}
+
+{% block finance_module_mandatory_payments_content %}
+    <div>
+        <form method="GET" class="d-flex align-items-center">
+            <label for="accrual">
+                <h1 style="font-size: 18px; margin-right: 20px;">
+                    Экспорт начислений
+                </h1>
+            </label>
+            <input type="text" name="accrual" id="accrual" hidden="hidden">
+            <button class="btn btn-primary" type="submit">Выгрузка</button>
+        </form>
+
+        <form method="GET" class="d-flex align-items-center mt-5">
+            <label for="seizure">
+                <h1 style="font-size: 18px; margin-right: 20px;">
+                    Экспорт изъятий
+                </h1>
+            </label>
+            <input type="text" name="seizure" id="seizure" hidden="hidden">
+            <button class="btn btn-primary" type="submit">Выгрузка</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

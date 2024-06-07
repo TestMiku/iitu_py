@@ -1,0 +1,39 @@
+{% extends "finance_module/base.html" %}
+
+{% load static %}
+{% block active_breadcrump %}
+Отдел финансового планирования
+{% endblock %}
+{% block title %}
+Отдел финансового планирования
+{% endblock %}
+{% block links %}
+<link rel="stylesheet" href="{% static 'finance_module/main.css' %}">
+
+    <style>
+
+    </style>
+{% endblock %}
+{% block breadcrumbs %}
+{{block.super}} <span class="mx-3 text-primary"><i class="fa-solid fa-chevron-right"></i></span>
+<div class="dropdown">
+    <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      {% block division_of_financial_planning_active_breadcrump %}{% endblock %}
+    </button>
+    <ul class="dropdown-menu ignore">
+        <li><a class="dropdown-item {% if request.resolver_match.view_name == 'finance_module:division_of_financial_planning:confirmation' %}active{% endif %}" href="{% url 'finance_module:division_of_financial_planning:confirmation' %}"><i class="fa-solid fa-square-check"></i> Подтвеждение платежей</a></li>
+        <li><a class="dropdown-item {% if request.resolver_match.view_name == 'finance_module:division_of_financial_planning:monthly_payments' %}active{% endif %}" href="{% url 'finance_module:division_of_financial_planning:monthly_payments' %}"><i class="fa-solid fa-table"></i> Ежемесячные выплаты</a></li>
+        <li><a class="dropdown-item {% if request.resolver_match.view_name == 'finance_module:division_of_financial_planning:daily' %}active{% endif %}" href="{% url 'finance_module:division_of_financial_planning:daily' %}"><i class="fa-solid fa-calendar-day"></i> Ежедневно</a></li>
+        <li><a class="dropdown-item {% if request.resolver_match.view_name == 'finance_module:division_of_financial_planning:administrative_transfer' %}active{% endif %}" href="{% url 'finance_module:division_of_financial_planning:transfers' %}"><i class="fa-solid fa-money-bill-transfer"></i> Переводы на АДМ</a></li>
+    </ul>
+  </div>
+{% endblock %}
+{% block finance_module_content %}
+<div>
+    <div>
+        {% block finance_module_mandatory_payments_content %}
+
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,7 @@
+[submodule "static/vendor/table-with-filter"]
+	path = static/vendor/table-with-filter
+	url = https://github.com/Uoyroem/table-with-filter.git
+	
+[submodule "static/vendor/smart-table"]
+	path = static/vendor/smart-table
+	url = https://github.com/Uoyroem/smart-table.git

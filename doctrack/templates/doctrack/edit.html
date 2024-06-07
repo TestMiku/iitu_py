@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}
+    <!-- Тайтлд пустой страницы -->
+{% endblock %}
+
+{% block links %}
+    <!-- Используемые ссылки в пустом разделе -->
+{% endblock %}
+
+{% block back_button %}
+{% endblock %}
+
+{% block chapter %}
+    <!-- Название пустого раздела -->
+{% endblock %}
+
+{% comment %}{% block back_button %}
+    Кнопка Назад (По умолчанию назад на прошлую веб страницу)
+{% endblock %}{% endcomment %}
+
+{% block content %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="d-none">
+            {{request_form.project}}
+            {{request_form.work_type}}
+        </div>
+
+        {{request_form.region}}
+        {{request_form.order_bs_name}}
+        {{request_form.order_number}}
+        {{request_form.order_date}}
+        {{request_form.comment}}
+        <br>
+        <label for="id_is_partial" class="form-check-label">
+            Частичное закрытие
+        </label>
+        {{request_form.is_partial}}
+        <br>
+        <button type="submit" class="btn btn-primary mt-2"> Сохранить</button>
+    </form>
+{% endblock %}
+
+
+{% block scripts %}
+    <!-- Скрипты пустого раздела -->
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    let _region = document.getElementById("id_region");
+    _region.classList.add("form-control");
+    _region.setAttribute("placeholder", "Выберите регион");
+    _region.parentElement.classList.add("mb-2");
+    createLabel(_region, "Регион");
+
+    let _order_bs_name = document.getElementById("id_order_bs_name");
+    _order_bs_name.classList.add("form-control");
+    _order_bs_name.setAttribute("placeholder", "Введите название БС");
+    _order_bs_name.parentElement.classList.add("mb-2");
+    createLabel(_order_bs_name, "Название БС");
+
+    let _order_number = document.getElementById("id_order_number");
+    _order_number.classList.add("form-control");
+    _order_number.setAttribute("placeholder", "Введите номер заказа");
+    _order_number.parentElement.classList.add("mb-2");
+    createLabel(_order_number, "Номер заказа");
+
+    let _order_date = document.getElementById("id_order_date");
+    _order_date.classList.add("form-control");
+    _order_date.setAttribute("placeholder", "Выберите дату заказа");
+    _order_date.parentElement.classList.add("mb-2");
+    createLabel(_order_date, "Дата заказа");
+
+    let _comment = document.getElementById("id_comment");
+    _comment.classList.add("form-control");
+    _comment.setAttribute("placeholder", "Введите комментарий");
+    _comment.parentElement.classList.add("mb-2");
+    createLabel(_comment, "Комментарий");
+});
+
+function createLabel(element, labelText) {
+    let label = document.createElement("label");
+    label.textContent = labelText;
+    label.setAttribute("for", element.id);
+    element.parentElement.insertBefore(label, element);
+}
+
+</script>
+<script src="{% static 'js/doctrack/main.js' %}"></script>
+{% endblock %}

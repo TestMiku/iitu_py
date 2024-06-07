@@ -1,0 +1,102 @@
+.main-form {
+    background-color: white; 
+    border-radius: 10px; 
+    padding: 20px;
+    padding-left: 30px;
+    padding-right: 30px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    margin-bottom: 20px
+}
+
+label {
+    font-weight: bold;
+}
+
+.main-form-block{
+    margin-bottom: 10px
+}
+
+.main-form-input{
+    /* max-width: 300px; */
+}
+
+.add-btn{
+    margin-top: 3%;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    /* max-height: 47px; */
+}
+
+.main-block{
+    /* padding-left: 10%; */
+    align-items: center;
+}
+.form-block{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: flex-end;
+    align-items: center;
+    
+}
+
+.list{
+    display: grid;
+    justify-content: start;
+    align-items: center;
+    height: max-content;
+    margin-left: 150px;
+}
+.btn-mb{
+    margin-bottom: 30px
+}
+.list-btn{
+    max-width: max-content;
+    min-width: 170px;
+}
+
+.transition-tbl{
+    /* position: absolute; */
+    /* left: 60%; */
+    width: 600px;
+    background-color: white;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border-radius: 10px;
+    max-height: 300px; overflow-y: auto;
+    min-height: 300px;
+    
+}
+
+.transition-tbl td {
+    cursor: pointer;
+    user-select: none;
+}
+
+.list-block{
+    display: flex;
+    justify-content: space-around;
+}
+.quantity-input{
+    width: 100px;
+    height: 30px;
+}
+
+.horizontal-line {
+    border-bottom: 1px solid #ccc; /* Цвет и толщина линии */
+    margin-top: 15px;
+}
+
+.dropdown-item{
+    cursor: pointer;
+}
+
+.down-btn{
+    position: fixed;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    transform: translate(1125%, -1500%);
+}
+
+.checkbox-input{
+    width: 15px;
+    height: 15px;
+}

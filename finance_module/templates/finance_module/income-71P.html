@@ -1,0 +1,213 @@
+{% extends 'finance_module/base.html' %}
+
+{% load static income71P_tag humanize %}
+
+{% block active_breadcrump %}
+    Приход 71п
+{% endblock %}
+
+{% block title %}
+    Приход 71п
+{% endblock %}
+
+{% block links %}
+    <link rel="stylesheet" href="{% static "finance_module/income71p.css" %}">
+{% endblock %}
+
+{% block finance_module_content %}
+    <div class="container-fluid">
+        <div class="d-flex">
+            <div class="flex-column me-3">
+                <form id="statement-reconciliation-form" style="position: sticky; top: 0;" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="card shadow ">
+
+                        <div class="card-header">
+                            <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="form-tab" data-bs-toggle="tab"
+                                            data-bs-target="#form" type="button" role="tab" aria-controls="form"
+                                            aria-selected="true">71п приход
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <label for="prihod71-file1-input" class="form-label">Выписка</label>
+                                <input type="file" name="file1[]" class="form-control" accept=".xlsx" id="file1-input" multiple required/>
+                            </div>
+                            <div class="mb-2">
+                                <label for="prihod71-file2-input" class="form-label">Файл 7.24</label>
+                                <input type="file" name="file2" id="file2-input" accept=".xlsx" class="form-control" required/>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary"
+                                        id="statement-reconciliation-form-submit-button">Показать таблицу
+                                </button>
+                                <div class="ms-2 d-none statement-reconciliation-form-loading">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                                <div class="ms-2 text-danger" id="statement-reconciliation-form-error-message"></div>
+                            </div>
+                        </div>
+                        {% if data %}
+                	        <button type="submit" id="download-excel" class="btn btn-success mt-3">Скачать Excel</button>
+                        {% endif %}
+                    </div>
+                </form>
+                {% if data is None %}
+                    <div>
+                        <br>
+                        <h3>Инструкция:</h3>
+                        Нужно прикрепить 2 файла формата xlsx. <br>
+                        1. Файл реестра оплат <br>
+                        2. Файл выписок оплат <br><br>
+                        В файле 1, должны быть заголовки:
+                        <ul>
+                            <li>Назначение платежа</li>
+                            <li>Кредит</li>
+                            <li>Корреспондент</li>
+                            <li>Дата</li>
+                        </ul>
+                        Во файле 2 должны быть заголовки:
+                        <ul>
+                            <li>№ Контракта</li>
+                            <li>Группа проектов</li>
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="flex-grow-1 overflow-auto ms-auto">
+                {% if data %}
+                    <table class="table w-auto table-bordered" id="income71p">
+                        <thead>
+                        <tr>
+                            <th class="text-center align-middle sticky-relative"
+                                style="min-width: 1em; max-width: 3em; position: sticky; top: 0px">№
+                            </th>
+                            <th class="text-center align-middle sticky-relative"
+                                style="min-width: 10em; max-width: 10em; position: sticky; top: 0px">№ Контракта | Название
+                            </th>
+                            <th class="text-center align-middle sticky-relative"
+                                style="min-width: 6em; max-width: 8em; position: sticky; top: 0px">Дата
+                            </th>
+                            <th class="text-center align-middle sticky-relative"
+                                style="min-width: 6em; max-width: 6em; position: sticky; top: 0px">Покупатель
+                            </th>
+                            <th class="text-center align-middle sticky-relative"
+                                style="min-width: 8em; max-width: 10em; position: sticky; top: 0px">Вся сумма
+                            </th>
+                            <th class="text-center align-middle sticky-relative"
+                                style="min-width: 6em; max-width: 10em; position: sticky; top: 0px">Резерв (10,7%)
+                            </th>
+                            <th class="text-center align-middle sticky-relative"
+                                style="min-width: 6em; max-width: 6em; position: sticky; top: 0px">Полученная сум.
+                            </th>
+                            <th class="text-center align-middle sticky-relative"
+                                style="min-width: 6em; max-width: 6em; position: sticky; top: 0px">ПМ
+                            </th>
+                            <th class="text-center align-middle sticky-relative"
+                                style="min-width: 6em; max-width: 6em; position: sticky; top: 0px">Проект
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in data %}
+                            {% ifchanged item.file_name %}
+                                <tr>
+                                    <td colspan="9" class="text-center" style="background-color: lightgray">{{ item.file_name }}</td>
+                                </tr>
+                            {% endifchanged %}
+                            <tr>
+                                <td>{{ item.num }}</td>
+                                <td>{{ item.id }}</td>
+                                <td>{{ item.date }}</td>
+                                <td>{{ item.buyer }}</td>
+                                <td>{{ item.sum|intcomma }}</td>
+                                <td>{{ item.reserve|intcomma }}</td>
+                                <td>{{ item.payed|intcomma }}</td>
+                                <td>
+                                    <div class="content-container">
+                                        {{ item.recipient }}
+
+                                        {% if item.recipient == "АДМ на 4" %}
+                                            <button class="button-toggle" onclick="toggleDetails('details{{ item.num }}')">▼</button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>{{ item.project }}</td>
+                            </tr>
+
+                            {% if item.recipient == "АДМ на 4" %}
+                                <tr id="details{{ item.num }}-1" style="display: none;">
+                                    <td colspan="5"></td>
+                                    <td>29%</td>
+                                    <td>{{ item.payed|multiply:0.29|intcomma }}</td>
+                                    <td>Азамат Бейсен</td>
+                                </tr>
+                                <tr id="details{{ item.num }}-2" style="display: none;">
+                                    <td colspan="5"></td> <!-- Пустые колонки под предыдущие данные -->
+                                    <td>29%</td>
+                                    <td>{{ item.payed|multiply:0.29|intcomma }}</td>
+                                    <td>Александр Азаров</td>
+                                </tr>
+                                <tr id="details{{ item.num }}-3" style="display: none;">
+                                    <td colspan="5"></td> <!-- Пустые колонки под предыдущие данные -->
+                                    <td>29%</td>
+                                    <td>{{ item.payed|multiply:0.29|intcomma }}</td>
+                                    <td>Дмитрий Ваганов</td>
+                                </tr>
+                                <tr id="details{{ item.num }}-4" style="display: none;">
+                                    <td colspan="5"></td> <!-- Пустые колонки под предыдущие данные -->
+                                    <td>13%</td>
+                                    <td>{{ item.payed|multiply:0.13|intcomma }}</td>
+                                    <td>Евгения Богомолова</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script>
+        function toggleDetails(baseId) {
+            for (let i = 1; i <= 4; i++) {
+                let detailRow = document.getElementById(`${baseId}-${i}`);
+                if (detailRow) {
+                    detailRow.style.display = detailRow.style.display === 'none' ? 'table-row' : 'none';
+                }
+            }
+        }
+    </script>
+    <script>
+        document.getElementById('download-excel').addEventListener('click', function(event) {
+            event.preventDefault();
+            fetch('/p1/finance-module/income-71-p/download-excel/', {
+                method: 'POST',
+                body: new FormData(document.getElementById('statement-reconciliation-form')),
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            }).then(response => {
+                if (response.ok) return response.blob();
+                throw new Error('Network response was not ok.');
+            }).then(blob => {
+                let url = window.URL.createObjectURL(blob);
+                let a = document.createElement('a');
+                a.href = url;
+                a.download = "income71p.xlsx";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            }).catch(error => console.error('There was a problem with your fetch operation:', error));
+        });
+    </script>
+{% endblock %}

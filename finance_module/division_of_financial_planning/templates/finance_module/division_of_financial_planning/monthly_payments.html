@@ -1,0 +1,244 @@
+{% extends 'finance_module/division_of_financial_planning/base.html' %}
+{% load static number_format table_cell_color %}
+{% block division_of_financial_planning_active_breadcrump %}
+Ежемесячные выплаты
+{% endblock %}
+{% block title %}
+Ежемесячные выплаты
+{% endblock %}
+{% block styles %}
+<style>
+    @font-face {
+        font-family: 'Calibri';
+        src: url("{% static 'finance_module/division_of_financial_planning/fonts/Calibri-Bold.woff2' %}") format('woff2'),
+        url("{% static 'finance_module/division_of_financial_planning/fonts/Calibri-Bold.woff' %}") format('woff');
+        font-weight: bold;
+        font-style: normal;
+        font-display: swap;
+    }
+    
+    @font-face {
+        font-family: 'Calibri';
+        src: url("{% static 'finance_module/division_of_financial_planning/fonts/Calibri.woff2' %}") format('woff2'),
+        url("{% static 'finance_module/division_of_financial_planning/fonts/Calibri.woff' %}") format('woff');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+        
+    #monthly-payments-table {
+        --border-size:  0.1cm;
+        width: 100%;
+        font-family: 'Calibri';
+        font-size: 16px;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    #monthly-payments-table :where(td, th) {
+        background-color: white;
+    }
+
+    #monthly-payments-table .border-top {
+        border-top: var(--border-size) solid black !important;
+    }
+
+    #monthly-payments-table .border-bottom {
+        border-bottom: var(--border-size) solid black !important;
+    }
+
+    #monthly-payments-table .border-right {
+        border-right: var(--border-size) solid black !important;
+    }
+
+    #monthly-payments-table .border-left {
+        border-left: var(--border-size) solid black !important;
+    }
+    
+    #monthly-payments-table tbody .category-th {
+        writing-mode: vertical-lr;
+        text-orientation: sideways-right;
+        rotate: -180deg;
+        text-align: center;
+        font-size: bold;
+        padding: 0;
+        margin: 0;
+    }
+    #monthly-payments-table thead :where(.payments-th, .monthly-payments-th, .mandatory-payment-th) {
+        text-align: center;
+        vertical-align: middle;
+
+    }
+    #monthly-payments-table tbody .mandatory-payment-th {
+        min-width: 10em;
+    }
+    #monthly-payments-table thead .payments-th {
+        background-color: #d8d8d8;
+    }
+
+    #monthly-payments-table .number {
+        text-align: center;
+    }
+    .percent-th {
+        background-color: #d6dce4;
+    }
+
+    .project-region-th {
+        text-align: center;
+        min-width: 6em;
+    }
+    #monthly-payments-table-container {
+        overflow: scroll;
+        height: 89vh;
+        position: relative;
+
+    }
+
+    .number__minus {
+        background-color: #c6efce !important;
+        color: #006100 !important;
+    }
+
+    .director-th {
+        text-align: center;
+    }
+
+    .gray-bg {
+        background-color: #d8d8d8 !important;
+    }
+
+    .center {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .deadline-td {
+        background-color: #fef2cb !important;
+        font-weight: bold;
+        min-width: 8em;
+    }
+
+    #monthly-payments-table .border-thin-top {
+        border-top: 1px solid #dadce0 !important;
+    }
+
+    #monthly-payments-table .border-thin-bottom {
+        border-bottom: 1px solid #dadce0 !important;
+    }
+
+    #monthly-payments-table .border-thin-right {
+        border-right: 1px solid #dadce0 !important;
+    }
+
+    #monthly-payments-table .border-thin-left {
+        border-left: 1px solid #dadce0 !important;
+    }
+</style>
+{% endblock %}
+{% block finance_module_content %}
+
+<div id="monthly-payments-table-container">
+<table id="monthly-payments-table">
+    <thead>
+        <tr>
+            {% if categories_colspan %}
+            <th class="border-thin-left border-thin-top sticky-relative sticky-relative-top sticky-relative-left" colspan="{{categories_colspan}}"></th>
+            {% endif %}
+            <th class="border-thin-left border-thin-top sticky-relative sticky-relative-top sticky-relative-left"></th>
+            <th class="border-thin-left border-thin-top sticky-relative sticky-relative-top sticky-relative-left"></th>
+            <th class="border-thin-left border-thin-top sticky-relative sticky-relative-top sticky-relative-left border-thin-right">{{disbursements_total_sum|format_number}}</th>
+            {% for project_region in project_regions %}
+            <th class="{% if forloop.counter != 1 %}border-thin-left{% endif %} border-thin-top number sticky-relative sticky-relative-top">{{project_region.total_sum|format_number}}</th>
+            {% endfor %}
+            <th class="border-thin-left border-thin-top number sticky-relative sticky-relative-top">{{mandatory_payments_total_sum|format_number}}</th>
+            <th class="border-thin-left border-thin-top border-thin-right sticky-relative sticky-relative-top"></th>
+        </tr>
+        <tr>
+            {% if categories_colspan %}
+            <th class="border-left border-top sticky-relative sticky-relative-top sticky-relative-left" rowspan="3" colspan="{{categories_colspan}}"></th>
+            {% endif %}
+            <th class="border-left border-top border-right sticky-relative sticky-relative-top sticky-relative-left" rowspan="3" colspan="3"></th>
+            {% for director, colspan, percent in directors %}
+            {% get_table_cell_color_from_instance_attr category="Ежемесячные выплаты.Директора" instance=director attr="first_name" as background_color %}
+            {% if colspan %}
+            <th class="{% if forloop.counter != 1 %}border-left{% endif %} border-top director-th sticky-relative sticky-relative-top" colspan="{{colspan}}" scope="col" style="background-color: {{background_color}};">{{director.first_name}}</th>
+            {% endif %}
+            <th class="{% if forloop.counter != 1 %}border-left{% endif %} border-top number sticky-relative sticky-relative-top" style="background-color: {{background_color}};">{{percent|format_percent}}</th>
+            {% endfor %}
+            <th class="border-left border-top gray-bg center sticky-relative sticky-relative-top " rowspan="3">АДМ</th>
+            <th class="border-left border-top border-right gray-bg center sticky-relative sticky-relative-top border-bottom" rowspan="6">Срок оплаты</th>
+        </tr>
+        <tr>
+            {% for manager, colspan in managers %}
+            <th class="center border-top {% if forloop.counter != 1 %}border-left{% endif %} sticky-relative sticky-relative-top" colspan="{{colspan}}">{{manager.first_name}}</th>
+            {% endfor %}
+        </tr>
+        <tr>
+            {% for project_region in project_regions %}
+            {% get_table_cell_color_from_instance_attr category="Ежемесячные выплаты.Директора.Регион проекты" instance=project_region.director attr="first_name" as director_color %}
+            {% get_table_cell_color_from_instance_attr category="Ежемесячные выплаты.Руководители.Регион проекты" instance=project_region.manager attr="first_name" as manager_color %}
+            {% get_table_cell_color_from_instance_attr category="Ежемесячные выплаты.Регион проекты" instance=project_region attr="name" as project_region_color %}
+            {% firstof project_region_color manager_color director_color as color %}
+            {% if project_region.project_manager %}
+            <th class="center border-top {% if forloop.counter != 1 %}border-left{% endif %} sticky-relative sticky-relative-top" style="background-color: {{color}};">{{project_region.project_manager.first_name}}</th>
+            {% else %}
+            <th class="border-top {% if forloop.counter != 1 %}border-left{% endif %} center sticky-relative sticky-relative-top" rowspan="2" style="background-color: {{color}};">{{project_region}}</th>
+            {% endif %}
+            {% endfor %}
+        </tr>
+        <tr>
+            {% if categories_colspan %}
+            <th rowspan="3" colspan="{{categories_colspan}}" class="sticky-relative sticky-relative-top border-top border-left sticky-relative-left border-bottom"></th>
+            {% endif %}
+            <th rowspan="3" class="mandatory-payment-th border-top border-left sticky-relative sticky-relative-top sticky-relative-left border-bottom">Статья</th>
+            <th rowspan="3" class="monthly-payments-th border-top border-left sticky-relative sticky-relative-top sticky-relative-left border-bottom">Ежемесячные выплаты</th>
+            <th rowspan="3" class="payments-th border-top border-bottom border-left sticky-relative sticky-relative-top sticky-relative-left border-right">Выплаты</th>
+            {% for project_region in project_regions %}
+            {% if project_region.project_manager %}
+            {% get_table_cell_color_from_instance_attr category="Ежемесячные выплаты.Директора.Регион проекты" instance=project_region.director attr="first_name" as director_color %}
+            {% get_table_cell_color_from_instance_attr category="Ежемесячные выплаты.Руководители.Регион проекты" instance=project_region.manager attr="first_name" as manager_color %}
+            {% get_table_cell_color_from_instance_attr category="Ежемесячные выплаты.Регион проекты" instance=project_region attr="name" as project_region_color %}
+            {% firstof project_region_color manager_color director_color as color %}
+            <th class="project-region-th sticky-relative sticky-relative-top border-top {% if forloop.counter != 1 %}border-left{% endif %}" scope="col" style="background-color: {{color}};">{{project_region}}</th>
+            {% endif %}
+            {% endfor %}
+            <th class="gray-bg center sticky-relative sticky-relative-top border-top border-left border-bottom" rowspan="3">Осталось к оплате, всего</th>
+        </tr>
+        <tr>
+            {% for project_region in project_regions %}
+            <th class="number sticky-relative sticky-relative-top border-top {% if forloop.counter != 1 %}border-left{% endif %}" scope="col">0</th>
+            {% endfor %}
+        </tr>
+        <tr>
+            {% for project_region in project_regions %}
+            <th class="number percent-th sticky-relative sticky-relative-top border-bottom border-top {% if forloop.counter != 1 %}border-left{% endif %}" scope="col">{{project_region.percent|format_percent}}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for mandatory_payment in mandatory_payments %}
+        <tr>
+            {% for level in mandatory_payment.levels %}
+            {% if level %} 
+            <th class="category-th border-right border-top sticky-relative sticky-relative-left" colspan="{{level.1}}" rowspan="{{level.2}}" style="background-color: {{level.0.get_color}}" scope="rowgroup">
+                <span style="{% if not level.0.name %}visibility: hidden{% endif%}">{{level.0.get_name}}</span>
+            </th>
+            {% endif %}
+            {% endfor %}
+            
+            <th class="mandatory-payment-th sticky-relative sticky-relative-left border-left border-bottom" style="background-color: {{mandatory_payment.get_color}};" scope="row">{{mandatory_payment}}</th>
+            <td class="number sticky-relative sticky-relative-left border-left border-bottom" style="background-color: {{mandatory_payment.get_color}};">{{mandatory_payment.monthly_payments|format_number}}</td>
+            <td class="number sticky-relative sticky-relative-left border-left border-bottom border-right">{{mandatory_payment.get_disbursements|format_number}}</td>
+            {% for payment in mandatory_payment.payments %}
+            <td class="{% if forloop.counter != 1 %}border-left{% endif %} border-bottom number{% if payment.sum < 0 %} number__minus{% endif %}">
+                {{payment.sum|format_number}}
+            </td>
+            {% endfor %}
+            <td class="number border-left border-bottom {% if mandatory_payment.total_sum < 0 %}number__minus{% endif %}">{{mandatory_payment.total_sum|format_number}}</td>
+            <td class="center deadline-td border-left border-bottom border-right">{{mandatory_payment.deadline_template|default:""}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}
